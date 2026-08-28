@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gostota - Fizika</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            gap: 40px; 
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        .main-title {
+            color: #2c3e50;
+            font-size: 3.5rem; 
+            margin: 0; 
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-align: center;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1); 
+        }
+
+        .app-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
+            padding: 40px 30px 30px 30px; 
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        :root {
+            --color-rho: #e67e22; 
+            --color-m: #2980b9;   
+            --color-vol: #27ae60; 
+        }
+
+        .bars-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end; 
+            height: 250px;
+            margin-bottom: 20px;
+            padding: 0 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 30%;
+        }
+
+        .bar-title { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; height: 25px; }
+        .value-display { font-size: 1.5rem; font-weight: bold; margin-bottom: 5px; height: 30px; }
+        
+        .explanation {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 15px;
+            min-height: 40px;
+            padding: 0 5px;
+        }
+
+        .bar-wrapper {
+            width: 80px; 
+            height: 150px; 
+            background-color: #f9f9f9;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+
+        .bar {
+            width: 100%;
+            border-radius: 6px;
+            position: absolute;
+            bottom: 0;
+        }
+
+        .bar.draggable { cursor: ns-resize; }
+        .bar.draggable:hover { filter: brightness(1.1); }
+        .bar.locked { cursor: not-allowed; opacity: 0.6; }
+
+        .controls {
+            margin-top: 15px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lock-btn {
+            background-color: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+
+        .lock-btn:hover { background-color: #bdc3c7; }
+        .lock-btn.is-locked { background-color: #f1c40f; border-color: #f39c12; font-weight: bold; }
+
+        .animation-section {
+            margin: 0 0 30px 0;
+            background-color: #eaecee; 
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #bdc3c7;
+            position: relative;
+        }
+
+        .scale-visual-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 200px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .object-sphere {
+            border-radius: 50%;
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.3), 5px 5px 15px rgba(0,0,0,0.2);
+            margin-bottom: -15px; 
+            z-index: 2;
+            position: relative;
+        }
+
+        .digital-scale {
+            background: linear-gradient(to bottom, #ecf0f1, #bdc3c7);
+            width: 180px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+            border: 2px solid #95a5a6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .scale-lcd {
+            background-color: #1c2833;
+            color: #2ecc71;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 2.2rem;
+            font-weight: bold;
+            padding: 5px 15px;
+            border-radius: 4px;
+            border: 2px solid #17202a;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            letter-spacing: 2px;
+            min-width: 140px;
+            text-align: right;
+        }
+
+        .scale-brand {
+            font-size: 0.7rem;
+            color: #7f8c8d;
+            margin-top: 2px;
+            font-weight: bold;
+        }
+
+        .anim-controls { margin-bottom: 20px; }
+
+        .reset-btn {
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .reset-btn:hover { background-color: #95a5a6; }
+
+        .materials-table {
+            width: 75%;
+            margin: 30px auto 0 auto;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .materials-table th, .materials-table td {
+            border: 1px solid #ddd;
+            padding: 4px 8px;
+        }
+        .materials-table th {
+            background-color: #2c3e50;
+            color: white;
+            font-size: 0.85rem;
+        }
+        .highlight-material {
+            background-color: #f9e79f !important;
+            font-weight: bold;
+            transition: 0.1s;
+        }
+        .color-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-left: 10px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+
+        .formula-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 0px; 
+            margin-bottom: 30px; 
+            background-color: #fff;
+            border: 2px dashed #bdc3c7;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .formula-side { width: 45%; }
+        .formula-title { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 10px; text-transform: uppercase; }
+
+        .equation { display: flex; align-items: center; justify-content: center; }
+        .left-side { font-size: 1.5rem; font-weight: bold; margin-right: 10px; white-space: nowrap; }
+        .equals { font-size: 1.5rem; margin-right: 10px; }
+
+        .fraction { display: flex; flex-direction: column; align-items: center; }
+        .fraction .num, .fraction .den { font-size: 1.5rem; font-weight: bold; padding: 0 10px; }
+        .fraction .line { width: 100%; height: 3px; background-color: #333; margin: 5px 0; }
+        .locked-indicator { font-size: 0.8rem; margin-left: 5px; vertical-align: middle; }
+
+        .no-select { user-select: none; -webkit-user-select: none; }
+    </style>
+
+    <style>
+        .exercise-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
+            padding: 40px 30px; 
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            border-top: 8px solid #e67e22; 
+        }
+
+        .ex-title { color: #e67e22; margin-top: 0; font-size: 2rem; text-transform: uppercase; }
+
+        .task-text {
+            font-size: 1.3rem; line-height: 1.6; margin: 20px 0; padding: 20px;
+            background-color: #fef9e7; border-radius: 10px; border: 2px dashed #e67e22;
+        }
+
+        .highlight-num {
+            display: inline-block; font-weight: bold; padding: 2px 5px;
+            border-radius: 5px; background-color: #fff; border-bottom: 2px solid;
+        }
+
+        .ex-step { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn-row { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
+
+        .ex-btn {
+            padding: 10px 20px; font-size: 1.1rem; font-weight: bold;
+            border: 2px solid #bdc3c7; background: #fff; border-radius: 8px; cursor: pointer; transition: 0.2s;
+        }
+        .ex-btn:hover { background: #ecf0f1; }
+        .ex-btn.correct { background: #2ecc71; color: white; border-color: #27ae60; }
+        .ex-btn.wrong { background: #e74c3c; color: white; border-color: #c0392b; animation: shake 0.4s; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+
+        .magic-triangle-wrapper { position: relative; width: 250px; height: 220px; margin: 0 auto; }
+        .tri-letter {
+            position: absolute; font-size: 2.5rem; font-weight: bold; cursor: pointer;
+            width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: 0.2s; border: 3px solid transparent;
+        }
+        .tri-letter:hover { transform: scale(1.1); }
+        .tri-letter.covered { background: #95a5a6; color: white !important; opacity: 0.8; cursor: not-allowed; border-color: #7f8c8d; }
+        .tri-letter.wrong-click { animation: shake 0.4s; border-color: #e74c3c; }
+
+		#pos-m { top: 10px; left: 95px; color: var(--color-m); }
+		#pos-rho { bottom: 20px; left: 30px; color: var(--color-rho); }
+		#pos-vol { bottom: 20px; right: 30px; color: var(--color-vol); }
+
+        .eq-build-area { display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; margin: 20px 0; min-height: 80px; }
+        .eq-input-box {
+            display: inline-block; width: 80px; height: 50px; border: 3px dashed #bdc3c7;
+            border-radius: 8px; margin: 0 10px; text-align: center; font-size: 1.5rem; font-weight: bold;
+            font-family: inherit; color: #333; outline: none; transition: 0.3s; box-sizing: border-box; background-color: transparent;
+        }
+        .eq-input-box:focus { border-style: solid; box-shadow: 0 0 8px rgba(52, 152, 219, 0.4); }
+        .eq-input-box.active-pulse { animation: pulseBorder 1.5s infinite; }
+        @keyframes pulseBorder { 0% { border-color: #bdc3c7; } 50% { border-color: #e67e22; } 100% { border-color: #bdc3c7; } }
+
+        .calc-input-area { font-size: 2rem; font-weight: bold; margin-top: 20px; }
+        #ex-answer { font-size: 1.8rem; width: 140px; text-align: center; border: 3px solid #bdc3c7; border-radius: 8px; padding: 5px; }
+
+        .success-msg { color: #27ae60; font-size: 1.5rem; font-weight: bold; margin-top: 20px; padding: 15px; background: #e8f8f5; border-radius: 10px; animation: fadeIn 0.5s; }
+    </style>
+</head>
+<body class="no-select">
+
+<h1 class="main-title">Gostota</h1>
+
+<div class="app-container">
+    <div class="bars-container">
+        <div class="column">
+            <div class="bar-title" style="color: var(--color-rho);">Gostota (ρ)</div>
+            <div class="value-display" style="color: var(--color-rho);" id="val-rho">1 000 kg/m³</div>
+            <div class="explanation" id="exp-rho">1 000 kg/m³ – to pomeni, da ima 1 m³ snovi maso 1 000 kg.</div>
+            <div class="bar-wrapper" id="wrapper-rho">
+                <div class="bar draggable" id="bar-rho" style="background-color: var(--color-rho); height: 50%;"></div>
+            </div>
+            <div class="controls">
+                <button class="lock-btn" id="lock-rho" onclick="toggleLock('rho')">🔒 Zakleni</button>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="bar-title" style="color: var(--color-m);">Masa (m)</div>
+            <div class="value-display" style="color: var(--color-m);" id="val-m">1 000 kg</div>
+            <div class="explanation" style="color: transparent;">Skriti tekst</div>
+            <div class="bar-wrapper" id="wrapper-m">
+                <div class="bar locked" id="bar-m" style="background-color: var(--color-m); height: 50%;"></div>
+            </div>
+            <div class="controls">
+                <button class="lock-btn is-locked" id="lock-m" onclick="toggleLock('m')">🔓 Odkleni</button>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="bar-title" style="color: var(--color-vol);">Prostornina (V)</div>
+            <div class="value-display" style="color: var(--color-vol);" id="val-vol">1,0 m³</div>
+            <div class="explanation" style="color: transparent;">Skriti tekst</div>
+            <div class="bar-wrapper" id="wrapper-vol">
+                <div class="bar draggable" id="bar-vol" style="background-color: var(--color-vol); height: 50%;"></div>
+            </div>
+            <div class="controls">
+                <button class="lock-btn" id="lock-vol" onclick="toggleLock('vol')">🔒 Zakleni</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="formula-container">
+        <div class="formula-side">
+            <div class="formula-title">Matematična oblika</div>
+            <div class="equation">
+                <div class="left-side" id="f-left-math" style="color: var(--color-rho);">1 000 kg/m³ <span class="locked-indicator" id="lock-ind-math-rho"></span></div>
+                <div class="equals">=</div>
+                <div class="fraction">
+                    <div class="num" id="f-num-math" style="color: var(--color-m);">1 000 kg <span class="locked-indicator" id="lock-ind-math-m">🔒</span></div>
+                    <div class="line"></div>
+                    <div class="den" id="f-den-math" style="color: var(--color-vol);">1,0 m³ <span class="locked-indicator" id="lock-ind-math-vol"></span></div>
+                </div>
+            </div>
+        </div>
+        <div class="formula-side">
+            <div class="formula-title">Besedna oblika</div>
+            <div class="equation">
+                <div class="left-side" id="f-left-text" style="color: var(--color-rho);">gostota <span class="locked-indicator" id="lock-ind-text-rho"></span></div>
+                <div class="equals">=</div>
+                <div class="fraction">
+                    <div class="num" id="f-num-text" style="color: var(--color-m);">masa <span class="locked-indicator" id="lock-ind-text-m">🔒</span></div>
+                    <div class="line"></div>
+                    <div class="den" id="f-den-text" style="color: var(--color-vol);">prostornina <span class="locked-indicator" id="lock-ind-text-vol"></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="animation-section">
+        <div class="anim-controls">
+            <button class="reset-btn" onclick="resetTest()">⟲ PONASTAVI (Voda 1m³)</button>
+        </div>
+        
+        <div class="scale-visual-container">
+            <div class="object-sphere" id="object-sphere" style="width: 60px; height: 60px; background-color: hsl(20, 60%, 45%);"></div>
+            <div class="digital-scale">
+                <div class="scale-lcd" id="scale-lcd">1 000</div>
+                <div class="scale-brand">DIGITALNA TEHTNICA</div>
+            </div>
+        </div>
+
+        <table class="materials-table">
+            <tr>
+                <th>Snov</th>
+                <th>Gostota (kg/m³)</th>
+                <th>Barva predmeta</th>
+            </tr>
+            <tr data-rho="1.3"><td>Zrak</td><td>1,3</td><td><span class="color-dot" style="background-color: hsl(50, 80%, 80%)"></span></td></tr>
+            <tr data-rho="500"><td>Smrekov les</td><td>500</td><td><span class="color-dot" style="background-color: hsl(30, 80%, 60%)"></span></td></tr>
+            <tr data-rho="700"><td>Bukov les</td><td>700</td><td><span class="color-dot" style="background-color: hsl(25, 70%, 55%)"></span></td></tr>
+            <tr data-rho="790"><td>Etanol</td><td>790</td><td><span class="color-dot" style="background-color: hsl(20, 60%, 50%)"></span></td></tr>
+            <tr data-rho="800"><td>Olje</td><td>800</td><td><span class="color-dot" style="background-color: hsl(20, 60%, 49%)"></span></td></tr>
+            <tr data-rho="1000"><td>Voda</td><td>1 000</td><td><span class="color-dot" style="background-color: hsl(20, 60%, 45%)"></span></td></tr>
+            <tr data-rho="2700"><td>Apnenec</td><td>2 700</td><td><span class="color-dot" style="background-color: hsl(10, 40%, 35%)"></span></td></tr>
+            <tr data-rho="2700"><td>Aluminij</td><td>2 700</td><td><span class="color-dot" style="background-color: hsl(10, 40%, 35%)"></span></td></tr>
+            <tr data-rho="7800"><td>Železo</td><td>7 800</td><td><span class="color-dot" style="background-color: hsl(0, 20%, 30%)"></span></td></tr>
+            <tr data-rho="11400"><td>Svinec</td><td>11 400</td><td><span class="color-dot" style="background-color: hsl(0, 10%, 25%)"></span></td></tr>
+            <tr data-rho="13590"><td>Živo srebro</td><td>13 590</td><td><span class="color-dot" style="background-color: hsl(0, 5%, 20%)"></span></td></tr>
+            <tr data-rho="19300"><td>Zlato</td><td>19 300</td><td><span class="color-dot" style="background-color: hsl(45, 80%, 35%)"></span></td></tr>
+            <tr data-rho="22600"><td>Osmij</td><td>22 600</td><td><span class="color-dot" style="background-color: hsl(0, 0%, 15%)"></span></td></tr>
+        </table>
+    </div>
+</div>
+
+<div class="exercise-container">
+    <h2 class="ex-title">Magični trikotnik</h2>
+    <p>Preveri, če razumeš! Naloge so narejene po preglednici iz učbenika.</p>
+    <button id="btn-start-ex" class="test-btn" style="background-color: #e67e22; box-shadow: 0 4px 6px rgba(230, 126, 34, 0.3);">📝 ŽELIM REŠITI NALOGO!</button>
+
+    <div id="ex-area" style="display:none;">
+        <div id="ex-text" class="task-text"></div>
+
+        <div id="ex-step-1" class="ex-step">
+            <p style="font-weight: bold; font-size: 1.2rem;">Kaj moramo izračunati v tej nalogi?</p>
+            <div class="btn-row">
+                <button class="ex-btn" onclick="checkUnknown('rho', this)">Gostota (ρ)</button>
+                <button class="ex-btn" onclick="checkUnknown('m', this)">Masa (m)</button>
+                <button class="ex-btn" onclick="checkUnknown('vol', this)">Prostornina (V)</button>
+            </div>
+        </div>
+
+        <div id="ex-step-2" class="ex-step" style="display:none;">
+            <p style="font-weight: bold; font-size: 1.2rem; color: #2980b9;">Odlično! Zdaj v magičnem trikotniku klikni tisto črko, ki jo iščemo.</p>
+            <div class="magic-triangle-wrapper">
+                <svg viewBox="0 0 250 220" width="250" height="220">
+                    <polygon points="125,20 20,200 230,200" fill="#fef9e7" stroke="#bdc3c7" stroke-width="4"/>
+                    <line x1="60" y1="120" x2="190" y2="120" stroke="#333" stroke-width="4" />
+                    <line x1="125" y1="120" x2="125" y2="200" stroke="#333" stroke-width="4" />
+                    <circle cx="125" cy="160" r="4" fill="#333" /> 
+                </svg>
+                <div class="tri-letter" id="pos-rho" onclick="checkTriangle('rho')">ρ</div>
+                <div class="tri-letter" id="pos-m" onclick="checkTriangle('m')">m</div>
+                <div class="tri-letter" id="pos-vol" onclick="checkTriangle('vol')">V</div>
+            </div>
+        </div>
+
+        <div id="ex-step-3" class="ex-step" style="display:none;">
+            <p style="font-weight: bold; font-size: 1.2rem; color: #27ae60;">Tako je! Tvoja enačba je pripravljena.</p>
+            <p>Vpiši ustrezne številke iz besedila zgoraj v prazna polja v enačbi!</p>
+            <div class="eq-build-area" id="eq-builder"></div>
+        </div>
+
+        <div id="ex-step-4" class="ex-step" style="display:none;">
+            <p style="font-weight: bold; font-size: 1.2rem;">Enačba je polna! Zdaj pa izračunaj in vpiši rezultat:</p>
+            <div class="calc-input-area">
+                <span id="final-eq-left" style="color: #333;"></span> = 
+                <input type="text" id="ex-answer" style="font-size: 1.8rem; width: 140px; text-align: center; border: 3px solid #bdc3c7; border-radius: 8px; padding: 5px;" placeholder="0,0"> 
+                <span id="final-unit" style="color: #333;"></span>
+            </div>
+            <button id="btn-check-ans" class="test-btn" style="margin-top: 15px;" onclick="checkAnswer()">PREVERI REZULTAT</button>
+            <div id="ex-feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let vals = { rho: 1000, m: 1000, vol: 1 };
+    let limits = { 
+        rho: { min: 1, max: 22600 }, 
+        m: { min: 0.01, max: 226000 }, 
+        vol: { min: 0.01, max: 10 } 
+    };
+    let lockedVar = 'm';
+    let activeDrag = null; 
+
+    function toSloNum(num) {
+        if (num >= 100) return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return num.toFixed(1).replace('.', ',');
+    }
+    
+    function toSloNumClean(num) {
+        if (num >= 100) return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return (num % 1 === 0 ? num.toFixed(0) : num.toFixed(1)).replace('.', ',');
+    }
+
+    function logMap(percentage, min, max) { return min * Math.pow(max / min, percentage); }
+    function invLogMap(value, min, max) { return Math.log(value / min) / Math.log(max / min); }
+
+    function handleDragStart(e, varName) {
+        if (lockedVar === varName) return;
+        activeDrag = varName;
+        e.preventDefault(); 
+    }
+
+    function handleDragMove(e) {
+        if (!activeDrag) return;
+        let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        let wrapper = document.getElementById(`wrapper-${activeDrag}`);
+        let rect = wrapper.getBoundingClientRect();
+        let y = clientY - rect.top;
+        let percentage = 1 - (y / rect.height);
+        percentage = Math.max(0, Math.min(1, percentage));
+        
+        let min = limits[activeDrag].min;
+        let max = limits[activeDrag].max;
+        let rawVal = logMap(percentage, min, max);
+        
+        if (activeDrag === 'rho') vals[activeDrag] = Math.round(rawVal);
+        else if (activeDrag === 'vol') vals[activeDrag] = Math.round(rawVal * 100) / 100;
+        else vals[activeDrag] = Math.round(rawVal * 10) / 10;
+        
+        calculate(activeDrag);
+    }
+
+    function handleDragEnd() { activeDrag = null; }
+
+    const vars = ['rho', 'm', 'vol'];
+    vars.forEach(vName => {
+        let bar = document.getElementById(`bar-${vName}`);
+        bar.addEventListener('mousedown', (e) => handleDragStart(e, vName));
+        bar.addEventListener('touchstart', (e) => handleDragStart(e, vName), {passive: false});
+    });
+
+    document.addEventListener('mousemove', handleDragMove);
+    document.addEventListener('mouseup', handleDragEnd);
+    document.addEventListener('touchmove', handleDragMove, {passive: false});
+    document.addEventListener('touchend', handleDragEnd);
+
+    function toggleLock(varToLock) {
+        if (lockedVar === varToLock) return; 
+        lockedVar = varToLock;
+        updateLockUI();
+        let triggerVar = vars.find(v => v !== varToLock);
+        calculate(triggerVar); 
+    }
+
+    function updateLockUI() {
+        vars.forEach(v => {
+            const btn = document.getElementById(`lock-${v}`);
+            const bar = document.getElementById(`bar-${v}`);
+            if (v === lockedVar) {
+                btn.innerHTML = '🔓 Odkleni';
+                btn.classList.add('is-locked');
+                bar.classList.remove('draggable');
+                bar.classList.add('locked');
+            } else {
+                btn.innerHTML = '🔒 Zakleni';
+                btn.classList.remove('is-locked');
+                bar.classList.add('draggable');
+                bar.classList.remove('locked');
+            }
+        });
+    }
+
+function calculate(changedVar) {
+        let rho = vals.rho, m = vals.m, vol = vals.vol;
+        let theo_rho = rho, theo_m = m, theo_vol = vol;
+
+        if (lockedVar === 'm') {
+            if (changedVar === 'rho') theo_vol = m / rho;
+            else if (changedVar === 'vol') theo_rho = m / vol;
+        } else if (lockedVar === 'rho') {
+            if (changedVar === 'm') theo_vol = m / rho;
+            else if (changedVar === 'vol') theo_m = rho * vol;
+        } else if (lockedVar === 'vol') {
+            if (changedVar === 'rho') theo_m = rho * vol;
+            else if (changedVar === 'm') theo_rho = m / vol;
+        }
+
+        theo_rho = Math.max(limits.rho.min, Math.min(limits.rho.max, theo_rho));
+        theo_m = Math.max(limits.m.min, Math.min(limits.m.max, theo_m));
+        theo_vol = Math.max(limits.vol.min, Math.min(limits.vol.max, theo_vol));
+
+        vals.rho = theo_rho; 
+        vals.m = theo_m; 
+        vals.vol = theo_vol;
+        
+        updateDisplay(vals.rho, vals.m, vals.vol);
+    }
+
+    function updateDisplay(rho, m, vol) {
+        document.getElementById('val-rho').innerText = toSloNum(rho) + ' kg/m³';
+        document.getElementById('val-m').innerText = toSloNum(m) + ' kg';
+        document.getElementById('val-vol').innerText = toSloNum(vol) + ' m³';
+
+        let rhoClean = toSloNumClean(rho);
+        document.getElementById('exp-rho').innerText = `${rhoClean} kg/m³ – to pomeni, da ima 1 m³ snovi maso ${rhoClean} kg.`;
+
+        document.getElementById('bar-rho').style.height = Math.max(5, invLogMap(rho, limits.rho.min, limits.rho.max) * 100) + '%';
+        document.getElementById('bar-m').style.height = Math.max(5, invLogMap(m, limits.m.min, limits.m.max) * 100) + '%';
+        document.getElementById('bar-vol').style.height = Math.max(5, invLogMap(vol, limits.vol.min, limits.vol.max) * 100) + '%';
+
+        document.getElementById('f-left-math').innerHTML = `${toSloNum(rho)} kg/m³ <span class="locked-indicator">${lockedVar==='rho'?'🔒':''}</span>`;
+        document.getElementById('f-num-math').innerHTML = `${toSloNum(m)} kg <span class="locked-indicator">${lockedVar==='m'?'🔒':''}</span>`;
+        document.getElementById('f-den-math').innerHTML = `${toSloNum(vol)} m³ <span class="locked-indicator">${lockedVar==='vol'?'🔒':''}</span>`;
+
+        document.getElementById('f-left-text').innerHTML = `gostota <span class="locked-indicator">${lockedVar==='rho'?'🔒':''}</span>`;
+        document.getElementById('f-num-text').innerHTML = `masa <span class="locked-indicator">${lockedVar==='m'?'🔒':''}</span>`;
+        document.getElementById('f-den-text').innerHTML = `prostornina <span class="locked-indicator">${lockedVar==='vol'?'🔒':''}</span>`;
+        
+        updateVisuals(rho, m, vol);
+        highlightMaterial(rho);
+    }
+
+    function updateVisuals(rho, m, vol) {
+        const sphere = document.getElementById('object-sphere');
+        const lcd = document.getElementById('scale-lcd');
+
+        lcd.innerText = toSloNumClean(m);
+
+        let sizePerc = invLogMap(vol, limits.vol.min, limits.vol.max);
+        let size = 30 + (sizePerc * 120);
+        sphere.style.width = size + 'px';
+        sphere.style.height = size + 'px';
+
+        let colorPerc = invLogMap(rho, limits.rho.min, limits.rho.max);
+        let lightness = 80 - (colorPerc * 65); 
+        let hue = 50 - (colorPerc * 50);
+        let saturation = 80 - (colorPerc * 60); 
+        sphere.style.backgroundColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    }
+
+    function highlightMaterial(currentRho) {
+        document.querySelectorAll('.materials-table tr').forEach(tr => tr.classList.remove('highlight-material'));
+        
+        let minDiff = Infinity;
+        let rows = [];
+        
+        document.querySelectorAll('.materials-table tr[data-rho]').forEach(row => {
+            let rowRho = parseFloat(row.getAttribute('data-rho'));
+            let diff = Math.abs(currentRho - rowRho);
+            rows.push({ row, diff });
+            if (diff < minDiff) minDiff = diff;
+        });
+
+        rows.forEach(item => {
+            if (Math.abs(item.diff - minDiff) < 0.01) {
+                item.row.classList.add('highlight-material');
+            }
+        });
+    }
+
+    function resetTest() {
+        vals = { rho: 1000, m: 1000, vol: 1 };
+        lockedVar = 'm';
+        updateLockUI();
+        updateDisplay(vals.rho, vals.m, vals.vol);
+    }
+
+    updateLockUI();
+    updateDisplay(vals.rho, vals.m, vals.vol);
+</script>
+
+<script>
+(function() {
+    const materials = [
+        { name: 'zrak', rho: 1.3 },
+        { name: 'smrekov les', rho: 500 },
+        { name: 'bukov les', rho: 700 },
+        { name: 'etanol', rho: 790 },
+        { name: 'olje', rho: 800 },
+        { name: 'voda', rho: 1000 },
+        { name: 'apnenec', rho: 2700 },
+        { name: 'aluminij', rho: 2700 },
+        { name: 'železo', rho: 7800 },
+        { name: 'svinec', rho: 11400 },
+        { name: 'živo srebro', rho: 13590 },
+        { name: 'zlato', rho: 19300 },
+        { name: 'osmij', rho: 22600 }
+    ];
+
+    // 1. Zgradimo bazo popolnih nalog za maso in volumen (realne snovi)
+    const taskPoolReal = [];
+    const niceVolumes = [0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0];
+    for (let mat of materials) {
+        for (let vol of niceVolumes) {
+            let m = mat.rho * vol;
+            m = Math.round(m * 100) / 100;
+            // Shranimo samo tiste, kjer ima masa max 1 decimalko
+            if (Math.abs(m * 10 - Math.round(m * 10)) < 0.001) {
+                taskPoolReal.push({ rho: mat.rho, m: Math.round(m * 10) / 10, vol: vol, name: mat.name });
+            }
+        }
+    }
+
+    // 2. Zgradimo bazo popolnih nalog za iskanje gostote (neznane snovi)
+    const taskPoolUnknown = [];
+    const niceMasses = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
+    for (let m of niceMasses) {
+        for (let vol of niceVolumes) {
+            let rho = m / vol;
+            rho = Math.round(rho * 100) / 100;
+            // Shranimo samo tiste, kjer ima gostota max 1 decimalko in je v mejah drsnika
+            if (Math.abs(rho * 10 - Math.round(rho * 10)) < 0.001 && rho >= 1 && rho <= 22600) {
+                taskPoolUnknown.push({ rho: Math.round(rho * 10) / 10, m: m, vol: vol, name: 'neznan material' });
+            }
+        }
+    }
+
+    let currentEx = { data: null, missing: '', filledBoxes: 0, materialName: '' };
+    const colors = { rho: '#e67e22', m: '#2980b9', vol: '#27ae60' };
+    const units = { rho: 'kg/m³', m: 'kg', vol: 'm³' };
+
+    document.getElementById('btn-start-ex').addEventListener('click', startExercise);
+
+    // Spremenjeno nazaj na toFixed(1), da ohranimo pravilo MAX 1 decimalke
+    function toSloNumClean(num) {
+        if (num >= 100) return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return (num % 1 === 0 ? num.toFixed(0) : num.toFixed(1)).replace('.', ',');
+    }
+
+    function startExercise() {
+        document.getElementById('btn-start-ex').style.display = 'none';
+        document.getElementById('ex-area').style.display = 'block';
+        resetExerciseUI();
+
+        const varsArr = ['rho', 'm', 'vol'];
+        let missing = varsArr[Math.floor(Math.random() * varsArr.length)];
+
+        // Izberemo iz pravega bazena
+        let task;
+        if (missing === 'rho') {
+            task = taskPoolUnknown[Math.floor(Math.random() * taskPoolUnknown.length)];
+        } else {
+            task = taskPoolReal[Math.floor(Math.random() * taskPoolReal.length)];
+        }
+
+        currentEx.data = { rho: task.rho, m: task.m, vol: task.vol };
+        currentEx.missing = missing;
+        currentEx.materialName = task.name;
+        currentEx.filledBoxes = 0;
+
+        renderText();
+    }
+
+    function renderText() {
+        let text = "";
+        const rhoText = `<span class="highlight-num" style="color:${colors.rho}; border-bottom-color:${colors.rho};">${toSloNumClean(currentEx.data.rho)} kg/m³</span>`;
+        const mText = `<span class="highlight-num" style="color:${colors.m}; border-bottom-color:${colors.m};">${toSloNumClean(currentEx.data.m)} kg</span>`;
+        const volText = `<span class="highlight-num" style="color:${colors.vol}; border-bottom-color:${colors.vol};">${toSloNumClean(currentEx.data.vol)} m³</span>`;
+        const nameStr = currentEx.materialName !== 'neznan material' ? ` iz snovi ${currentEx.materialName.charAt(0).toUpperCase() + currentEx.materialName.slice(1)}` : '';
+
+        if (currentEx.missing === 'm') {
+            text = `Imamo predmet${nameStr} z gostostjo ${rhoText} in prostornino ${volText}. Kolikšna je njegova masa?`;
+        } else if (currentEx.missing === 'rho') {
+            text = `Predmet ima maso ${mText} in zaseda prostornino ${volText}. Kolikšna je njegova gostota?`;
+        } else {
+            text = `Imamo kos${nameStr} z maso ${mText} in gostostjo ${rhoText}. Kolikšna je njegova prostornina?`;
+        }
+
+        document.getElementById('ex-text').innerHTML = text;
+    }
+
+    function resetExerciseUI() {
+        document.getElementById('ex-step-1').style.display = 'block';
+        document.getElementById('ex-step-2').style.display = 'none';
+        document.getElementById('ex-step-3').style.display = 'none';
+        document.getElementById('ex-step-4').style.display = 'none';
+        document.getElementById('ex-feedback').innerHTML = '';
+        document.getElementById('ex-answer').value = '';
+        document.getElementById('btn-check-ans').style.display = 'inline-block';
+        document.querySelectorAll('.ex-btn').forEach(btn => btn.classList.remove('correct', 'wrong'));
+        document.querySelectorAll('.tri-letter').forEach(el => el.classList.remove('covered', 'wrong-click'));
+    }
+
+    window.checkUnknown = function(varName, btn) {
+        if (varName === currentEx.missing) {
+            btn.classList.add('correct');
+            setTimeout(() => {
+                document.getElementById('ex-step-2').style.display = 'block';
+                document.getElementById('ex-step-2').scrollIntoView({behavior: 'smooth'});
+            }, 500);
+        } else {
+            btn.classList.add('wrong');
+            setTimeout(() => btn.classList.remove('wrong'), 500);
+        }
+    }
+
+    window.checkTriangle = function(varName) {
+        const el = document.getElementById('pos-' + varName);
+        if (varName === currentEx.missing) {
+            el.classList.add('covered');
+            setTimeout(() => {
+                buildEquationFramework();
+                document.getElementById('ex-step-3').style.display = 'block';
+                document.getElementById('ex-step-3').scrollIntoView({behavior: 'smooth'});
+            }, 600);
+        } else {
+            el.classList.add('wrong-click');
+            setTimeout(() => el.classList.remove('wrong-click'), 500);
+        }
+    }
+
+    function buildEquationFramework() {
+        const builder = document.getElementById('eq-builder');
+        builder.innerHTML = '';
+        const m = currentEx.missing;
+        let html = `<span style="color: ${colors[m]}">${m === 'vol' ? 'V' : m === 'rho' ? 'ρ' : 'm'}</span> = `;
+        const makeInput = (v) => `<input type="text" class="eq-input-box active-pulse" id="input-${v}" data-var="${v}" style="border-color:${colors[v]}" oninput="checkFormulaInput(this)">`;
+
+        if (m === 'vol') {
+            html += `<div style="display:inline-flex; flex-direction:column; align-items:center;">${makeInput('m')}<div style="width: 100%; height: 4px; background: #333; margin: 5px 0;"></div>${makeInput('rho')}</div>`;
+        } else if (m === 'rho') {
+            html += `<div style="display:inline-flex; flex-direction:column; align-items:center;">${makeInput('m')}<div style="width: 100%; height: 4px; background: #333; margin: 5px 0;"></div>${makeInput('vol')}</div>`;
+        } else if (m === 'm') {
+            html += makeInput('rho') + ` &middot; ` + makeInput('vol');
+        }
+        builder.innerHTML = html;
+        
+        let displaySymbol = m === 'vol' ? 'V' : m === 'rho' ? 'ρ' : 'm';
+        document.getElementById('final-eq-left').innerText = displaySymbol;
+        document.getElementById('final-eq-left').style.color = colors[m];
+        document.getElementById('final-unit').innerText = units[m];
+    }
+
+    window.checkFormulaInput = function(inputEl) {
+        const varType = inputEl.getAttribute('data-var');
+        const expectedVal = currentEx.data[varType];
+        let userValStr = inputEl.value.replace(',', '.').trim();
+        let userVal = parseFloat(userValStr);
+
+        if (!isNaN(userVal) && Math.abs(userVal - expectedVal) < (expectedVal * 0.05)) {
+            if (!inputEl.disabled) {
+                inputEl.disabled = true; 
+                inputEl.classList.remove('active-pulse');
+                inputEl.style.borderStyle = 'solid';
+                inputEl.style.backgroundColor = '#fef9e7'; 
+                inputEl.style.color = colors[varType];
+                inputEl.value = toSloNumClean(expectedVal); 
+                currentEx.filledBoxes++;
+                
+                if (currentEx.filledBoxes === 2) {
+                    setTimeout(() => {
+                        document.getElementById('ex-step-4').style.display = 'block';
+                        document.getElementById('ex-step-4').scrollIntoView({behavior: 'smooth'});
+                    }, 500);
+                }
+            }
+        }
+    }
+
+    window.checkAnswer = function() {
+        const inputStr = document.getElementById('ex-answer').value.replace(',', '.');
+        const userVal = parseFloat(inputStr);
+        const correctVal = currentEx.data[currentEx.missing];
+        const feedback = document.getElementById('ex-feedback');
+
+        if (isNaN(userVal)) return;
+
+        if (Math.abs(userVal - correctVal) < (correctVal * 0.05)) {
+            feedback.innerHTML = `
+                <div class="success-msg">
+                    🎉 ODLIČNO! Pravilen rezultat je ${toSloNumClean(correctVal)} ${units[currentEx.missing]}.<br>
+                    <span style="font-size: 1.1rem; color: #555;">💡 Zdaj lahko zgoraj nastaviš drsnike in vidiš, kako se predmet obnaša!</span><br><br>
+                    <button class="test-btn" onclick="document.getElementById('btn-start-ex').click()" style="font-size: 1rem;">REŠI ŠE ENO NALOGO</button>
+                </div>
+            `;
+            document.getElementById('btn-check-ans').style.display = 'none';
+        } else {
+            feedback.innerHTML = `<div class="success-msg" style="background:#fadbd8; color:#c0392b;">Poskusi znova. Preveri svoj izračun in enote.</div>`;
+            setTimeout(() => { feedback.innerHTML = ''; }, 3000);
+        }
+    }
+})();
+</script>
+
+</body>
+</html>

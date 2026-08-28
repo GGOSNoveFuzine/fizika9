@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Celoletni pregled – Fizika</title>
+  <meta name="description" content="Celoletni pregled fizike po korakih: izberi temo, ponovi ključne formule in utrdi znanje z interaktivnimi vajami." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#0f172a" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Celoletni pregled – Fizika" />
+  <meta property="og:description" content="Mirno in po korakih ponovi najpomembnejše vsebine fizike iz celega leta." />
+  <meta property="og:image" content="cover.png" />
+  <meta property="og:locale" content="sl_SI" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Celoletni pregled – Fizika" />
+  <meta name="twitter:description" content="Pregled fizike po korakih z interaktivnimi vajami." />
+  <meta name="twitter:image" content="cover.png" />
+
+  <style>
+    :root{
+      --bg1:#0f172a; --bg2:#111827; --ink:#e5e7eb; --muted:#9ca3af;
+      --card:#0b1220; --border:#020617; --pri:#22c55e; --pri2:#16a34a;
+      --acc:#38bdf8; --hot:#f97316; --shadow:#0008; --ring:#facc15;
+      --gold:#facc15; --gold2:#eab308;
+    }
+    *{box-sizing:border-box}
+
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: radial-gradient(1200px 800px at 10% -10%, #0b1220 0%, var(--bg1) 60%),
+                  linear-gradient(160deg, var(--bg1), var(--bg2));
+      font: 16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 1100px;
+      margin: auto 0;
+    }
+
+    .skip{position:absolute; left:8px; top:-40px; z-index:100; background:#111827; color:#fff;
+      padding:8px 12px; border-radius:10px; text-decoration:none; border:1px solid #2b2b2b;
+      transition:top .15s ease;}
+    .skip:focus{top:8px; outline:none; box-shadow:0 0 0 3px var(--ring);}
+
+    header{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; padding:4px 2px;}
+    .title-row{display:flex; align-items:center; gap:16px;}
+    .logo{width:56px; height:56px; border-radius:16px; display:grid; place-items:center;
+      background:conic-gradient(from 160deg, var(--gold), var(--acc), #8b5cf6, var(--gold));
+      color:#111827; font-weight:900; font-size:18px; box-shadow:0 12px 28px var(--shadow);}
+    h1{margin:0; font-size:28px}
+    .subtitle{color:var(--muted); margin:2px 0 0}
+
+    .back-link{display:inline-flex; align-items:center; gap:8px; color:#dbeafe; text-decoration:none;
+      background:#0b1527; border:1px solid #1f2a44; border-radius:999px; padding:9px 13px;
+      font-weight:800; white-space:nowrap;}
+    .back-link:hover{border-color:#334155; background:#111c33;}
+    .back-link:focus-visible{outline:none; box-shadow:0 0 0 3px var(--ring);}
+
+    .panel{background:linear-gradient(180deg, #0d1526, #0a1120);
+      border:1px solid var(--border); border-radius:18px; box-shadow:0 18px 48px var(--shadow); padding:18px;}
+
+    .hero{display:grid; grid-template-columns: 1.3fr .7fr; gap:16px; margin-bottom:16px;}
+    .hero-card{border:1px solid #1f2a44; border-radius:18px; padding:20px;
+      background:linear-gradient(135deg, #111827, #172554); overflow:hidden; position:relative;}
+    .hero-card::after{content:""; position:absolute; right:-80px; top:-80px; width:190px; height:190px;
+      background:radial-gradient(circle, rgba(56,189,248,.25), transparent 68%);}
+    .hero-card h2{margin:0 0 8px; font-size:24px;}
+    .hero-card p{margin:0; color:#cbd5e1; max-width:70ch;}
+
+    .steps{border:1px solid #1f2a44; border-radius:18px; padding:20px; background:linear-gradient(180deg, #121a2b, #0e1627);}
+    .steps h2{font-size:18px; margin:0 0 12px;}
+    .step-list{display:grid; gap:10px; margin:0; padding:0; list-style:none;}
+    .step-list li{display:flex; gap:10px; align-items:flex-start; color:#cbd5e1;}
+    .step-num{flex:0 0 auto; width:26px; height:26px; border-radius:999px; display:grid; place-items:center;
+      color:#041a10; background:linear-gradient(180deg, var(--pri), var(--pri2)); font-weight:900; font-size:13px;}
+
+    .section-title{margin:18px 4px 10px; font-size:20px}
+    .grid{display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));}
+    
+    .card{position:relative; overflow:hidden; display:block; text-decoration:none; color:inherit;
+      background:linear-gradient(180deg, #121a2b, #0e1627); border:1px solid #0a1020;
+      border-radius:16px; padding:16px; transition:transform .08s ease, box-shadow .2s ease, border-color .2s ease; min-height:205px;}
+    .card:hover{transform:translateY(-2px); border-color:#1f2a44; box-shadow:0 12px 30px var(--shadow);}
+    .card:focus-visible{outline:none; box-shadow:0 0 0 3px var(--ring), 0 12px 30px var(--shadow);}
+    
+    .badge{position:absolute; top:12px; right:12px; font-size:12px; color:#052e1a;
+      background:linear-gradient(180deg,var(--pri),var(--pri2)); padding:4px 8px; border-radius:999px; font-weight:800;}
+    .icon{width:48px; height:48px; border-radius:12px; display:grid; place-items:center;
+      background:#0b1527; border:1px solid #0a1020; margin-bottom:10px; font-size:24px;}
+    h3{margin:6px 0 6px; font-size:18px}
+    p{margin:0 0 12px; color:var(--muted)}
+    .pill{display:inline-block; font-weight:700; color:#041a10;
+      background:linear-gradient(180deg, var(--acc), #1ea0d7); border-radius:999px; padding:6px 10px; font-size:12px;}
+
+    /* Prilagojene barve posameznih kartic */
+    .motion-card { background: linear-gradient(135deg, #064e3b, #0f172a); border: 1px solid #047857; box-shadow: 0 0 20px rgba(4, 120, 87, 0.32); }
+    .motion-card .icon { background:#052e2b; border-color:#065f46; }
+
+    .density-card { background: linear-gradient(135deg, #7c2d12, #111827); border: 1px solid #c2410c; box-shadow: 0 0 20px rgba(249, 115, 22, 0.25); }
+    .density-card .icon { background:#431407; border-color:#9a3412; }
+    .density-card .badge { background:linear-gradient(180deg, var(--gold), var(--gold2)); color:#1f2937; }
+
+    .spring-card { background: linear-gradient(135deg, #4c1d95, #111827); border: 1px solid #7c3aed; box-shadow: 0 0 20px rgba(124, 58, 237, 0.25); }
+    .spring-card .icon { background: #2e1065; border-color: #5b21b6; }
+    .spring-card .badge { background: linear-gradient(180deg, #c084fc, #a855f7); color: #fff; }
+
+    .pressure-card { background: linear-gradient(135deg, #1e3a8a, #111827); border: 1px solid #2563eb; box-shadow: 0 0 20px rgba(37, 99, 235, 0.25); }
+    .pressure-card .icon { background: #172554; border-color: #1d4ed8; }
+    .pressure-card .badge { background: linear-gradient(180deg, #60a5fa, #3b82f6); color: #111827; }
+
+    .fluid-card { background: linear-gradient(135deg, #083344, #111827); border: 1px solid #0891b2; box-shadow: 0 0 20px rgba(8, 145, 178, 0.25); }
+    .fluid-card .icon { background: #082f49; border-color: #0e7490; }
+    .fluid-card .badge { background: linear-gradient(180deg, #22d3ee, #06b6d4); color: #083344; }
+
+    .buoyancy-card { background: linear-gradient(135deg, #172554, #111827); border: 1px solid #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.25); }
+    .buoyancy-card .icon { background: #1e3a8a; border-color: #2563eb; }
+    .buoyancy-card .badge { background: linear-gradient(180deg, #93c5fd, #60a5fa); color: #1e3a8a; }
+
+    .note{margin-top:16px; padding:14px 16px; border:1px dashed #334155; border-radius:14px; color:#cbd5e1; background:#0b1527;}
+    footer{color:var(--muted); font-size:14px; text-align:center; margin-top:24px;}
+
+    @media (max-width: 760px){
+      body{padding:28px 14px;}
+      header{align-items:flex-start; flex-direction:column;}
+      .hero{grid-template-columns:1fr;}
+      h1{font-size:25px;}
+      .hero-card h2{font-size:22px;}
+      .back-link{width:fit-content;}
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .card{transition:none}.card:hover{transform:none}.skip{transition:none}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#vaje">Preskoči na vaje</a>
+
+  <div class="wrap">
+    <header>
+      <div class="title-row">
+        <div class="logo" aria-hidden="true">CP</div>
+        <div>
+          <h1>Celoletni pregled</h1>
+          <p class="subtitle">Fizika po korakih – za mirno ponavljanje in utrjevanje znanja</p>
+        </div>
+      </div>
+      <a class="back-link" href="index.html">← Nazaj na glavno stran</a>
+    </header>
+
+    <main class="panel" id="vaje">
+      <section class="hero" aria-label="Uvod v celoletni pregled">
+        <div class="hero-card">
+          <h2>Začni tam, kjer trenutno potrebuješ največ vaje.</h2>
+          <p>Ta stran je namenjena ponavljanju ključnih tem iz fizike. Vsaka kartica odpre interaktivno vajo, kjer lahko najprej raziščeš povezave med količinami, nato pa rešiš naloge.</p>
+        </div>
+
+        <div class="steps">
+          <h2>Predlagani način dela</h2>
+          <ol class="step-list">
+            <li><span class="step-num">1</span><span>Odpri temo in najprej premikaj količine v simulaciji.</span></li>
+            <li><span class="step-num">2</span><span>Poglej, katera formula se spreminja.</span></li>
+            <li><span class="step-num">3</span><span>Reši nekaj nalog z magičnim trikotnikom.</span></li>
+          </ol>
+        </div>
+      </section>
+
+      <h2 class="section-title">Teme za pregled</h2>
+      <div class="grid" aria-label="Teme za celoletni pregled">
+        
+        <a class="card motion-card" href="enakomerno_gibanje.html">
+          <span class="badge">1. KORAK</span>
+          <div class="icon" aria-hidden="true">🏃‍♂️</div>
+          <h3>Enakomerno gibanje</h3>
+          <p>Ponovi zvezo med potjo, hitrostjo in časom. Preizkusi gibanje, opazuj formulo in reši naloge z magičnim trikotnikom.</p>
+          <span class="pill">Odpri vajo →</span>
+        </a>
+
+        <a class="card density-card" href="gostota.html">
+          <span class="badge">2. KORAK</span>
+          <div class="icon" aria-hidden="true">🧊</div>
+          <h3>Gostota</h3>
+          <p>Razumi povezavo med maso, prostornino in gostoto. Primerjaj snovi, opazuj tehtnico in utrdi računanje.</p>
+          <span class="pill">Odpri vajo →</span>
+        </a>
+
+        <a class="card spring-card" href="vzmet.html">
+          <span class="badge">3. KORAK</span>
+          <div class="icon" aria-hidden="true">📏</div>
+          <h3>Hookov zakon</h3>
+          <p>Opazuj raztegovanje vzmeti pod obremenitvijo. Spoznaj koeficient togosti, mejo elastičnosti in rešuj naloge.</p>
+          <span class="pill">Odpri vajo →</span>
+        </a>
+
+        <a class="card pressure-card" href="tlak.html">
+          <span class="badge">4. KORAK</span>
+          <div class="icon" aria-hidden="true">🔨</div>
+          <h3>Tlak trdnih teles</h3>
+          <p>Razumi, zakaj se v sneg udreš v čevljih in zakaj ne na smučeh. Poveži silo, ploskev in tlak.</p>
+          <span class="pill">Odpri vajo →</span>
+        </a>
+
+        <a class="card fluid-card" href="tlaktekocine.html">
+          <span class="badge">5. KORAK</span>
+          <div class="icon" aria-hidden="true">🤿</div>
+          <h3>Tlak v tekočinah</h3>
+          <p>Razišči, kako tlak narašča z globino in kako nanj vpliva gostota tekočine v različnih bazenih.</p>
+          <span class="pill">Odpri vajo →</span>
+        </a>
+
+
+
+      </div>
+
+      <div class="note">
+        Stran se lahko postopoma razširi z novimi temami, ko bodo pripravljene dodatne vaje.
+      </div>
+    </main>
+
+    <footer>
+      Namig: za najboljši pregled pojdi počasi – najprej razumi povezavo, šele nato računaj 😊
+    </footer>
+  </div>
+</body>
+</html>

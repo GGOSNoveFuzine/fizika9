@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vzgon in Gostota - Virtualni laboratorij</title>
+    <style>
+        :root {
+            --color-fv: #20c997; 
+            --color-fg: #e74c3c;
+            --color-rho: #845ef7; 
+            --color-v: #ff922b; 
+            --bg-dark: #212529;
+            --btn-cfg-bg: #e9ecef;
+            --btn-cfg-text: #495057;
+            --btn-cfg-active: #3498db;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f7; color: #333; min-height: 100vh; display: flex; flex-direction: column; gap: 15px; padding: 15px; overflow-y: auto; }
+
+        header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        h1 { font-size: 1.4rem; color: #2c3e50; text-transform: uppercase; letter-spacing: 2px; }
+        .formula-box { font-family: 'Times New Roman', serif; font-size: 1.4rem; background: #f8f9fa; padding: 5px 15px; border-radius: 8px; border: 1px solid #dee2e6; }
+        
+        .canvas-wrapper { width: 100%; height: 50vh; min-height: 450px; background: #eaecee; border: 2px solid #bdc3c7; border-radius: 10px; position: relative; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
+        canvas { display: block; width: 100%; height: 100%; }
+
+        .bottom-panel { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 15px; }
+
+        .panel-box { background: white; border-radius: 10px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; border: 1px solid #dee2e6; }
+        
+        .control-group { margin-bottom: 12px; }
+        .control-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem;}
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 8px; border-radius: 4px; background: #e9ecef; margin-top: 5px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 3px solid white; background: #3498db; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        .cfg-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+        .cfg-btn { background: var(--btn-cfg-bg); color: var(--btn-cfg-text); border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 0.8rem; flex-grow: 1; text-align: center; }
+        .cfg-btn:hover { background: #ced4da; }
+        .cfg-btn.active { background: #3498db; color: white; }
+        .cfg-btn.active-rho { background: var(--color-rho); color: white; }
+
+        .btn-action { width: 100%; padding: 12px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; transition: 0.3s; margin-top: auto; text-transform: uppercase; color: white; }
+        .btn-drop { background-color: #e74c3c; } .btn-drop:hover { background-color: #c0392b; }
+        .btn-lift { background-color: #95a5a6; } .btn-lift:hover { background-color: #7f8c8d; }
+
+        .dashboard { background: var(--bg-dark); color: white; border: 1px solid #495057; }
+        .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 100%; }
+        .dash-item { display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; text-align:center;}
+        .dash-label { font-size: 0.7rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;}
+        .dash-value { font-size: 1.4rem; font-weight: bold; font-family: 'Courier New', monospace; }
+
+        .tabs { display: flex; margin-bottom: 15px; border-bottom: 2px solid #e9ecef; }
+        .tab { flex: 1; text-align: center; padding: 8px; font-weight: bold; cursor: pointer; color: #adb5bd; transition: 0.3s; }
+        .tab.active { color: #3498db; border-bottom: 3px solid #3498db; }
+        
+        .status-badge { margin-top: 10px; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; background: #51cf66; color: #2b8a3e; text-align: center;}
+        .status-sink { background: #ffc9c9; color: #c92a2a; }
+        .status-hover { background: #ffe8cc; color: #d9480f; }
+
+        /* Magična piramida stili (skrajšano za preglednost) */
+        .exercise-container { background-color: white; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); padding: 30px; width: 100%; text-align: center; border-top: 8px solid #f39c12; margin-top: 10px; }
+        .test-btn { background-color: #f39c12; color: white; border: none; padding: 10px 25px; font-size: 1.1rem; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Laboratorij Vzgona in Gostote</h1>
+    <div class="formula-box">
+        <span style="color:var(--color-fg)">F<sub>g</sub> = m·g</span> &nbsp;&nbsp;|&nbsp;&nbsp;
+        <span style="color:var(--color-fv)">F<sub>v</sub> = ρ<sub>tek</sub>·g·V<sub>pot</sub></span>
+    </div>
+</header>
+
+<div class="canvas-wrapper">
+    <canvas id="physicsCanvas"></canvas>
+</div>
+
+<div class="bottom-panel">
+    <div class="panel-box">
+        <h3 style="margin-bottom: 15px; color: var(--color-rho); border-bottom: 2px solid #f1f3f5; padding-bottom: 5px;">1. TEKOČINA (Okolje)</h3>
+        <div class="control-group">
+		<div class="control-group">
+            <div class="control-header">
+                <span>Gostota tekočine (ρ)</span>
+                <span id="disp-rho-tek">1000 kg/m³</span>
+            </div>
+            <div class="cfg-row" id="preset-tek">
+                <button class="cfg-btn" onclick="setTek(700, this)">Bencin</button>
+                <button class="cfg-btn active-rho" onclick="setTek(1000, this)">Voda</button>
+                <button class="cfg-btn" onclick="setTek(1030, this)">Morje</button>
+                <button class="cfg-btn" onclick="setTek(1260, this)">Glicerin</button>
+                <button class="cfg-btn" onclick="setTek(13600, this)">Ž. Srebro</button>
+            </div>
+            <input type="range" id="slider-rho-tek" min="500" max="14000" step="10" value="1000" oninput="manualTek()">
+        </div>
+
+
+        </div>
+        <button id="btn-drop" class="btn-action btn-drop" onclick="toggleDrop()">⬇️ SPUSTI TELO</button>
+    </div>
+
+    <div class="panel-box" style="padding-top: 5px;">
+        <div class="tabs">
+            <div class="tab active" id="tab-homo" onclick="setBodyMode('homo')">Homogena kocka</div>
+            <div class="tab" id="tab-stek" onclick="setBodyMode('stek')">Sestavljeno telo</div>
+        </div>
+        
+        <div id="ui-homo">
+            <div class="control-group">
+                <div class="control-header">
+                    <span>Gostota telesa</span>
+                    <span id="disp-rho-homo">500 kg/m³</span>
+                </div>
+                <div class="cfg-row" id="preset-homo">
+                    <button class="cfg-btn active" onclick="setHomo(500, this)">Les</button>
+                    <button class="cfg-btn" onclick="setHomo(920, this)">Led</button>
+                    <button class="cfg-btn" onclick="setHomo(2700, this)">Aluminij</button>
+                    <button class="cfg-btn" onclick="setHomo(7800, this)">Železo</button>
+                </div>
+                <input type="range" id="slider-rho-homo" min="100" max="8000" step="50" value="500" oninput="manualHomo()">
+            </div>
+        </div>
+
+        <div id="ui-stek" style="display: none;">
+            <div class="control-group" style="margin-bottom: 5px;">
+                <div class="control-header"><span>Snov za polnjenje</span></div>
+                <div class="cfg-row" id="preset-fill">
+                    <button class="cfg-btn active" onclick="setFill(1.2, this)">Zrak (Prazna)</button>
+                    <button class="cfg-btn" onclick="setFill(1000, this)">Voda</button>
+                    <button class="cfg-btn" onclick="setFill(1600, this)">Pesek</button>
+                    <button class="cfg-btn" onclick="setFill(13500, this)">Ž.Srebro</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <span>Napolnjenost posode</span>
+                    <span id="disp-fill-perc">0 %</span>
+                </div>
+                <input type="range" id="slider-fill" min="0" max="100" step="1" value="0" oninput="updatePhysics()">
+            </div>
+			<div style="font-size: 0.75rem; color: #7f8c8d; line-height: 1.2;">
+                *Poenostavljen primer: stene posode nimajo mase in volumna. Notranjost je mešanica zraka in izbranega polnila.
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-box dashboard">
+        <div class="dash-grid">
+            <div class="dash-item" style="border: 2px solid var(--color-fg);">
+                <div class="dash-label">Sila teže (F_g)</div>
+                <div class="dash-value" style="color: var(--color-fg)" id="val-fg">0.0</div>
+                <div style="font-size: 0.7rem;">N (navzdol)</div>
+            </div>
+            <div class="dash-item" style="border: 2px solid var(--color-fv);">
+                <div class="dash-label">Sila vzgona (F_v)</div>
+                <div class="dash-value" style="color: var(--color-fv)" id="val-fv">0.0</div>
+                <div style="font-size: 0.7rem;">N (navzgor)</div>
+            </div>
+            <div class="dash-item">
+                <div class="dash-label">Povp. gostota telesa</div>
+                <div class="dash-value" id="val-rho-avg" style="color: #f1c40f;">500</div>
+                <div style="font-size: 0.7rem;">kg/m³</div>
+            </div>
+            <div class="dash-item">
+                <div class="dash-label">Potopljeni del (V_pot)</div>
+                <div class="dash-value" id="val-vpot" style="color: var(--color-v);">0 %</div>
+                <div style="font-size: 0.7rem;">od celote</div>
+            </div>
+        </div>
+        <div id="status-badge" class="status-badge">PRIPRAVLJENO</div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('physicsCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // FIZIKALNE KONSTANTE IN SPREMENLJIVKE (v osnovnih SI enotah, razen če je navedeno drugače)
+    const g = 10;
+    const V_body = 0.01; // Volumen telesa: 0.01 m3 (10 dm3)
+    const H_body = 0.2;  // Višina telesa: 20 cm
+    const A_body = V_body / H_body; // Presek: 0.05 m2
+    
+    // Telo in okolje
+    let rho_tek = 1000;
+    let bodyMode = 'homo'; // 'homo' ali 'stek'
+    let rho_homo = 500;
+    let rho_fill = 1.2; // privzeto zrak
+    let fill_perc = 0;
+    let rho_avg = 500;
+    
+    // Dinamika
+    let isDropped = false;
+    let y_m = -0.3; // Pozicija vrha telesa (0 je gladina vode)
+    let v_m_s = 0;
+    
+    // Platno
+    let W, H;
+    let ppm = 500; // Pikslov na meter
+    let waterY_px = 0;
+
+    function resizeCanvas() {
+        const wrapper = document.querySelector('.canvas-wrapper');
+        canvas.width = wrapper.clientWidth;
+        canvas.height = wrapper.clientHeight;
+        W = canvas.width;
+        H = canvas.height;
+        waterY_px = H * 0.45; // Gladina vode na 45% višine platna
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    // UPORABNIŠKI VMESNIK - FUNKCIJE
+    function setTek(val, btn) {
+        document.getElementById('slider-rho-tek').value = val;
+        let siblings = document.getElementById('preset-tek').children;
+        for(let b of siblings) b.classList.remove('active-rho');
+        btn.classList.add('active-rho');
+        updatePhysics();
+    }
+    function manualTek() {
+        let siblings = document.getElementById('preset-tek').children;
+        for(let b of siblings) b.classList.remove('active-rho');
+        updatePhysics();
+    }
+    function setBodyMode(mode) {
+        bodyMode = mode;
+        document.getElementById('tab-homo').classList.toggle('active', mode === 'homo');
+        document.getElementById('tab-stek').classList.toggle('active', mode === 'stek');
+        document.getElementById('ui-homo').style.display = mode === 'homo' ? 'block' : 'none';
+        document.getElementById('ui-stek').style.display = mode === 'stek' ? 'block' : 'none';
+        updatePhysics();
+    }
+    function setHomo(val, btn) {
+        document.getElementById('slider-rho-homo').value = val;
+        let siblings = document.getElementById('preset-homo').children;
+        for(let b of siblings) b.classList.remove('active');
+        btn.classList.add('active');
+        updatePhysics();
+    }
+    function manualHomo() {
+        let siblings = document.getElementById('preset-homo').children;
+        for(let b of siblings) b.classList.remove('active');
+        updatePhysics();
+    }
+    function setFill(val, btn) {
+        rho_fill = val;
+        let siblings = document.getElementById('preset-fill').children;
+        for(let b of siblings) b.classList.remove('active');
+        btn.classList.add('active');
+        updatePhysics();
+    }
+    function toggleDrop() {
+        isDropped = !isDropped;
+        let btn = document.getElementById('btn-drop');
+        if (isDropped) {
+            btn.innerHTML = "⬆️ DVIGNI TELO";
+            btn.className = "btn-action btn-lift";
+        } else {
+            btn.innerHTML = "⬇️ SPUSTI TELO";
+            btn.className = "btn-action btn-drop";
+        }
+    }
+
+    // GLAVNA FIZIKALNA LOGIKA
+    function updatePhysics() {
+        // Branje drsnikov
+        rho_tek = parseFloat(document.getElementById('slider-rho-tek').value);
+        document.getElementById('disp-rho-tek').innerText = rho_tek + " kg/m³";
+
+        if (bodyMode === 'homo') {
+            rho_homo = parseFloat(document.getElementById('slider-rho-homo').value);
+            document.getElementById('disp-rho-homo').innerText = rho_homo + " kg/m³";
+            rho_avg = rho_homo;
+		} else {
+            fill_perc = parseFloat(document.getElementById('slider-fill').value);
+            document.getElementById('disp-fill-perc').innerText = fill_perc + " %";
+            
+            // Izračun gostote steklenice (Poenostavljen model brez mase sten)
+            let V_notri = V_body; // Celoten volumen je na voljo za polnilo
+            let V_polnilo = V_notri * (fill_perc / 100);
+            let V_zrak = V_notri - V_polnilo;
+            
+            let m_polnilo = V_polnilo * rho_fill;
+            let m_zrak = V_zrak * 1.2; // Gostota zraka
+            
+            let m_total = m_polnilo + m_zrak;
+            rho_avg = m_total / V_body;
+        }
+
+        document.getElementById('val-rho-avg').innerText = Math.round(rho_avg);
+    }
+
+    // ANIMACIJSKA ZANKA (Fizikalni pogon)
+    let lastTime = performance.now();
+    function animateLoop(time) {
+        let dt = (time - lastTime) / 1000;
+        lastTime = time;
+        if (dt > 0.05) dt = 0.05; // Varnostna omejitev za menjave zavihkov
+
+        let mass = rho_avg * V_body;
+        let Fg = mass * g;
+        
+        // Izračun potopljenega dela
+        let bottom_y_m = y_m + H_body;
+        let fraction = 0;
+        if (bottom_y_m > 0) {
+            if (y_m >= 0) fraction = 1; // V celoti potopljeno
+            else fraction = bottom_y_m / H_body; // Delno
+        }
+        
+        let Fv = rho_tek * (V_body * fraction) * g;
+
+        if (!isDropped) {
+            // Telo je dvignjeno nad vodo (gladko premikanje na začetno pozicijo)
+            v_m_s = 0;
+            y_m += (-0.25 - y_m) * 5 * dt; 
+        } else {
+            // Eulerjeva integracija padanja in vzgona
+            // Sila upora vode (zelo poenostavljeno, a vizualno efektivno)
+            let drag = - (10 + 200 * fraction) * v_m_s; 
+            
+            let F_net = Fg - Fv + drag;
+            let a = F_net / mass;
+            
+            v_m_s += a * dt;
+            y_m += v_m_s * dt;
+            
+            // Trk z dnom posode
+            let tank_depth_m = (H - waterY_px - 20) / ppm; // Dinamično dno
+            if (bottom_y_m > tank_depth_m) {
+                y_m = tank_depth_m - H_body;
+                if (v_m_s > 0) v_m_s *= -0.2; // Majhen odboj
+            }
+        }
+
+        updateDashboard(Fg, Fv, fraction);
+        drawCanvas(fraction, Fg, Fv);
+        
+        requestAnimationFrame(animateLoop);
+    }
+
+    function updateDashboard(Fg, Fv, fraction) {
+        document.getElementById('val-fg').innerText = Fg.toFixed(1);
+        document.getElementById('val-fv').innerText = Fv.toFixed(1);
+        document.getElementById('val-vpot').innerText = (fraction * 100).toFixed(1) + " %";
+
+        let badge = document.getElementById('status-badge');
+        if (!isDropped) {
+            badge.innerText = "PRIPRAVLJENO (V ZRAKU)";
+            badge.className = "status-badge";
+            badge.style.background = "#e9ecef"; badge.style.color = "#495057";
+        } else if (y_m + H_body >= (H - waterY_px - 20) / ppm - 0.01) {
+            badge.innerText = "TELO JE POTONILO";
+            badge.className = "status-badge status-sink";
+        } else if (fraction > 0.99 && Math.abs(rho_avg - rho_tek) < 10) {
+            badge.innerText = "TELO LEBDI";
+            badge.className = "status-badge status-hover";
+        } else if (Math.abs(v_m_s) < 0.05 && fraction > 0 && fraction < 0.99) {
+            badge.innerText = "TELO PLAVA";
+            badge.className = "status-badge";
+            badge.style.background = "#51cf66"; badge.style.color = "#2b8a3e";
+        } else {
+            badge.innerText = "GIBANJE...";
+            badge.className = "status-badge";
+            badge.style.background = "#fff3cd"; badge.style.color = "#856404";
+        }
+    }
+
+    function drawCanvas(fraction, Fg, Fv) {
+        ctx.clearRect(0, 0, W, H);
+        
+        let tankW = Math.min(W * 0.8, 400);
+        let tX = W/2 - tankW/2;
+        let tH = H - waterY_px - 20; // 20px od spodnjega roba
+
+		// 1. TEKOČINA
+        let hue = 200, sat = 70, lgt = 55, alp = 0.4;
+        if (rho_tek < 900) { hue = 50; } // Bencin/olje (rumenkasto)
+        else if (rho_tek >= 900 && rho_tek <= 1100) { hue = 200; } // Voda/Morje (modro)
+        else if (rho_tek > 1100 && rho_tek <= 5000) { hue = 280; } // Glicerin (vijolično)
+        else { hue = 0; sat = 0; lgt = 60; alp = 0.7; } // Živo srebro (srebrno-siva, bolj neprozorna)
+        
+        ctx.fillStyle = `hsla(${hue}, ${sat}%, ${lgt}%, ${alp})`;
+        ctx.fillRect(tX, waterY_px, tankW, tH);
+        
+        // Bazen (črte)
+        ctx.strokeStyle = '#bdc3c7'; ctx.lineWidth = 6; ctx.lineJoin = 'round';
+        ctx.beginPath(); ctx.moveTo(tX, waterY_px-20); ctx.lineTo(tX, waterY_px+tH); 
+        ctx.lineTo(tX + tankW, waterY_px+tH); ctx.lineTo(tX + tankW, waterY_px-20); ctx.stroke();
+        
+        // Valovi na gladini
+        ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${lgt - 15}%, ${alp + 0.2})`; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(tX, waterY_px);
+        for(let i=0; i<tankW; i+=10) ctx.lineTo(tX + i, waterY_px + Math.sin(i*0.1 + performance.now()*0.005)*3);
+        ctx.stroke();
+
+        // 2. TELO
+        let sidePx = H_body * ppm; // Širina in višina
+        let boxX = W/2 - sidePx/2;
+        let boxY = waterY_px + y_m * ppm;
+
+        if (bodyMode === 'homo') {
+            // Risanje homogene kocke
+            let bColor = '#f39c12'; // Les
+            if (rho_homo > 900) bColor = '#ecf0f1'; // Led
+            if (rho_homo > 2000) bColor = '#95a5a6'; // Kovina
+            if (rho_homo > 5000) bColor = '#34495e'; // Težka kovina
+            
+            ctx.fillStyle = bColor; ctx.fillRect(boxX, boxY, sidePx, sidePx);
+            ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 2; ctx.strokeRect(boxX, boxY, sidePx, sidePx);
+		} else {
+            // Risanje steklenice (prerez)
+            let wall = sidePx * 0.015; // Zelo tanka stena (samo za vizualno mejo)
+            
+            // Ozadje (steklo)
+            ctx.fillStyle = 'rgba(189, 195, 199, 0.5)';
+            ctx.fillRect(boxX, boxY, sidePx, sidePx);
+            
+            // Notranjost (Zrak + Polnilo)
+            let inX = boxX + wall; let inY = boxY + wall;
+            let inS = sidePx - 2*wall;
+            
+            ctx.fillStyle = 'rgba(255,255,255,0.8)'; // Zrak
+            ctx.fillRect(inX, inY, inS, inS);
+            
+            // Polnilo (spodnji del)
+            if (fill_perc > 0) {
+                let fillH = inS * (fill_perc / 100);
+                let fColor = '#3498db'; // voda
+                if (rho_fill > 1200) fColor = '#e67e22'; // pesek
+                if (rho_fill > 10000) fColor = '#7f8c8d'; // zivo srebro
+                
+                ctx.fillStyle = fColor;
+                ctx.fillRect(inX, inY + inS - fillH, inS, fillH);
+            }
+            
+            ctx.strokeStyle = '#7f8c8d'; ctx.lineWidth = 2; ctx.strokeRect(boxX, boxY, sidePx, sidePx);
+        }
+
+// 3. SILE (Puščice)
+        if (isDropped) {
+            let centerMassY = boxY + sidePx/2;
+            let arrowX = W/2;
+            
+            // --- NOVA LOGIKA ZA PROPORCIONALNE VEKTORJE ---
+            // Poiščemo največjo silo, da določimo merilo (ohranja pravo razmerje na zaslonu)
+            let maxForce = Math.max(Fg, Fv);
+            // Najdaljša puščica bo dolga največ 100px. Minimalna osnova je 50, da majhne sile ne eksplodirajo.
+            let vScale = 100 / Math.max(maxForce, 50); 
+            
+            // Sila teže (Rdeča, iz težišča navzdol)
+            let lenFg = Fg * vScale; 
+            drawArrow(ctx, arrowX - 15, centerMassY, arrowX - 15, centerMassY + lenFg, '#e74c3c', 'F_g');
+
+            // Sila vzgona (Zelena, iz središča POTOPLJENEGA dela navzgor)
+            if (fraction > 0.01) {
+                let submergedPx = fraction * sidePx;
+                let centerBuoyancyY = (boxY + sidePx) - submergedPx/2;
+                let lenFv = Fv * vScale;
+                drawArrow(ctx, arrowX + 15, centerBuoyancyY, arrowX + 15, centerBuoyancyY - lenFv, '#20c997', 'F_v');
+            }
+        } else {
+            // Nitka, ki drži telo
+            ctx.strokeStyle = '#95a5a6'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, boxY); ctx.stroke();
+        }
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color, label) {
+        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        
+        let angle = Math.atan2(y2 - y1, x2 - x1);
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - 12 * Math.cos(angle - Math.PI/6), y2 - 12 * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(x2 - 12 * Math.cos(angle + Math.PI/6), y2 - 12 * Math.sin(angle + Math.PI/6));
+        ctx.closePath(); ctx.fill();
+        
+        ctx.font = 'bold 15px Segoe UI'; ctx.textAlign = 'center';
+        // Sprememba za lepši izpis F_g in F_v
+        ctx.fillText(label, x2 + (x2>x1 ? 22 : -22), y2 + 5);
+    }
+
+    // ZAGON
+    resizeCanvas();
+    updatePhysics();
+    requestAnimationFrame(animateLoop);
+
+</script>
+</body>
+</html>

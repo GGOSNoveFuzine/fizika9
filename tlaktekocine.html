@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tlak v tekočinah - Fizika</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #060e1a;
+            --card: #0c1a2e;
+            --card-border: #1a2d4a;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --accent: #00d4ff;
+            --accent-dim: rgba(0,212,255,0.12);
+            --danger: #ff4757;
+            --warning: #ffa502;
+            --success: #2ed573;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            font-family:'Outfit',sans-serif;
+            background:var(--bg);
+            color:var(--text);
+            min-height:100vh;
+            padding:20px;
+        }
+        .container{max-width:1020px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+        .header{text-align:center;padding:16px 0 6px;}
+        .header h1{
+            font-size:2.2rem;font-weight:900;letter-spacing:2px;text-transform:uppercase;
+            background:linear-gradient(135deg,var(--accent),#00ff88);
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+            background-clip:text;
+        }
+        .header .formula{
+            font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+            color:var(--muted);margin-top:6px;
+        }
+        .header .formula b{color:var(--accent);font-weight:700;}
+
+        .controls-top { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 5px;}
+
+        .fluid-selector{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+        .fluid-btn{
+            padding:10px 20px;border:2px solid var(--card-border);background:var(--card);
+            color:var(--text);border-radius:12px;cursor:pointer;font-family:'Outfit',sans-serif;
+            font-size:.9rem;font-weight:600;transition:all .3s;display:flex;align-items:center;gap:8px;
+        }
+        .fluid-btn:hover{border-color:var(--accent);background:var(--accent-dim);}
+        .fluid-btn.active{border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 20px rgba(0,212,255,.2);}
+        .fluid-dot{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.25);flex-shrink:0;}
+        .fluid-rho{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);}
+
+        .toggle-atm {
+            display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+            background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 8px; border: 1px solid var(--card-border);
+            font-weight: 600; transition: 0.3s;
+        }
+        .toggle-atm:hover { background: rgba(255,255,255,0.1); }
+        .toggle-atm input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+
+        .canvas-wrap{position:relative;border-radius:14px;overflow:hidden;border:2px solid var(--card-border);background:#000;}
+        canvas{display:block;width:100%;cursor:default;}
+        .canvas-hint{
+            position:absolute;top:10px;right:12px;
+            background:rgba(0,0,0,.55);backdrop-filter:blur(8px);
+            padding:6px 14px;border-radius:8px;font-size:.8rem;color:var(--muted);
+            pointer-events:none;display:flex;align-items:center;gap:6px;
+        }
+
+        .data-grid{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:10px;}
+        .data-card{
+            background:var(--card);border:1px solid var(--card-border);
+            border-radius:12px;padding:18px;text-align:center;
+        }
+        .data-card .label{font-size:.75rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px;}
+        .data-card .value{font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:700;color:var(--accent);}
+        .data-card .unit{font-size:.8rem;color:var(--muted);margin-top:3px;}
+        .data-card.pressure-card{
+            border-color:rgba(0,212,255,.35);
+            background:linear-gradient(145deg,var(--card),var(--accent-dim));
+        }
+
+        .formula-card{
+            background:var(--card);border:1px solid var(--card-border);
+            border-radius:12px;padding:18px 22px;font-family:'JetBrains Mono',monospace;
+        }
+        .formula-card .title{
+            font-family:'Outfit',sans-serif;font-size:.75rem;text-transform:uppercase;
+            letter-spacing:1.5px;color:var(--muted);margin-bottom:10px;
+        }
+        .fl{font-size:1rem;line-height:1.9;color:var(--text);}
+        .fl .hp{color:var(--accent);font-weight:700;}
+        .fl .hr{color:#ffa502;}
+        .fl .hh{color:#2ed573;}
+        .fl .hp0{color:#ff6b81;}
+        .fl.result{font-size:1.25rem;color:var(--accent);margin-top:4px;padding-top:6px;border-top:1px solid var(--card-border);}
+
+        .info-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .info-card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:18px;}
+        .zone-name{font-size:1.1rem;font-weight:700;margin-bottom:6px;}
+        .zone-desc{font-size:.85rem;color:var(--muted);line-height:1.5;}
+        .danger-bar{height:8px;border-radius:4px;background:#1a2d4a;margin-top:10px;overflow:hidden;}
+        .danger-fill{height:100%;border-radius:4px;transition:width .4s,background .4s;}
+        .danger-label{display:flex;justify-content:space-between;margin-top:5px;font-size:.75rem;color:var(--muted);}
+
+        .comp-table{width:100%;border-collapse:collapse;font-size:.85rem;}
+        .comp-table th,.comp-table td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--card-border);}
+        .comp-table th{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;font-weight:600;}
+        .comp-table tr.active-row{background:var(--accent-dim);}
+        .comp-table .val{font-family:'JetBrains Mono',monospace;font-weight:700;}
+        .bar-bg{background:#1a2d4a;height:7px;border-radius:4px;overflow:hidden;}
+        .bar-fill{height:100%;border-radius:4px;transition:width .5s;}
+
+        /* STILI ZA VAJE (Magični trikotnik) */
+        .exercise-container {
+            background: var(--card); border: 1px solid var(--card-border);
+            border-top: 4px solid var(--accent); border-radius: 12px; padding: 30px; text-align: center; margin-top: 10px;
+        }
+        .ex-title { color: var(--accent); margin-top: 0; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1.5px; }
+        .task-text { font-size: 1.15rem; line-height: 1.6; margin: 20px 0; padding: 20px; background-color: rgba(0, 212, 255, 0.05); border-radius: 10px; border: 1px dashed var(--accent); }
+        .highlight-num { display: inline-block; font-weight: bold; padding: 2px 5px; border-radius: 5px; background-color: var(--bg); border-bottom: 2px solid; }
+        
+        .test-btn { background-color: var(--accent); color: #000; border: none; padding: 12px 25px; font-size: 1.1rem; border-radius: 8px; cursor: pointer; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+        .test-btn:hover { background-color: #00ff88; box-shadow: 0 0 15px rgba(0, 255, 136, 0.3); }
+        
+        .ex-step { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--card-border); animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
+        .ex-btn { padding: 10px 20px; font-size: 1rem; font-weight: bold; border: 1px solid var(--card-border); background: var(--bg); color: var(--text); border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .ex-btn:hover { background: var(--accent-dim); border-color: var(--accent); }
+        .ex-btn.correct { background: rgba(46, 213, 115, 0.2); color: var(--success); border-color: var(--success); }
+        .ex-btn.wrong { background: rgba(255, 71, 87, 0.2); color: var(--danger); border-color: var(--danger); animation: shake 0.4s; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+
+        .magic-triangle-wrapper { position: relative; width: 250px; height: 220px; margin: 0 auto; }
+        .tri-letter { position: absolute; font-size: 1.8rem; font-family: 'JetBrains Mono', monospace; font-weight: bold; cursor: pointer; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--card); border: 2px solid var(--card-border); box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: 0.2s; }
+        .tri-letter:hover { transform: scale(1.1); border-color: var(--text); }
+        .tri-letter.covered { background: #0c1a2e; color: #3d4757 !important; opacity: 0.8; cursor: not-allowed; border-color: #1a2d4a; box-shadow: none; }
+        .tri-letter.wrong-click { animation: shake 0.4s; border-color: var(--danger); }
+
+        #pos-p { top: 25px; left: 100px; color: var(--accent); }
+        #pos-rho { bottom: 20px; left: 30px; color: var(--warning); }
+        #pos-g { bottom: 20px; left: 100px; color: var(--muted); cursor: default; pointer-events: none; }
+        #pos-h { bottom: 20px; left: 170px; color: var(--success); }
+
+        .eq-build-area { display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-family: 'JetBrains Mono', monospace; font-weight: bold; margin: 20px 0; min-height: 80px; }
+        .eq-input-box { display: inline-block; width: 90px; height: 45px; border: 2px dashed var(--muted); border-radius: 8px; margin: 0 8px; text-align: center; font-size: 1.3rem; font-weight: bold; font-family: inherit; color: var(--accent); outline: none; transition: 0.3s; box-sizing: border-box; background-color: transparent; }
+        .eq-input-box:focus { border-style: solid; border-color: var(--accent); box-shadow: 0 0 10px rgba(0,212,255,0.2); }
+        .eq-input-box.active-pulse { animation: pulseBorder 1.5s infinite; }
+        @keyframes pulseBorder { 0% { border-color: var(--muted); } 50% { border-color: var(--accent); } 100% { border-color: var(--muted); } }
+
+        .calc-input-area { font-size: 1.8rem; font-weight: bold; font-family: 'JetBrains Mono', monospace; margin-top: 20px; }
+        #ex-answer { background: var(--bg); color: var(--text); font-size: 1.6rem; width: 140px; text-align: center; border: 2px solid var(--card-border); border-radius: 8px; padding: 5px; outline: none; transition: border-color 0.3s; }
+        #ex-answer:focus { border-color: var(--accent); }
+        .success-msg { color: var(--success); font-size: 1.3rem; font-weight: bold; margin-top: 20px; padding: 15px; background: rgba(46, 213, 115, 0.1); border-radius: 10px; animation: fadeIn 0.5s; border: 1px solid rgba(46, 213, 115, 0.3); }
+
+        @media(max-width:768px){
+            .data-grid{grid-template-columns:1fr;}
+            .info-row{grid-template-columns:1fr;}
+            .header h1{font-size:1.5rem;}
+            .fluid-btn{padding:8px 14px;font-size:.8rem;}
+            .calc-input-area { font-size: 1.4rem; }
+            .eq-build-area { font-size: 1.4rem; flex-wrap: wrap; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <h1>Tlak v tekočinah</h1>
+        <div class="formula"><b>P</b> = P₀ + <b>ρ</b> · g · <b>h</b></div>
+    </header>
+
+    <div class="controls-top">
+        <nav class="fluid-selector" id="fluid-sel"></nav>
+        
+        <label class="toggle-atm">
+            <input type="checkbox" id="atm-toggle" checked onchange="toggleAtmosphere()">
+            Upoštevaj zračni tlak na gladini (P₀)
+        </label>
+    </div>
+
+    <section class="canvas-wrap">
+        <canvas id="ocean"></canvas>
+        <div class="canvas-hint"><i class="fas fa-arrows-alt"></i> Povleci podmornico ali uporabi puščice</div>
+    </section>
+
+    <section class="data-grid">
+        <div class="data-card">
+            <div class="label">Globina (h)</div>
+            <div class="value" id="v-depth">0</div>
+            <div class="unit">m</div>
+        </div>
+        <div class="data-card">
+            <div class="label">Gostota (ρ)</div>
+            <div class="value" id="v-rho">1030</div>
+            <div class="unit">kg/m³</div>
+        </div>
+        <div class="data-card pressure-card">
+            <div class="label">Skupni tlak (P)</div>
+            <div class="value" id="v-pa">100.000</div>
+            <div class="unit" id="v-units">Pa = 100,0 kPa = 0,10 MPa</div>
+        </div>
+    </section>
+
+    <section class="formula-card" id="f-card"></section>
+
+    <section class="info-row">
+        <div class="info-card" id="zone-card"></div>
+        <div class="info-card" id="danger-card"></div>
+    </section>
+
+    <section class="info-card">
+        <div class="title" style="font-family:Outfit;font-size:.75rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:10px;">Primerjava tlakov</div>
+        <table class="comp-table" id="comp-tbl"></table>
+    </section>
+
+    <section class="exercise-container" id="exercise-section">
+        <h2 class="ex-title">Magični trikotnik <span style="color:var(--muted); font-size:1rem; vertical-align:middle;">(samo hidrostatični tlak)</span></h2>
+        <p style="color:var(--muted); margin-top:5px;">Preveri, če razumeš! Računalnik ti bo pripravil naključno nalogo za izračun hidrostatičnega tlaka, gostote ali globine.</p>
+        <button id="btn-start-ex" class="test-btn" style="margin-top:15px;">📝 ŽELIM REŠITI NALOGO!</button>
+
+        <div id="ex-area" style="display:none;">
+            <div id="ex-text" class="task-text"></div>
+
+            <div id="ex-step-1" class="ex-step">
+                <p style="font-weight: 600; font-size: 1.1rem;">Kaj moramo izračunati v tej nalogi?</p>
+                <div class="btn-row">
+                    <button class="ex-btn" onclick="checkUnknown('p', this)">Hidrostatični tlak (p)</button>
+                    <button class="ex-btn" onclick="checkUnknown('rho', this)">Gostota (ρ)</button>
+                    <button class="ex-btn" onclick="checkUnknown('h', this)">Globina (h)</button>
+                </div>
+            </div>
+
+            <div id="ex-step-2" class="ex-step" style="display:none;">
+                <p style="font-weight: 600; font-size: 1.1rem; color: var(--accent);">Odlično! Zdaj v magičnem trikotniku klikni tisto črko, ki jo iščemo.</p>
+                <div class="magic-triangle-wrapper">
+                    <svg viewBox="0 0 250 220" width="250" height="220">
+                        <polygon points="125,20 20,200 230,200" fill="var(--bg)" stroke="var(--card-border)" stroke-width="4"/>
+                        <line x1="72" y1="110" x2="178" y2="110" stroke="var(--card-border)" stroke-width="4" />
+                        <line x1="90" y1="110" x2="90" y2="200" stroke="var(--card-border)" stroke-width="4" />
+                        <line x1="160" y1="110" x2="160" y2="200" stroke="var(--card-border)" stroke-width="4" />
+                        <circle cx="90" cy="155" r="3" fill="var(--muted)" />
+                        <circle cx="160" cy="155" r="3" fill="var(--muted)" />
+                    </svg>
+                    <div class="tri-letter" id="pos-p" onclick="checkTriangle('p')">p</div>
+                    <div class="tri-letter" id="pos-rho" onclick="checkTriangle('rho')">ρ</div>
+                    <div class="tri-letter" id="pos-g">g</div>
+                    <div class="tri-letter" id="pos-h" onclick="checkTriangle('h')">h</div>
+                </div>
+            </div>
+
+            <div id="ex-step-3" class="ex-step" style="display:none;">
+                <p style="font-weight: 600; font-size: 1.1rem; color: var(--success);">Tako je! Tvoja enačba je pripravljena.</p>
+                <p style="color:var(--muted); font-size:0.95rem;">Vpiši ustrezne številke iz besedila zgoraj v prazna polja v enačbi (g = 10 m/s²).</p>
+                <div class="eq-build-area" id="eq-builder"></div>
+            </div>
+
+            <div id="ex-step-4" class="ex-step" style="display:none;">
+                <p style="font-weight: 600; font-size: 1.1rem;">Enačba je polna! Zdaj pa izračunaj in vpiši rezultat:</p>
+                <div class="calc-input-area">
+                    <span id="final-eq-left" style="color: var(--accent);"></span> = 
+                    <input type="text" id="ex-answer" placeholder="0,0"> 
+                    <span id="final-unit" style="color: var(--text);"></span>
+                </div>
+                <button id="btn-check-ans" class="test-btn" style="margin-top: 20px;" onclick="checkAnswer()">PREVERI REZULTAT</button>
+                <div id="ex-feedback"></div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+/* =============================================
+   TLAK V TEKOČINAH — INTERAKTIVNA SIMULACIJA
+   ============================================= */
+
+const canvas = document.getElementById('ocean');
+const ctx = canvas.getContext('2d');
+
+// Fizikalne konstante
+const ATM_P = 100000;   // atmosferski tlak na 100.000 Pa (100 kPa)
+const G  = 10;          // težni pospešek (N/kg)
+const MAX_DEPTH = 1000;
+
+// Tekočine
+const fluids = {
+    fresh:   { name:'Sladka voda',  rho:1000,  sRGB:[72,180,220], dRGB:[1,18,36],   dot:'#48b4dc' },
+    salt:    { name:'Slana voda',   rho:1030,  sRGB:[40,120,210], dRGB:[0,14,42],   dot:'#2878d2' },
+    oil:     { name:'Olje',         rho:800,   sRGB:[230,155,80], dRGB:[55,25,2],   dot:'#e69b50' },
+    mercury: { name:'Živo srebro',  rho:13590, sRGB:[170,170,175],dRGB:[28,28,32],  dot:'#aaaab0' }
+};
+
+// Stanje
+let curFluid  = 'salt';
+let subDepth  = 200;       
+let subX      = 0.5;       
+let facingR   = true;
+let includeAtm = true;     
+
+// Spremenljivke za pravilno drsenje
+let dragging  = false;
+let dragOX    = 0; 
+let dragOY    = 0; 
+let mouseX    = -999, mouseY = -999;
+let time      = 0;
+
+// Dimenzije platna
+const W = 960, H = 560;
+const SURF_Y = 55;          
+const VIEW   = 300;         
+canvas.width = W;
+canvas.height = H;
+
+// Ločena kamera za gladko drsenje
+let cameraDepth = Math.max(0, subDepth - VIEW * 0.4); 
+
+// Delci
+let bubbles = [];
+let fish = [];
+let particles = [];
+
+/* ---- Pomožne funkcije ---- */
+
+function fmtSI(n, d=0){
+    const s = n.toFixed(d);
+    const p = s.split('.');
+    p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return p.join(',');
+}
+
+function vpTop(){ return cameraDepth; }
+
+function d2y(d){
+    const vt = vpTop();
+    return SURF_Y + ((d - vt) / VIEW) * (H - SURF_Y);
+}
+function y2d(y){
+    const vt = vpTop();
+    return vt + ((y - SURF_Y) / (H - SURF_Y)) * VIEW;
+}
+
+function waterColor(d){
+    const f = fluids[curFluid];
+    const t = Math.min(1, d / MAX_DEPTH);
+    const r = Math.round(f.sRGB[0]+(f.dRGB[0]-f.sRGB[0])*t);
+    const g = Math.round(f.sRGB[1]+(f.dRGB[1]-f.sRGB[1])*t);
+    const b = Math.round(f.sRGB[2]+(f.dRGB[2]-f.sRGB[2])*t);
+    return `rgb(${r},${g},${b})`;
+}
+
+/* ---- Vmesnik za kontrole ---- */
+
+function toggleAtmosphere() {
+    includeAtm = document.getElementById('atm-toggle').checked;
+    updateUI();
+}
+
+(function initBtns(){
+    const c = document.getElementById('fluid-sel');
+    for(const[k,f] of Object.entries(fluids)){
+        const b = document.createElement('button');
+        b.className = 'fluid-btn'+(k===curFluid?' active':'');
+        b.innerHTML = `<span class="fluid-dot" style="background:${f.dot}"></span>${f.name}<span class="fluid-rho">${fmtSI(f.rho)} kg/m³</span>`;
+        b.onclick = ()=>{
+            curFluid = k;
+            c.querySelectorAll('.fluid-btn').forEach(x=>x.classList.remove('active'));
+            b.classList.add('active');
+            updateUI();
+        };
+        c.appendChild(b);
+    }
+})();
+
+
+function cPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    // Podpira tako miško kot dotik (za mobilne naprave)
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+    };
+}
+
+
+
+
+/* ---- Generiranje življenja ---- */
+
+(function initFish(){
+    for(let i=0;i<18;i++){
+        fish.push({
+            depth: Math.random()*900+30, x: Math.random()*W,
+            spd: (Math.random()-.5)*1.8, sz: Math.random()*5+3,
+            col:['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff922b','#a29bfe'][Math.floor(Math.random()*6)]
+        });
+    }
+})();
+
+(function initParticles(){
+    for(let i=0;i<60;i++){
+        particles.push({
+            depth: Math.random()*MAX_DEPTH, x: Math.random()*W,
+            r: Math.random()*1.5+.5, drift: (Math.random()-.5)*.3, op: Math.random()*.25+.05
+        });
+    }
+})();
+
+/* ---- Risanje (platno) ---- */
+
+function drawSky(){
+    const vt = vpTop();
+    if(vt > 40) return;
+    const g1 = ctx.createLinearGradient(0,0,0,SURF_Y);
+    g1.addColorStop(0,'#0d1b2a'); g1.addColorStop(1,'#1b2838');
+    ctx.fillStyle = g1; ctx.fillRect(0,0,W,SURF_Y);
+    if(vt < 15){
+        ctx.fillStyle = 'rgba(255,255,255,.45)';
+        for(let i=0;i<25;i++){
+            ctx.beginPath(); ctx.arc((i*137.5+23)%W, (i*73.1+11)%(SURF_Y-8), .8, 0, Math.PI*2); ctx.fill();
+        }
+    }
+}
+
+function drawWater(){
+    const vt = vpTop();
+    const g1 = ctx.createLinearGradient(0,SURF_Y,0,H);
+    for(let i=0;i<=10;i++) g1.addColorStop(i/10, waterColor(vt + (i/10)*VIEW));
+    ctx.fillStyle = g1; ctx.fillRect(0,SURF_Y,W,H-SURF_Y);
+}
+
+function drawSurface(){
+    const vt = vpTop();
+    if(vt > 25) return;
+    ctx.beginPath(); ctx.moveTo(0, SURF_Y);
+    for(let x=0;x<=W;x+=4) ctx.lineTo(x, SURF_Y + Math.sin(x*.02+time*2)*3 + Math.sin(x*.013+time*1.3)*2);
+    ctx.lineTo(W, SURF_Y-8); ctx.lineTo(0, SURF_Y-8); ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fill();
+    
+    ctx.beginPath();
+    for(let x=0;x<=W;x+=4){
+        const w = Math.sin(x*.02+time*2)*3 + Math.sin(x*.013+time*1.3)*2;
+        x===0 ? ctx.moveTo(x,SURF_Y+w) : ctx.lineTo(x,SURF_Y+w);
+    }
+    ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=1.5; ctx.stroke();
+    
+    if(vt < 5){
+        ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='11px JetBrains Mono'; ctx.textAlign='left';
+        ctx.fillText('POVRŠINA  0 m', 68, SURF_Y-10);
+    }
+}
+
+function drawLightRays(){
+    const vt = vpTop();
+    if(vt > 350) return;
+    const maxOp = Math.max(0, .12*(1-vt/350));
+    for(let i=0;i<7;i++){
+        const x = ((i*143+time*15)%(W+300))-150;
+        const w = 25+Math.sin(time+i)*8;
+        const len = 180+Math.sin(time*.4+i*2.3)*40;
+        ctx.beginPath(); ctx.moveTo(x-w/2, SURF_Y); ctx.lineTo(x+w/2, SURF_Y); ctx.lineTo(x+w*1.5, SURF_Y+len); ctx.lineTo(x-w, SURF_Y+len); ctx.closePath();
+        const lg = ctx.createLinearGradient(x,SURF_Y,x,SURF_Y+len);
+        lg.addColorStop(0,`rgba(255,255,210,${maxOp})`); lg.addColorStop(1,'rgba(255,255,210,0)');
+        ctx.fillStyle = lg; ctx.fill();
+    }
+}
+
+function drawSeabed(){
+    const vt = vpTop();
+    if(vt+VIEW < 960) return;
+    const sy = d2y(MAX_DEPTH);
+    if(sy > H+10) return;
+    const sg = ctx.createLinearGradient(0,sy-15,0,H);
+    if(curFluid==='mercury'){ sg.addColorStop(0,'rgba(90,90,95,.9)'); sg.addColorStop(1,'rgba(50,50,55,1)'); } 
+    else if(curFluid==='oil'){ sg.addColorStop(0,'rgba(100,70,30,.8)'); sg.addColorStop(1,'rgba(60,40,15,1)'); } 
+    else { sg.addColorStop(0,'rgba(70,55,30,.8)'); sg.addColorStop(1,'rgba(35,25,12,1)'); }
+    
+    ctx.beginPath(); ctx.moveTo(0,sy);
+    for(let x=0;x<=W;x+=8) ctx.lineTo(x, sy + Math.sin(x*.025)*4 + Math.sin(x*.06)*2);
+    ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
+    ctx.fillStyle = sg; ctx.fill();
+    
+    if(sy < H-5){
+        ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font='11px JetBrains Mono'; ctx.textAlign='left';
+        ctx.fillText('1000 m — DNO', 68, sy-6);
+    }
+}
+
+function drawDepthRuler(){
+    const vt = vpTop();
+    const vb = Math.min(MAX_DEPTH, vt+VIEW);
+    ctx.fillStyle='rgba(0,0,0,.45)'; ctx.fillRect(0,SURF_Y,62,H-SURF_Y);
+    
+    let tick = VIEW<120 ? 10 : (VIEW<250 ? 25 : 100);
+    const start = Math.ceil(vt/tick)*tick;
+    ctx.textAlign='right'; ctx.font='10px JetBrains Mono';
+    
+    for(let d=start;d<=vb;d+=tick){
+        const y = d2y(d);
+        if(y<SURF_Y-2||y>H+2) continue;
+        ctx.beginPath(); ctx.moveTo(48,y); ctx.lineTo(62,y);
+        ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=1; ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,.6)'; ctx.fillText(d+'', 45, y+3.5);
+    }
+    
+    if(vt<200 && vb>200){
+        const y200 = d2y(200);
+        ctx.setLineDash([4,4]);
+        ctx.beginPath(); ctx.moveTo(62,y200); ctx.lineTo(W-5,y200);
+        ctx.strokeStyle='rgba(255,165,2,.25)'; ctx.lineWidth=1; ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle='rgba(255,165,2,.5)'; ctx.font='9px Outfit'; ctx.textAlign='left';
+        ctx.fillText('200 m — meja sončne cone', 68, y200-4);
+    }
+}
+
+function drawDepthLine(sy){
+    if(sy<SURF_Y||sy>H) return;
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(62,sy); ctx.lineTo(W-8,sy);
+    ctx.strokeStyle='rgba(0,212,255,.25)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.setLineDash([]);
+}
+
+function drawParticles(){
+    const vt = vpTop();
+    for(const p of particles){
+        if(p.depth<vt||p.depth>vt+VIEW) continue;
+        const y = d2y(p.depth);
+        const fadeAtDepth = Math.max(.3, 1 - p.depth/MAX_DEPTH);
+        ctx.beginPath(); ctx.arc(p.x, y, p.r, 0, Math.PI*2);
+        const col = curFluid==='mercury' ? `rgba(200,200,210,${p.op*fadeAtDepth})` : curFluid==='oil' ? `rgba(240,200,130,${p.op*fadeAtDepth})` : `rgba(180,220,255,${p.op*fadeAtDepth})`;
+        ctx.fillStyle = col; ctx.fill();
+        p.x += p.drift; if(p.x>W+5) p.x=-5; if(p.x<-5) p.x=W+5;
+    }
+}
+
+function drawFish(){
+    const vt = vpTop();
+    for(const f of fish){
+        if(f.depth<vt||f.depth>vt+VIEW) continue;
+        const y = d2y(f.depth);
+        const op = Math.max(.08, .45 - f.depth/1800);
+        ctx.save(); ctx.translate(f.x,y); ctx.globalAlpha=op;
+        if(f.spd<0) ctx.scale(-1,1);
+        ctx.beginPath(); ctx.ellipse(0,0,f.sz,f.sz*.5,0,0,Math.PI*2);
+        ctx.fillStyle=f.col; ctx.fill();
+        ctx.beginPath(); ctx.moveTo(-f.sz,0); ctx.lineTo(-f.sz*1.5,-f.sz*.45); ctx.lineTo(-f.sz*1.5,f.sz*.45); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.arc(f.sz*.35,-f.sz*.12,f.sz*.12,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+        ctx.globalAlpha=1; ctx.restore();
+        f.x += f.spd; if(f.x>W+25) f.x=-25; if(f.x<-25) f.x=W+25;
+    }
+}
+
+function drawBubbles(){
+    for(const b of bubbles){
+        ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fillStyle=`rgba(190,225,255,${b.op})`; ctx.fill();
+        ctx.beginPath(); ctx.arc(b.x-b.r*.3,b.y-b.r*.3,b.r*.25,0,Math.PI*2); ctx.fillStyle=`rgba(255,255,255,${b.op*.4})`; ctx.fill();
+    }
+}
+
+function updateBubbles(){
+    for(let i=bubbles.length-1;i>=0;i--){
+        const b=bubbles[i];
+        b.y-=b.spd; b.x+=Math.sin(time*b.ws+b.wp)*.4; b.op-=.0015;
+        if(b.y<SURF_Y||b.op<=0) bubbles.splice(i,1);
+    }
+}
+
+function spawnBubble(sx,sy){
+    bubbles.push({ x:sx-78+(Math.random()-.5)*12, y:sy+(Math.random()-.5)*16, r:Math.random()*2.5+.8, spd:Math.random()*1.2+.4, wp:Math.random()*Math.PI*2, ws:Math.random()*2+.8, op:Math.random()*.3+.15 });
+}
+
+/* ---- Podmornica ---- */
+
+function drawSub(x, y){
+    ctx.save(); ctx.translate(x, y);
+    if(!facingR) ctx.scale(-1,1);
+
+    const hw=78, hh=22;
+    ctx.fillStyle='rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(3,4,hw,hh,0,0,Math.PI*2); ctx.fill();
+
+    const hg=ctx.createLinearGradient(0,-hh,0,hh);
+    hg.addColorStop(0,'#5e6b7d'); hg.addColorStop(.45,'#3d4757'); hg.addColorStop(1,'#282f3a');
+    ctx.beginPath(); ctx.ellipse(0,0,hw,hh,0,0,Math.PI*2);
+    ctx.fillStyle=hg; ctx.fill(); ctx.strokeStyle='#1a2030'; ctx.lineWidth=2; ctx.stroke();
+
+    ctx.beginPath(); ctx.moveTo(-9,-hh); ctx.lineTo(-13,-hh-20); ctx.lineTo(13,-hh-20); ctx.lineTo(9,-hh); ctx.closePath();
+    const sg=ctx.createLinearGradient(0,-hh-20,0,-hh);
+    sg.addColorStop(0,'#4a5568'); sg.addColorStop(1,'#2d3748');
+    ctx.fillStyle=sg; ctx.fill(); ctx.strokeStyle='#1a2030'; ctx.lineWidth=1.5; ctx.stroke();
+
+    ctx.beginPath(); ctx.moveTo(2,-hh-20); ctx.lineTo(2,-hh-30); ctx.lineTo(8,-hh-30); ctx.strokeStyle='#4a5568'; ctx.lineWidth=2; ctx.stroke();
+
+    ctx.beginPath(); ctx.moveTo(-hw+8,-hh); ctx.lineTo(-hw-6,-hh-11); ctx.lineTo(-hw+18,-hh); ctx.fillStyle='#3d4757'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-hw+8,hh); ctx.lineTo(-hw-6,hh+11); ctx.lineTo(-hw+18,hh); ctx.fill();
+
+    ctx.save(); ctx.translate(-hw-4,0);
+    const pa=time*12;
+    for(let i=0;i<4;i++){
+        ctx.save(); ctx.rotate(pa+i*Math.PI/2);
+        ctx.beginPath(); ctx.ellipse(0,-7,2.5,7,0,0,Math.PI*2); ctx.fillStyle='#718096'; ctx.fill(); ctx.restore();
+    }
+    ctx.beginPath(); ctx.arc(0,0,3.5,0,Math.PI*2); ctx.fillStyle='#4a5568'; ctx.fill(); ctx.restore();
+
+    for(let i=-2;i<=2;i++){
+        if(i===0) continue;
+        const px=i*22;
+        ctx.beginPath(); ctx.arc(px,0,4.5,0,Math.PI*2);
+        const pg=ctx.createRadialGradient(px-1,-1,0,px,0,4.5);
+        pg.addColorStop(0,'#87ceeb'); pg.addColorStop(1,'#3a6ea5');
+        ctx.fillStyle=pg; ctx.fill(); ctx.strokeStyle='#1a2030'; ctx.lineWidth=1.5; ctx.stroke();
+    }
+
+    const bl=110;
+    ctx.beginPath(); ctx.moveTo(hw-4,-5); ctx.lineTo(hw+bl,-22); ctx.lineTo(hw+bl,22); ctx.lineTo(hw-4,5); ctx.closePath();
+    const bg=ctx.createLinearGradient(hw,0,hw+bl,0);
+    bg.addColorStop(0,'rgba(255,255,190,.28)'); bg.addColorStop(1,'rgba(255,255,190,0)');
+    ctx.fillStyle=bg; ctx.fill();
+    ctx.beginPath(); ctx.arc(hw-4,0,3.5,0,Math.PI*2); ctx.fillStyle='#ffffaa'; ctx.fill();
+    ctx.beginPath(); ctx.arc(hw-4,0,8,0,Math.PI*2); ctx.fillStyle='rgba(255,255,190,.15)'; ctx.fill();
+    ctx.restore();
+}
+
+function drawHUD(sy){
+    if(sy<SURF_Y-30||sy>H+30) return;
+    const tx = Math.min(W-10, 70+subX*(W-85)+90);
+    const ty = sy-38;
+    ctx.fillStyle='rgba(0,0,0,.5)';
+    const tw = 140, th = 36;
+    const rx = Math.max(70, Math.min(tx-tw/2, W-tw-10));
+    const ry = Math.max(5, ty);
+    ctx.beginPath(); ctx.roundRect(rx, ry, tw, th, 6); ctx.fill();
+    
+    ctx.fillStyle='var(--accent)'; ctx.font='bold 13px JetBrains Mono'; ctx.textAlign='center';
+    ctx.fillText(subDepth.toFixed(0)+' m', rx+tw/2, ry+15);
+    
+    const fl = fluids[curFluid];
+    const curP0 = includeAtm ? ATM_P : 0;
+    const p = curP0 + fl.rho*G*subDepth;
+    
+    ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='10px JetBrains Mono';
+    ctx.fillText(fmtSI(p/1e6,2)+' MPa', rx+tw/2, ry+29);
+}
+
+/* ---- Zaznavanje in Posodobitve ---- */
+
+function isOnSub(mx,my){
+    const sx = 70+subX*(W-85);
+    const sy = d2y(subDepth);
+    const dx=mx-sx, dy=my-sy;
+    return (dx*dx)/(92*92)+(dy*dy)/(38*38)<1;
+}
+
+function updateUI(){
+    const fl = fluids[curFluid];
+    const d = subDepth;
+    const curP0 = includeAtm ? ATM_P : 0;
+    const hydro = fl.rho * G * d;
+    const total = curP0 + hydro;
+
+    document.getElementById('v-depth').textContent = fmtSI(d, d%1===0?0:1);
+    document.getElementById('v-rho').textContent = fmtSI(fl.rho);
+
+    const pa = total, kpa = pa/1e3, mpa = pa/1e6;
+    document.getElementById('v-pa').textContent = fmtSI(pa,0);
+    document.getElementById('v-units').textContent = `Pa = ${fmtSI(kpa,1)} kPa = ${fmtSI(mpa,2)} MPa`;
+
+    const fc = document.getElementById('f-card');
+    fc.innerHTML = `
+        <div class="title">Korak za korakom</div>
+        <div class="fl"><span class="hp0">P₀</span> = ${fmtSI(curP0)} Pa  (${includeAtm ? 'atmosferski tlak na gladini' : 'izklopljen'})</div>
+        <div class="fl"><span class="hr">ρ</span> = ${fmtSI(fl.rho)} kg/m³  (${fl.name})</div>
+        <div class="fl"><span class="hh">h</span> = ${fmtSI(d, d%1===0?0:1)} m  (globina podmornice)</div>
+        <div class="fl" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--card-border);">
+            P = <span class="hp0">${fmtSI(curP0)}</span> + <span class="hr">${fmtSI(fl.rho)}</span> · 10 · <span class="hh">${fmtSI(d, d%1===0?0:1)}</span>
+        </div>
+        <div class="fl">P = <span class="hp0">${fmtSI(curP0)}</span> + <span class="hr">${fmtSI(hydro,0)}</span></div>
+        <div class="fl result">P = <span class="hp">${fmtSI(total,0)} Pa</span></div>
+    `;
+
+    const zone = d<200
+        ? {name:'Sončna cona (epipelagial)', desc:'Dovolj sončne svetlobe za fotosintezo. Tu živi večina morskih organizmov — od fitoplanktona do rib.', col:'#2ed573'}
+        : {name:'Somračna cona (mezopelagial)', desc:'Šibka svetloba, ki ne zadošča za fotosintezo. Mnoge vrste imajo bioluminiscentne organe.', col:'#ffa502'};
+    document.getElementById('zone-card').innerHTML = `<div class="zone-name" style="color:${zone.col}">${zone.name}</div><div class="zone-desc">${zone.desc}</div>`;
+
+    const hydroMPa = hydro / 1000000; 
+    const pct = Math.min(100, (hydroMPa / 10) * 100);
+    
+    let dc, dt;
+    if(hydroMPa < 3.1){ dc = '#2ed573'; dt = 'Varno za večino vojaških podmornic'; }
+    else if(hydroMPa < 6.2){ dc = '#ffa502'; dt = 'Omejeno število specializiranih podmornic'; }
+    else{ dc = '#ff4757'; dt = 'Kritična obremenitev trupa — nevarnost implozije'; }
+
+    document.getElementById('danger-card').innerHTML = `
+        <div class="zone-name" style="color:${dc}"><i class="fas fa-exclamation-triangle"></i> Tveganje za podmornico</div>
+        <div class="zone-desc">${dt}</div>
+        <div class="danger-bar"><div class="danger-fill" style="width:${pct}%;background:${dc}"></div></div>
+        <div class="danger-label"><span>0 MPa</span><span style="color:${dc}">Obremenitev: ${fmtSI(hydroMPa, 2)} MPa</span><span>10 MPa</span></div>
+    `;
+
+    const rows = [
+        {name:'Naša podmornica (trenutna)', p:total, active:true},
+        {name:'Zračni tlak na morski gladini (100 kPa)', p:curP0},
+        {name:'Vojaška podmornica — tipična (300 m)', p:curP0+1030*G*300},
+        {name:'Raziskovalna podmornica (4000 m)', p:curP0+1030*G*4000},
+        {name:'Titanic (3800 m)', p:curP0+1030*G*3800},
+        {name:'Marianski jarek (10 916 m)', p:curP0+1030*G*10916}
+    ];
+    const maxP = Math.max(1, ...rows.map(r=>r.p)); 
+    let html='<thead><tr><th>Primer</th><th>Tlak</th><th></th></tr></thead><tbody>';
+    for(const r of rows){
+        const bw = (r.p/maxP)*100;
+        html+=`<tr class="${r.active?'active-row':''}">
+            <td>${r.name}</td>
+            <td class="val" style="color:${r.active?'var(--accent)':'var(--text)'}">${fmtSI(r.p/1e3,1)} kPa</td>
+            <td><div class="bar-bg"><div class="bar-fill" style="width:${bw}%;background:${r.active?'var(--accent)':'#3d4757'}"></div></div></td>
+        </tr>`;
+    }
+    html+='</tbody>';
+    document.getElementById('comp-tbl').innerHTML=html;
+}
+
+canvas.addEventListener('mousedown',e=>{
+    const p=cPos(e);
+    if(isOnSub(p.x,p.y)){
+        dragging=true; dragOX = p.x-(70+subX*(W-85)); dragOY = p.y-d2y(subDepth);
+        canvas.style.cursor='grabbing';
+    }
+});
+canvas.addEventListener('mousemove',e=>{
+    const p=cPos(e); mouseX=p.x; mouseY=p.y;
+    if(dragging){
+        const nx = p.x-dragOX; const newX = 70+subX*(W-85);
+        if(nx!==newX){ facingR=nx>newX; }
+        subX = Math.max(0,Math.min(1,(nx-70)/(W-85)));
+        subDepth = Math.max(0, Math.min(MAX_DEPTH, y2d(p.y - dragOY)));
+        updateUI();
+    } else { canvas.style.cursor=isOnSub(p.x,p.y)?'grab':'default'; }
+});
+canvas.addEventListener('mouseup',()=>{dragging=false;canvas.style.cursor='default';});
+canvas.addEventListener('mouseleave',()=>{dragging=false;mouseX=-999;mouseY=-999;});
+
+canvas.addEventListener('touchstart',e=>{
+    e.preventDefault(); const p=cPos(e);
+    if(isOnSub(p.x,p.y)){ dragging=true; dragOX = p.x-(70+subX*(W-85)); dragOY = p.y-d2y(subDepth); }
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+    e.preventDefault(); if(!dragging)return;
+    const p=cPos(e); mouseX=p.x; mouseY=p.y; 
+    const nx = p.x-dragOX; const newX = 70+subX*(W-85);
+    if(nx!==newX) facingR=nx>newX;
+    subX = Math.max(0,Math.min(1,(nx-70)/(W-85)));
+    subDepth = Math.max(0, Math.min(MAX_DEPTH, y2d(p.y - dragOY)));
+    updateUI();
+},{passive:false});
+canvas.addEventListener('touchend',()=>{dragging=false;});
+
+document.addEventListener('keydown',e=>{
+    const step=e.shiftKey?50:10; let moved=false;
+    if(e.key==='ArrowDown'){subDepth=Math.min(MAX_DEPTH,subDepth+step);moved=true;}
+    if(e.key==='ArrowUp'){subDepth=Math.max(0,subDepth-step);moved=true;}
+    if(e.key==='ArrowLeft'){subX=Math.max(0,subX-.04);facingR=false;moved=true;}
+    if(e.key==='ArrowRight'){subX=Math.min(1,subX+.04);facingR=true;moved=true;}
+    if(moved){updateUI();e.preventDefault();}
+});
+
+function render(){
+    time+=.016;
+    if (dragging) {
+        let sy = mouseY - dragOY; let margin = 120; let edgeScroll = 0;
+        if (sy < SURF_Y + margin) { let ratio = (SURF_Y + margin - sy) / margin; edgeScroll = -Math.pow(ratio, 1.5) * 4.0; } 
+        else if (sy > H - margin) { let ratio = (sy - (H - margin)) / margin; edgeScroll = Math.pow(ratio, 1.5) * 4.0; }
+        if (edgeScroll !== 0) {
+            cameraDepth = Math.max(0, Math.min(MAX_DEPTH - VIEW, cameraDepth + edgeScroll));
+            subDepth = Math.max(0, Math.min(MAX_DEPTH, y2d(mouseY - dragOY)));
+            updateUI();
+        }
+    } else {
+        let targetCamera = Math.max(0, Math.min(MAX_DEPTH - VIEW, subDepth - VIEW * 0.4));
+        cameraDepth += (targetCamera - cameraDepth) * 0.08;
+    }
+
+    ctx.clearRect(0,0,W,H);
+    drawSky(); drawWater(); drawLightRays(); drawSeabed(); drawSurface();
+    drawParticles(); drawFish(); drawBubbles(); drawDepthRuler();
+
+    const sx = 70+subX*(W-85);
+    let sy = d2y(subDepth) + (dragging?0:Math.sin(time*1.5)*2.5);
+
+    drawDepthLine(sy);
+    if(!dragging && isOnSub(mouseX,mouseY)){ ctx.shadowColor='rgba(0,212,255,.4)'; ctx.shadowBlur=22; }
+    drawSub(sx, sy); ctx.shadowBlur=0; drawHUD(sy);
+
+    if(Math.random()<.12) spawnBubble(sx,sy);
+    updateBubbles();
+
+    requestAnimationFrame(render);
+}
+updateUI(); render();
+
+/* =============================================
+   MAGIČNI TRIKOTNIK LOGIKA
+   ============================================= */
+(function() {
+    const exTaskPool = [];
+    const niceRhos = [800, 1000, 1030, 13590]; // Olje, voda, slana voda, živo srebro
+    const niceDepths = [2, 5, 10, 20, 50, 100, 200, 500, 1000];
+    
+    for (let r of niceRhos) {
+        for (let d of niceDepths) {
+            exTaskPool.push({ rho: r, h: d, p: r * 10 * d }); // p = rho * g * h
+        }
+    }
+
+    let currentEx = { data: null, missing: '', filledBoxes: 0 };
+    const exColors = { p: 'var(--accent)', rho: 'var(--warning)', h: 'var(--success)' };
+    const exUnits = { p: 'Pa', rho: 'kg/m³', h: 'm' };
+
+    document.getElementById('btn-start-ex').addEventListener('click', startExercise);
+
+    function startExercise() {
+        document.getElementById('btn-start-ex').style.display = 'none';
+        document.getElementById('ex-area').style.display = 'block';
+        resetExerciseUI();
+
+        currentEx.data = exTaskPool[Math.floor(Math.random() * exTaskPool.length)];
+        const varsArr = ['p', 'rho', 'h'];
+        currentEx.missing = varsArr[Math.floor(Math.random() * varsArr.length)];
+        currentEx.filledBoxes = 0;
+
+        renderText();
+    }
+
+    function renderText() {
+        let text = "";
+        const pText = `<span class="highlight-num" style="color:${exColors.p}; border-bottom-color:${exColors.p};">${fmtSI(currentEx.data.p)} Pa</span>`;
+        const rhoText = `<span class="highlight-num" style="color:${exColors.rho}; border-bottom-color:${exColors.rho};">${fmtSI(currentEx.data.rho)} kg/m³</span>`;
+        const hText = `<span class="highlight-num" style="color:${exColors.h}; border-bottom-color:${exColors.h};">${fmtSI(currentEx.data.h)} m</span>`;
+
+        if (currentEx.missing === 'p') {
+            text = `Podmornica je na globini ${hText} v tekočini z gostoto ${rhoText}. Kolikšen je hidrostatični tlak na tej globini?`;
+        } else if (currentEx.missing === 'rho') {
+            text = `Na globini ${hText} smo izmerili hidrostatični tlak ${pText}. Kolikšna je gostota tekočine, v kateri smo?`;
+        } else {
+            text = `Nahajamo se v tekočini z gostoto ${rhoText}. Instrument kaže hidrostatični tlak ${pText}. Na kakšni globini smo?`;
+        }
+
+        document.getElementById('ex-text').innerHTML = text;
+    }
+
+    function resetExerciseUI() {
+        document.getElementById('ex-step-1').style.display = 'block';
+        document.getElementById('ex-step-2').style.display = 'none';
+        document.getElementById('ex-step-3').style.display = 'none';
+        document.getElementById('ex-step-4').style.display = 'none';
+        document.getElementById('ex-feedback').innerHTML = '';
+        document.getElementById('ex-answer').value = '';
+        document.getElementById('btn-check-ans').style.display = 'inline-block';
+
+        document.querySelectorAll('.ex-btn').forEach(btn => btn.classList.remove('correct', 'wrong'));
+        document.querySelectorAll('.tri-letter').forEach(el => el.classList.remove('covered', 'wrong-click'));
+    }
+
+    window.checkUnknown = function(varName, btn) {
+        if (varName === currentEx.missing) {
+            btn.classList.add('correct');
+            setTimeout(() => {
+                document.getElementById('ex-step-2').style.display = 'block';
+                document.getElementById('ex-step-2').scrollIntoView({behavior: 'smooth'});
+            }, 500);
+        } else {
+            btn.classList.add('wrong');
+            setTimeout(() => btn.classList.remove('wrong'), 500);
+        }
+    }
+
+    window.checkTriangle = function(varName) {
+        const el = document.getElementById('pos-' + varName);
+        if (varName === currentEx.missing) {
+            el.classList.add('covered');
+            setTimeout(() => {
+                buildEquationFramework();
+                document.getElementById('ex-step-3').style.display = 'block';
+                document.getElementById('ex-step-3').scrollIntoView({behavior: 'smooth'});
+            }, 600);
+        } else {
+            el.classList.add('wrong-click');
+            setTimeout(() => el.classList.remove('wrong-click'), 500);
+        }
+    }
+
+    function buildEquationFramework() {
+        const builder = document.getElementById('eq-builder');
+        const m = currentEx.missing;
+        const makeInput = (v) => `<input type="text" class="eq-input-box active-pulse" id="input-${v}" data-var="${v}" style="color:${exColors[v]}" oninput="checkFormulaInput(this)">`;
+        
+        let html = `<span style="color: ${exColors[m]}; margin-right: 15px;">${m === 'rho' ? 'ρ' : m}</span> = `;
+
+        if (m === 'p') {
+            html += `${makeInput('rho')} <span style="color:var(--muted); font-size:1.4rem;">&middot; 10 &middot;</span> ${makeInput('h')}`;
+        } else if (m === 'rho') {
+            html += `<div style="display:inline-flex; flex-direction:column; align-items:center;">
+                        ${makeInput('p')}
+                        <div style="width: 100%; height: 2px; background: var(--muted); margin: 6px 0;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;"><span style="color:var(--muted); font-size:1.4rem;">10 &middot;</span> ${makeInput('h')}</div>
+                     </div>`;
+        } else if (m === 'h') {
+            html += `<div style="display:inline-flex; flex-direction:column; align-items:center;">
+                        ${makeInput('p')}
+                        <div style="width: 100%; height: 2px; background: var(--muted); margin: 6px 0;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;">${makeInput('rho')} <span style="color:var(--muted); font-size:1.4rem;">&middot; 10</span></div>
+                     </div>`;
+        }
+
+        builder.innerHTML = html;
+        document.getElementById('final-eq-left').innerText = m === 'rho' ? 'ρ' : m;
+        document.getElementById('final-eq-left').style.color = exColors[m];
+        document.getElementById('final-unit').innerText = exUnits[m];
+    }
+
+    window.checkFormulaInput = function(inputEl) {
+        const varType = inputEl.getAttribute('data-var');
+        const expectedVal = currentEx.data[varType];
+        
+        let userValStr = inputEl.value.replace(/\./g, '').replace(',', '.').trim();
+        let userVal = parseFloat(userValStr);
+
+        if (!isNaN(userVal) && Math.abs(userVal - expectedVal) < 0.1) {
+            if (!inputEl.disabled) {
+                inputEl.disabled = true; 
+                inputEl.classList.remove('active-pulse');
+                inputEl.style.borderStyle = 'solid';
+                inputEl.style.backgroundColor = 'rgba(255,255,255,0.05)'; 
+                inputEl.value = fmtSI(expectedVal); 
+                
+                currentEx.filledBoxes++;
+                
+                if (currentEx.filledBoxes === 2) {
+                    setTimeout(() => {
+                        document.getElementById('ex-step-4').style.display = 'block';
+                        document.getElementById('ex-step-4').scrollIntoView({behavior: 'smooth'});
+                    }, 500);
+                }
+            }
+        }
+    }
+
+    window.checkAnswer = function() {
+        let inputStr = document.getElementById('ex-answer').value.trim();
+        if (inputStr.includes('.') && inputStr.includes(',')) {
+            inputStr = inputStr.replace(/\./g, '').replace(',', '.');
+        } else if (inputStr.includes(',')) {
+            inputStr = inputStr.replace(',', '.');
+        }
+
+        const userVal = parseFloat(inputStr);
+        const correctVal = currentEx.data[currentEx.missing];
+        const feedback = document.getElementById('ex-feedback');
+
+        if (isNaN(userVal)) return;
+
+        if (Math.abs(userVal - correctVal) < 0.1) {
+            feedback.innerHTML = `
+                <div class="success-msg">
+                    🎉 ODLIČNO! Pravilen rezultat je ${fmtSI(correctVal)} ${exUnits[currentEx.missing]}.<br><br>
+                    <button class="test-btn" onclick="document.getElementById('btn-start-ex').click()" style="font-size: 1rem;">REŠI ŠE ENO NALOGO</button>
+                </div>
+            `;
+            document.getElementById('btn-check-ans').style.display = 'none';
+        } else {
+            feedback.innerHTML = `<div class="success-msg" style="background:rgba(255,71,87,0.1); color:var(--danger); border-color:rgba(255,71,87,0.3);">Poskusi znova. Preveri svoj izračun.</div>`;
+            setTimeout(() => { feedback.innerHTML = ''; }, 3000);
+        }
+    }
+})();
+</script>
+</body>
+</html>
