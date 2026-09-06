@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prosti pad – Fizika 9</title>
+<meta name="description" content="Interaktivni prikaz prostega pada in vodeno računanje hitrosti, časa, poti in gravitacijskega pospeška.">
+<meta name="theme-color" content="#17263d">
+<style>
+:root{
+  --night:#17263d;
+  --night2:#223858;
+  --night3:#0d1828;
+  --sky:#294a70;
+  --cyan:#5ee6db;
+  --cyan2:#19bfb4;
+  --gold:#ffc857;
+  --cream:#fffaf1;
+  --paper:#f7f2e9;
+  --ink:#213746;
+  --muted:#6d7c86;
+  --line:#d9d5cc;
+  --green:#177b58;
+  --red:#a33b34;
+  --shadow:0 18px 54px rgba(22,37,55,.15);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 10% 2%,rgba(94,230,219,.12),transparent 28rem),
+    radial-gradient(circle at 95% 15%,rgba(255,200,87,.12),transparent 25rem),
+    #e7edf3;
+  font:16px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.wrap{width:min(1480px,calc(100% - 52px));margin:0 auto 76px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 0 12px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:950}
+.brand-mark{
+  width:46px;height:46px;border-radius:15px;display:grid;place-items:center;
+  background:var(--night);color:#fff;font-weight:950
+}
+.back{
+  text-decoration:none;border:1px solid #cbd4dc;border-radius:999px;
+  padding:10px 15px;background:#ffffffb5;font-weight:850
+}
+.hero{
+  display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:end;
+  padding:32px 0 26px
+}
+.eyebrow{
+  color:#237c91;font-size:.78rem;font-weight:950;letter-spacing:.15em;text-transform:uppercase
+}
+h1{
+  margin:7px 0 11px;
+  font:700 clamp(3.7rem,7.5vw,7.5rem)/.92 Georgia,"Times New Roman",serif;
+  letter-spacing:-.055em
+}
+.hero p{margin:0;color:var(--muted);font-size:1.12rem;max-width:68ch}
+.hero-note{
+  border-left:4px solid #237c91;padding:8px 0 8px 19px;color:var(--muted);font-weight:700
+}
+.panel{
+  background:rgba(255,250,241,.97);
+  border:1px solid rgba(33,55,70,.13);
+  border-radius:26px;
+  box-shadow:var(--shadow)
+}
+.sim-panel,.tasks-panel{padding:25px}
+.section-head{
+  display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:18px
+}
+.section-head h2{
+  margin:0;font:700 clamp(2rem,3.5vw,3.35rem)/1 Georgia,"Times New Roman",serif;letter-spacing:-.035em
+}
+.section-head p{margin:7px 0 0;color:var(--muted)}
+
+/* top-level choice: dva velika gumba, no menu hunting */
+.mode-switch{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:18px;
+}
+.mode-choice{
+  border:2px solid #cfd9df;
+  border-radius:20px;
+  background:#fff;
+  color:var(--night);
+  padding:18px 20px;
+  text-align:left;
+  font-size:1.16rem;
+  font-weight:950;
+  transition:.15s ease;
+}
+.mode-choice small{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:.86rem;
+  font-weight:700;
+}
+.mode-choice.active{
+  border-color:#237c91;
+  background:linear-gradient(135deg,#eaf7fa,#fff);
+  box-shadow:0 9px 23px rgba(35,124,145,.12);
+}
+.mode-pane[hidden]{display:none!important}
+
+.mass-control-card{
+  border:1px solid #d6dce1;
+  border-radius:22px;
+  background:#fff;
+  padding:20px;
+}
+.mass-pair{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+.mass-mini{
+  border-radius:17px;
+  padding:15px;
+  background:#f1f6f8;
+  border:1px solid #d7e1e5;
+}
+.mass-mini small{
+  display:block;
+  color:var(--muted);
+  font-weight:850;
+}
+.mass-mini strong{
+  display:block;
+  margin-top:3px;
+  font-size:1.7rem;
+  color:var(--night);
+}
+.mass-result{
+  min-height:118px;
+  border:1px solid #d6dce1;
+  border-radius:22px;
+  background:#fff;
+  padding:18px;
+}
+.mass-result strong{
+  display:block;
+  margin-top:7px;
+  font:700 1.35rem/1.35 Georgia,"Times New Roman",serif;
+  color:#214c5c;
+}
+
+/* =====================================
+   SIMULACIJA
+===================================== */
+.sim-shell{
+  display:grid;
+  grid-template-columns:minmax(340px,.82fr) minmax(620px,1.55fr);
+  gap:18px;
+}
+.control-column{display:flex;flex-direction:column;gap:14px}
+.control-card{
+  border:1px solid #d6dce1;border-radius:22px;background:#fff;padding:20px
+}
+.control-label{
+  display:block;text-transform:uppercase;letter-spacing:.1em;font-size:.8rem;font-weight:950;color:var(--muted)
+}
+.height-value{
+  margin-top:3px;font-size:clamp(3rem,5vw,5.2rem);font-weight:950;letter-spacing:-.055em;color:var(--night)
+}
+.slider-row{
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:18px;margin-top:18px
+}
+.step-btn{
+  width:58px;height:58px;border-radius:18px;border:1px solid #cbd5dc;background:#fff;
+  color:var(--night);font-size:1.8rem;font-weight:950
+}
+.range{
+  -webkit-appearance:none;appearance:none;width:100%;height:18px;border-radius:999px;
+  background:linear-gradient(90deg,#237c91 0%,#237c91 var(--fill,50%),#dde5e9 var(--fill,50%),#dde5e9 100%);
+  border:1px solid #cad5da;outline:none
+}
+.range::-webkit-slider-runnable-track{height:18px;background:transparent;border-radius:999px}
+.range::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:38px;height:38px;border-radius:50%;
+  margin-top:-10px;background:#237c91;border:4px solid #fff;box-shadow:0 6px 15px rgba(35,124,145,.28)
+}
+.range::-moz-range-track{height:18px;border-radius:999px;background:#dde5e9}
+.range::-moz-range-progress{height:18px;border-radius:999px;background:#237c91}
+.range::-moz-range-thumb{
+  width:38px;height:38px;border-radius:50%;background:#237c91;border:4px solid #fff
+}
+
+.constants{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px
+}
+.constant{
+  border-radius:18px;background:#eff6f8;border:1px solid #cedee3;padding:16px
+}
+.constant small{
+  display:block;text-transform:uppercase;letter-spacing:.08em;font-weight:900;color:#65808c
+}
+.constant strong{
+  display:block;margin-top:4px;font-size:1.5rem;color:#234858
+}
+.constant.note{background:#fff6df;border-color:#ead49b}
+.constant.note strong{font-size:1.05rem;color:#785b13}
+
+.drop-btn{
+  border:0;border-radius:20px;padding:21px 24px;width:100%;
+  background:linear-gradient(135deg,#1c89a0,#235c8e);
+  color:#fff;font-weight:950;font-size:1.5rem;
+  box-shadow:0 13px 27px rgba(35,92,142,.22)
+}
+.drop-btn:disabled{opacity:.5;cursor:not-allowed}
+.mass-btn{
+  display:none;border:2px solid #d0dae0;border-radius:18px;padding:16px 20px;
+  background:#fff;color:var(--night);font-weight:950;font-size:1.08rem
+}
+.mass-btn.show{display:block}
+
+.results{
+  min-height:160px;border:1px solid #d6dce1;border-radius:22px;background:#fff;padding:18px
+}
+.results-title{
+  text-transform:uppercase;letter-spacing:.09em;font-size:.8rem;font-weight:950;color:var(--muted)
+}
+.results-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px
+}
+.result-box{
+  border-radius:16px;background:#f3f7f8;border:1px solid #dce5e7;padding:12px
+}
+.result-box small{display:block;color:var(--muted);font-weight:800}
+.result-box strong{display:block;margin-top:3px;font-size:1.34rem;color:var(--night)}
+.result-empty{color:var(--muted);font-weight:750;margin-top:18px}
+
+/* navpični prikaz */
+.drop-stage{
+  position:relative;
+  min-height:690px;
+  overflow:hidden;
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 77% 13%,rgba(255,255,255,.15) 0 2px,transparent 3px),
+    radial-gradient(circle at 28% 20%,rgba(255,255,255,.13) 0 1px,transparent 2px),
+    radial-gradient(circle at 63% 42%,rgba(255,255,255,.10) 0 1px,transparent 2px),
+    linear-gradient(180deg,var(--night3),var(--night2) 60%,#24496a);
+  border:1px solid #13223a;
+  box-shadow:inset 0 0 60px rgba(0,0,0,.22)
+}
+.stage-title{
+  position:absolute;left:24px;top:19px;color:#d8edf2;font-size:.82rem;
+  letter-spacing:.1em;text-transform:uppercase;font-weight:900
+}
+.height-scale{
+  position:absolute;left:38px;top:74px;bottom:58px;width:90px;border-right:2px solid rgba(255,255,255,.34)
+}
+.scale-mark{
+  position:absolute;right:-1px;width:22px;height:1px;background:rgba(255,255,255,.44)
+}
+.scale-mark span{
+  position:absolute;right:31px;top:-10px;white-space:nowrap;color:#b9cad4;font-size:.78rem;font-weight:800
+}
+.g-arrow{
+  position:absolute;right:28px;top:88px;width:116px;text-align:center;color:var(--cyan);font-weight:950
+}
+.g-line{
+  position:relative;width:12px;height:86px;background:var(--cyan);border-radius:8px;margin:8px auto 0
+}
+.g-line::after{
+  content:"";position:absolute;left:50%;bottom:-17px;transform:translateX(-50%);
+  border-top:22px solid var(--cyan);border-left:15px solid transparent;border-right:15px solid transparent
+}
+.fall-path{
+  position:absolute;left:150px;right:155px;top:76px;bottom:62px
+}
+.drop-object{
+  /* same visual scale kot trail dots — pojav je fokus, ne "hero" žoga */
+  position:absolute;left:50%;top:0;width:24px;height:24px;transform:translate3d(-50%,0,0);
+  border-radius:50%;
+  background:linear-gradient(145deg,#ffcf65,#e58923);
+  border:3px solid #ffe29a;
+  box-shadow:0 0 0 6px rgba(255,200,87,.10);
+  will-change:transform;
+  backface-visibility:hidden;
+  contain:layout paint;
+}
+.speed-tag{
+  position:absolute;left:calc(50% + 28px);top:-5px;white-space:nowrap;
+  padding:8px 11px;border-radius:12px;background:#ffffffec;color:var(--night);
+  font-size:1.05rem;font-weight:950;box-shadow:0 7px 18px rgba(0,0,0,.18);
+  will-change:transform;
+  backface-visibility:hidden
+}
+.clock{
+  position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+  color:#fff;font-size:1.55rem;font-weight:950;font-variant-numeric:tabular-nums
+}
+.ground{
+  position:absolute;left:0;right:0;bottom:0;height:52px;
+  background:repeating-linear-gradient(135deg,#c8a165 0 16px,#b48c51 16px 32px);
+  border-top:5px solid #e6bd7e
+}
+.trace-dot{
+  position:absolute;left:50%;width:24px;height:24px;border-radius:50%;
+  transform:translate(-50%,-50%);background:rgba(94,230,219,.76);
+  box-shadow:0 0 0 5px rgba(94,230,219,.10)
+}
+.trace-dot span{
+  position:absolute;left:27px;top:-4px;white-space:nowrap;color:#aeece8;font-size:.78rem;font-weight:850
+}
+
+/* masa experiment: same-size balls on purpose — testiramo maso, ne velikosti */
+.mass-stage{
+  position:relative;
+  min-height:690px;
+  overflow:hidden;
+  border-radius:24px;
+  background:linear-gradient(180deg,#111d31,#213b5b);
+  border:1px solid #13223a;
+}
+.mass-stage-title{
+  position:absolute;
+  left:24px;
+  top:19px;
+  color:#e9f5f7;
+  font-size:1.08rem;
+  font-weight:950;
+}
+.mass-lanes{
+  position:absolute;
+  left:28px;
+  right:28px;
+  top:72px;
+  bottom:48px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+.mass-lane{
+  position:relative;
+  border:1px solid #ffffff25;
+  border-radius:20px;
+  background:#ffffff08;
+  overflow:hidden;
+}
+.mass-label{
+  position:absolute;
+  left:16px;
+  top:14px;
+  color:#fff;
+  font-weight:950;
+  font-size:1.1rem;
+}
+.mass-body{
+  position:absolute;
+  left:50%;
+  top:72px;
+  width:64px;
+  height:64px;
+  transform:translate3d(-50%,0,0);
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font-weight:950;
+  color:#16283a;
+  will-change:transform;
+  backface-visibility:hidden;
+}
+.mass-body.light{
+  background:#83e1df;
+  border:4px solid #b6f4f1;
+}
+.mass-body.heavy{
+  background:#ffc857;
+  border:4px solid #ffe09a;
+}
+.mass-ground{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:38px;
+  background:#99764d;
+  border-top:4px solid #d5ad72;
+}
+
+/* =====================================
+   RAČUNANJE
+===================================== */
+.tasks-panel{margin-top:34px;background:#fffaf1}
+.task-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:20px}
+.task-card{border:1px solid var(--line);border-radius:21px;background:#fff;padding:22px}
+.task-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.task-heading{font-weight:950;font-size:1.16rem}
+.task-chip{border-radius:999px;padding:6px 10px;background:#eef4f6;font-size:.82rem;font-weight:900;color:#365b69}
+.task-text{margin:22px 0;font:650 1.28rem/1.55 Georgia,"Times New Roman",serif;color:#263b47}
+.step{margin-top:14px;border-top:1px dashed var(--line);padding-top:15px}
+.step h3{margin:0 0 10px;font-size:1rem}
+.choices{display:flex;gap:8px;flex-wrap:wrap}
+.choice{
+  border:1px solid var(--line);border-radius:13px;background:#fff;padding:10px 14px;color:var(--ink);font-weight:850
+}
+.choice.good{background:#e8f7ef;border-color:#8fd4b3;color:#146345}
+.choice.bad{background:#fff0ee;border-color:#e7aaa3;color:#91382f}
+.btn{
+  border:0;border-radius:999px;padding:12px 18px;background:#315365;color:#fff;font-weight:900
+}
+.btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.task-nav{display:flex;gap:10px;margin-top:18px}
+.task-nav .btn{min-width:145px}
+
+/* trikotnik v = g t */
+.magic-wrap{
+  display:grid;grid-template-columns:minmax(270px,390px) minmax(250px,1fr);
+  gap:20px;align-items:center
+}
+.magic-triangle{position:relative;width:min(100%,360px);aspect-ratio:1.18/1;margin:7px auto}
+.magic-triangle svg{position:absolute;inset:0;width:100%;height:100%}
+.magic-btn{
+  position:absolute;width:88px;height:66px;border:2px solid #b9cbc7;border-radius:18px;background:#fff;
+  color:var(--ink);font-size:1.58rem;font-weight:950;box-shadow:0 7px 16px rgba(32,52,64,.10);z-index:2
+}
+.magic-btn.good{background:#e6f7f2;border-color:#65c8b7;color:#12675e}
+.magic-btn.bad{background:#fff0ee;border-color:#e5a69e;color:#96392f}
+.magic-btn.v{left:50%;top:17%;transform:translate(-50%,-50%)}
+.magic-btn.g{left:28%;bottom:9%;transform:translate(-50%,50%)}
+.magic-btn.t{left:72%;bottom:9%;transform:translate(-50%,50%)}
+.magic-help{border-left:4px solid #237c91;padding:11px 0 11px 16px;color:var(--muted);font-weight:750}
+.magic-help strong{display:block;color:var(--ink);margin-bottom:3px}
+.step-feedback{min-height:28px;margin-top:8px;font-weight:850;color:var(--muted)}
+.step-feedback.ok{color:var(--green)}.step-feedback.err{color:var(--red)}
+
+/* vodeno sestavljanje */
+.guide-card{border:1px solid #d6dfdf;border-radius:18px;background:#f7faf9;padding:18px}
+.guide-line{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:1.22rem;font-weight:900}
+.guide-input{
+  width:120px;border:2px solid #c7d3d2;border-radius:12px;padding:9px 11px;background:#fff;
+  color:var(--ink);font-size:1.08rem;font-weight:900;text-align:center
+}
+.guide-input.good{background:#effaf5;border-color:#68c2a2}
+.guide-input.bad{background:#fff3f1;border-color:#e4a19a}
+.guide-unit{font-size:.93rem;color:#5c7078;font-weight:850}
+.answer-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:13px}
+.answer-input{
+  width:180px;border:2px solid #cbd3cf;border-radius:12px;padding:11px 13px;font-size:1.12rem;font-weight:900;color:var(--ink)
+}
+.answer-unit{font-weight:950}
+.feedback{min-height:31px;margin-top:10px;font-weight:850}
+.feedback.ok{color:var(--green)}.feedback.err{color:var(--red)}
+.result-stage{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+.help-card{border-radius:21px;background:#213c51;color:#fff;padding:21px;min-height:250px}
+.help-card h3{margin:0 0 8px;font:700 1.55rem/1.1 Georgia,serif}
+.help-card p{margin:0 0 14px;color:#d7e3e8}
+.help-text{min-height:96px;border:1px solid #ffffff22;border-radius:14px;background:#ffffff12;padding:13px;margin-top:12px}
+
+footer{padding:29px 0;color:var(--muted);text-align:center;font-size:.92rem}
+@media(max-width:1100px){
+  .hero{grid-template-columns:1fr}
+  .sim-shell{grid-template-columns:1fr}
+  .task-layout{grid-template-columns:1fr}
+  .magic-wrap{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .wrap{width:min(100% - 22px,1480px)}
+  .sim-panel,.tasks-panel{padding:15px}
+  .drop-stage{min-width:690px}
+  .sim-shell{overflow:auto}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark">F9</span><span>Fizika 9</span></a>
+    <a class="back" href="index.html">← Nazaj na poglavja</a>
+  </div>
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Enakomerno pospešeno gibanje pod vplivom teže</div>
+      <h1>Prosti pad</h1>
+      <p>Spremeni višino, spusti telo in opazuj, kako med padanjem narašča njegova hitrost.</p>
+    </div>
+    <div class="hero-note">Najprej opazuj pojav. Nato isto zvezo uporabi pri računanju.</div>
+  </header>
+
+  <main>
+    <section class="panel sim-panel" aria-labelledby="simTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="simTitle">Razišči prosti pad</h2>
+          <p>Izberi prikaz.</p>
+        </div>
+      </div>
+
+      <div class="mode-switch" aria-label="Način prikaza">
+        <button class="mode-choice active" type="button" data-sim-mode="drop">
+          1 · Opazuj prosti pad
+          <small>Spreminjaj višino in opazuj hitrost.</small>
+        </button>
+        <button class="mode-choice" type="button" data-sim-mode="mass">
+          2 · Preveri, ali masa vpliva
+          <small>Primerjaj dve različno težki telesi.</small>
+        </button>
+      </div>
+
+      <div class="sim-shell mode-pane" id="dropPane">
+        <div class="control-column">
+          <div class="control-card">
+            <span class="control-label">Višina</span>
+            <div class="height-value" id="heightValue">45 m</div>
+            <div class="slider-row">
+              <button class="step-btn" id="heightMinus" type="button" aria-label="Zmanjšaj višino">−</button>
+              <input class="range" id="heightSlider" type="range" min="5" max="80" step="5" value="45">
+              <button class="step-btn" id="heightPlus" type="button" aria-label="Povečaj višino">+</button>
+            </div>
+          </div>
+
+          <div class="constants">
+            <div class="constant">
+              <small>Zemlja</small>
+              <strong>g = 10 m/s²</strong>
+            </div>
+            <div class="constant note">
+              <small>Model</small>
+              <strong>Zračni upor zanemarimo.</strong>
+            </div>
+          </div>
+
+          <button class="drop-btn" id="dropBtn" type="button">SPUSTI</button>
+
+          <div class="results">
+            <div class="results-title">Po padcu</div>
+            <div class="result-empty" id="resultEmpty">Rezultat se pokaže, ko telo doseže tla.</div>
+            <div class="results-grid" id="resultsGrid" hidden>
+              <div class="result-box"><small>Višina</small><strong id="resHeight">—</strong></div>
+              <div class="result-box"><small>Čas</small><strong id="resTime">—</strong></div>
+              <div class="result-box"><small>Hitrost</small><strong id="resSpeed">—</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="drop-stage" id="dropStage">
+          <div class="stage-title">Merilni jašek</div>
+          <div class="height-scale" id="heightScale"></div>
+
+          <div class="g-arrow">
+            g = 10 m/s²
+            <div class="g-line"></div>
+          </div>
+
+          <div class="fall-path" id="fallPath">
+            <div id="traceLayer"></div>
+            <div class="drop-object" id="dropObject"></div>
+            <div class="speed-tag" id="speedTag">0,0 m/s</div>
+          </div>
+
+          <div class="clock" id="clock">t = 0,00 s</div>
+          <div class="ground"></div>
+        </div>
+      </div>
+
+      <div class="sim-shell mode-pane" id="massPane" hidden>
+        <div class="control-column">
+          <div class="mass-control-card">
+            <span class="control-label">Primerjava mase</span>
+            <div class="mass-pair">
+              <div class="mass-mini"><small>Lažje telo</small><strong>0,2 kg</strong></div>
+              <div class="mass-mini"><small>Težje telo</small><strong>5 kg</strong></div>
+            </div>
+          </div>
+
+          <div class="constants">
+            <div class="constant">
+              <small>Obe telesi</small>
+              <strong>g = 10 m/s²</strong>
+            </div>
+            <div class="constant note">
+              <small>Model</small>
+              <strong>Zračni upor zanemarimo.</strong>
+            </div>
+          </div>
+
+          <button class="drop-btn" id="massDropBtn" type="button">SPUSTI OBA</button>
+
+          <div class="mass-result">
+            <span class="control-label">Rezultat</span>
+            <strong id="massResultText">Opazuj, ali telesi dosežeta tla hkrati.</strong>
+          </div>
+        </div>
+
+        <div class="mass-stage" id="massStage">
+          <div class="mass-stage-title">Ali težje telo pade prej?</div>
+          <div class="mass-lanes">
+            <div class="mass-lane">
+              <div class="mass-label">0,2 kg</div>
+              <div class="mass-body light" id="lightBody">0,2</div>
+              <div class="mass-ground"></div>
+            </div>
+            <div class="mass-lane">
+              <div class="mass-label">5 kg</div>
+              <div class="mass-body heavy" id="heavyBody">5</div>
+              <div class="mass-ground"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel tasks-panel" aria-labelledby="tasksTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="tasksTitle">2 · Računanje po korakih</h2>
+          <p>Izberi, kaj iščeš. Pomoč se pokaže samo toliko, kolikor jo potrebuješ.</p>
+        </div>
+      </div>
+
+      <div class="task-layout">
+        <div class="task-card">
+          <div class="task-top">
+            <span class="task-heading">Računska naloga</span>
+            <span class="task-chip" id="taskChip"></span>
+          </div>
+          <div class="task-text" id="taskText"></div>
+
+          <div class="step">
+            <h3>1. Kaj moramo izračunati?</h3>
+            <div class="choices" id="targetChoices"></div>
+          </div>
+
+          <div class="step" id="stepIntermediate" hidden>
+            <h3 id="intermediateTitle">2. Kaj moramo narediti najprej?</h3>
+            <div class="choices" id="intermediateChoices"></div>
+          </div>
+
+          <div class="step" id="stepMagic" hidden>
+            <h3 id="magicTitle">2. V magičnem trikotniku klikni količino, ki jo iščemo.</h3>
+            <div class="magic-wrap">
+              <div>
+                <div class="magic-triangle">
+                  <svg viewBox="0 0 360 305" aria-hidden="true">
+                    <path d="M180 18 L338 280 L22 280 Z" fill="#f8fbfa" stroke="#237c91" stroke-width="6"/>
+                    <line x1="73" y1="185" x2="287" y2="185" stroke="#237c91" stroke-width="5"/>
+                    <line x1="180" y1="185" x2="180" y2="280" stroke="#237c91" stroke-width="5"/>
+                  </svg>
+                  <button class="magic-btn v" type="button" data-magic="v">v</button>
+                  <button class="magic-btn g" type="button" data-magic="g">g</button>
+                  <button class="magic-btn t" type="button" data-magic="t">t</button>
+                </div>
+                <div class="step-feedback" id="magicFeedback"></div>
+              </div>
+              <div class="magic-help">
+                <strong>v = g · t</strong>
+                Klikni količino, ki jo iščeš. Trikotnik ti pripravi enačbo.
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="stepGuide" hidden>
+            <h3 id="guideTitle">3. Vstavi podatke.</h3>
+            <div class="guide-card">
+              <div class="guide-line" id="guideLine"></div>
+              <button class="btn" id="checkDataBtn" type="button" style="margin-top:14px">Preveri podatke</button>
+              <div class="step-feedback" id="dataFeedback"></div>
+
+              <div class="result-stage" id="resultStage" hidden>
+                <strong>Izračunaj rezultat.</strong>
+                <div class="answer-row">
+                  <input class="answer-input" id="answerInput" inputmode="decimal" autocomplete="off" placeholder="rezultat">
+                  <span class="answer-unit" id="answerUnit"></span>
+                  <button class="btn" id="checkAnswerBtn" type="button">Preveri rezultat</button>
+                </div>
+                <div class="feedback" id="feedback"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-nav">
+            <button class="btn secondary" id="prevTask" type="button">← Prejšnja</button>
+            <button class="btn secondary" id="nextTask" type="button">Naslednja →</button>
+          </div>
+        </div>
+
+        <aside class="help-card">
+          <h3>Pomoč pri računanju</h3>
+          <p>Namig se razkriva po korakih.</p>
+          <button class="btn secondary" id="hintBtn" type="button">Pokaži namig</button>
+          <div class="help-text" id="hintText">Poskusi najprej sam.</div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer>Fizika 9 · Prosti pad · opazuj pojav → računaj</footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+const TASKS=[{"id": 1, "type": "v_from_t", "text": "Kamen prosto pada 0,5 s. Zračni upor zanemarimo. Kolikšna je njegova hitrost?", "target": "v", "answer": 5.0, "unit": "m/s", "g": 10, "t": 0.5}, {"id": 2, "type": "v_from_t", "text": "Kamen prosto pada 1 s. Zračni upor zanemarimo. Kolikšna je njegova hitrost?", "target": "v", "answer": 10.0, "unit": "m/s", "g": 10, "t": 1}, {"id": 3, "type": "v_from_t", "text": "Kamen prosto pada 1,5 s. Zračni upor zanemarimo. Kolikšna je njegova hitrost?", "target": "v", "answer": 15.0, "unit": "m/s", "g": 10, "t": 1.5}, {"id": 4, "type": "v_from_t", "text": "Kamen prosto pada 2 s. Zračni upor zanemarimo. Kolikšna je njegova hitrost?", "target": "v", "answer": 20.0, "unit": "m/s", "g": 10, "t": 2}, {"id": 5, "type": "v_from_t", "text": "Kamen prosto pada 2,5 s. Zračni upor zanemarimo. Kolikšna je njegova hitrost?", "target": "v", "answer": 25.0, "unit": "m/s", "g": 10, "t": 2.5}, {"id": 6, "type": "v_from_t", "text": "Kamen prosto pada 3 s. Zračni upor zanemarimo. Kolikšna je njegova hitrost?", "target": "v", "answer": 30.0, "unit": "m/s", "g": 10, "t": 3}, {"id": 7, "type": "v_from_t", "text": "Kamen prosto pada 3,5 s. Zračni upor zanemarimo. Kolikšna je njegova hitrost?", "target": "v", "answer": 35.0, "unit": "m/s", "g": 10, "t": 3.5}, {"id": 8, "type": "v_from_t", "text": "Kamen prosto pada 4 s. Zračni upor zanemarimo. Kolikšna je njegova hitrost?", "target": "v", "answer": 40.0, "unit": "m/s", "g": 10, "t": 4}, {"id": 9, "type": "v_from_t", "text": "Kamen prosto pada 4,5 s. Zračni upor zanemarimo. Kolikšna je njegova hitrost?", "target": "v", "answer": 45.0, "unit": "m/s", "g": 10, "t": 4.5}, {"id": 10, "type": "v_from_t", "text": "Kamen prosto pada 5 s. Zračni upor zanemarimo. Kolikšna je njegova hitrost?", "target": "v", "answer": 50.0, "unit": "m/s", "g": 10, "t": 5}, {"id": 11, "type": "t_from_v", "text": "Prosto padajoče telo ima hitrost 5 m/s. Koliko časa že pada? Uporabi g = 10 m/s².", "target": "t", "answer": 0.5, "unit": "s", "g": 10, "v": 5}, {"id": 12, "type": "t_from_v", "text": "Prosto padajoče telo ima hitrost 10 m/s. Koliko časa že pada? Uporabi g = 10 m/s².", "target": "t", "answer": 1.0, "unit": "s", "g": 10, "v": 10}, {"id": 13, "type": "t_from_v", "text": "Prosto padajoče telo ima hitrost 15 m/s. Koliko časa že pada? Uporabi g = 10 m/s².", "target": "t", "answer": 1.5, "unit": "s", "g": 10, "v": 15}, {"id": 14, "type": "t_from_v", "text": "Prosto padajoče telo ima hitrost 20 m/s. Koliko časa že pada? Uporabi g = 10 m/s².", "target": "t", "answer": 2.0, "unit": "s", "g": 10, "v": 20}, {"id": 15, "type": "t_from_v", "text": "Prosto padajoče telo ima hitrost 25 m/s. Koliko časa že pada? Uporabi g = 10 m/s².", "target": "t", "answer": 2.5, "unit": "s", "g": 10, "v": 25}, {"id": 16, "type": "t_from_v", "text": "Prosto padajoče telo ima hitrost 30 m/s. Koliko časa že pada? Uporabi g = 10 m/s².", "target": "t", "answer": 3.0, "unit": "s", "g": 10, "v": 30}, {"id": 17, "type": "t_from_v", "text": "Prosto padajoče telo ima hitrost 35 m/s. Koliko časa že pada? Uporabi g = 10 m/s².", "target": "t", "answer": 3.5, "unit": "s", "g": 10, "v": 35}, {"id": 18, "type": "t_from_v", "text": "Prosto padajoče telo ima hitrost 40 m/s. Koliko časa že pada? Uporabi g = 10 m/s².", "target": "t", "answer": 4.0, "unit": "s", "g": 10, "v": 40}, {"id": 19, "type": "s_from_t", "text": "Telo spustimo iz mirovanja. Kolikšno pot opravi v 0,5 s prostega padanja? Uporabi g = 10 m/s².", "target": "s", "answer": 1.25, "unit": "m", "g": 10, "t": 0.5}, {"id": 20, "type": "s_from_t", "text": "Telo spustimo iz mirovanja. Kolikšno pot opravi v 1 s prostega padanja? Uporabi g = 10 m/s².", "target": "s", "answer": 5.0, "unit": "m", "g": 10, "t": 1}, {"id": 21, "type": "s_from_t", "text": "Telo spustimo iz mirovanja. Kolikšno pot opravi v 1,5 s prostega padanja? Uporabi g = 10 m/s².", "target": "s", "answer": 11.25, "unit": "m", "g": 10, "t": 1.5}, {"id": 22, "type": "s_from_t", "text": "Telo spustimo iz mirovanja. Kolikšno pot opravi v 2 s prostega padanja? Uporabi g = 10 m/s².", "target": "s", "answer": 20.0, "unit": "m", "g": 10, "t": 2}, {"id": 23, "type": "s_from_t", "text": "Telo spustimo iz mirovanja. Kolikšno pot opravi v 2,5 s prostega padanja? Uporabi g = 10 m/s².", "target": "s", "answer": 31.25, "unit": "m", "g": 10, "t": 2.5}, {"id": 24, "type": "s_from_t", "text": "Telo spustimo iz mirovanja. Kolikšno pot opravi v 3 s prostega padanja? Uporabi g = 10 m/s².", "target": "s", "answer": 45.0, "unit": "m", "g": 10, "t": 3}, {"id": 25, "type": "s_from_t", "text": "Telo spustimo iz mirovanja. Kolikšno pot opravi v 3,5 s prostega padanja? Uporabi g = 10 m/s².", "target": "s", "answer": 61.25, "unit": "m", "g": 10, "t": 3.5}, {"id": 26, "type": "s_from_t", "text": "Telo spustimo iz mirovanja. Kolikšno pot opravi v 4 s prostega padanja? Uporabi g = 10 m/s².", "target": "s", "answer": 80.0, "unit": "m", "g": 10, "t": 4}, {"id": 27, "type": "s_from_t", "text": "Telo spustimo iz mirovanja. Kolikšno pot opravi v 4,5 s prostega padanja? Uporabi g = 10 m/s².", "target": "s", "answer": 101.25, "unit": "m", "g": 10, "t": 4.5}, {"id": 28, "type": "s_from_t", "text": "Telo spustimo iz mirovanja. Kolikšno pot opravi v 5 s prostega padanja? Uporabi g = 10 m/s².", "target": "s", "answer": 125.0, "unit": "m", "g": 10, "t": 5}, {"id": 29, "type": "t_from_s", "text": "Kamen spustimo z višine 5,0 m. Koliko časa pada do tal? Uporabi g = 10 m/s².", "target": "t", "answer": 1.0, "unit": "s", "g": 10, "s": 5.0}, {"id": 30, "type": "t_from_s", "text": "Kamen spustimo z višine 11,25 m. Koliko časa pada do tal? Uporabi g = 10 m/s².", "target": "t", "answer": 1.5, "unit": "s", "g": 10, "s": 11.25}, {"id": 31, "type": "t_from_s", "text": "Kamen spustimo z višine 20,0 m. Koliko časa pada do tal? Uporabi g = 10 m/s².", "target": "t", "answer": 2.0, "unit": "s", "g": 10, "s": 20.0}, {"id": 32, "type": "t_from_s", "text": "Kamen spustimo z višine 31,25 m. Koliko časa pada do tal? Uporabi g = 10 m/s².", "target": "t", "answer": 2.5, "unit": "s", "g": 10, "s": 31.25}, {"id": 33, "type": "t_from_s", "text": "Kamen spustimo z višine 45,0 m. Koliko časa pada do tal? Uporabi g = 10 m/s².", "target": "t", "answer": 3.0, "unit": "s", "g": 10, "s": 45.0}, {"id": 34, "type": "t_from_s", "text": "Kamen spustimo z višine 61,25 m. Koliko časa pada do tal? Uporabi g = 10 m/s².", "target": "t", "answer": 3.5, "unit": "s", "g": 10, "s": 61.25}, {"id": 35, "type": "t_from_s", "text": "Kamen spustimo z višine 80,0 m. Koliko časa pada do tal? Uporabi g = 10 m/s².", "target": "t", "answer": 4.0, "unit": "s", "g": 10, "s": 80.0}, {"id": 36, "type": "t_from_s", "text": "Kamen spustimo z višine 125,0 m. Koliko časa pada do tal? Uporabi g = 10 m/s².", "target": "t", "answer": 5.0, "unit": "s", "g": 10, "s": 125.0}, {"id": 37, "type": "g_from_vt", "text": "Na nekem nebesnem telesu hitrost prosto padajočega telesa po 2 s znaša 20 m/s. Kolikšen je gravitacijski pospešek?", "target": "g", "answer": 10.0, "unit": "m/s²", "v": 20, "t": 2}, {"id": 38, "type": "g_from_vt", "text": "Na nekem nebesnem telesu hitrost prosto padajočega telesa po 3 s znaša 30 m/s. Kolikšen je gravitacijski pospešek?", "target": "g", "answer": 10.0, "unit": "m/s²", "v": 30, "t": 3}, {"id": 39, "type": "g_from_vt", "text": "Na nekem nebesnem telesu hitrost prosto padajočega telesa po 2 s znaša 16 m/s. Kolikšen je gravitacijski pospešek?", "target": "g", "answer": 8.0, "unit": "m/s²", "v": 16, "t": 2}, {"id": 40, "type": "g_from_vt", "text": "Na nekem nebesnem telesu hitrost prosto padajočega telesa po 4 s znaša 20 m/s. Kolikšen je gravitacijski pospešek?", "target": "g", "answer": 5.0, "unit": "m/s²", "v": 20, "t": 4}, {"id": 41, "type": "g_from_vt", "text": "Na nekem nebesnem telesu hitrost prosto padajočega telesa po 3 s znaša 12 m/s. Kolikšen je gravitacijski pospešek?", "target": "g", "answer": 4.0, "unit": "m/s²", "v": 12, "t": 3}, {"id": 42, "type": "g_from_vt", "text": "Na nekem nebesnem telesu hitrost prosto padajočega telesa po 5 s znaša 10 m/s. Kolikšen je gravitacijski pospešek?", "target": "g", "answer": 2.0, "unit": "m/s²", "v": 10, "t": 5}, {"id": 43, "type": "g_from_st", "text": "Telo pri prostem padu v 2 s opravi pot 20,0 m. Kolikšen je gravitacijski pospešek?", "target": "g", "answer": 10.0, "unit": "m/s²", "s": 20.0, "t": 2}, {"id": 44, "type": "g_from_st", "text": "Telo pri prostem padu v 2 s opravi pot 10,0 m. Kolikšen je gravitacijski pospešek?", "target": "g", "answer": 5.0, "unit": "m/s²", "s": 10.0, "t": 2}, {"id": 45, "type": "g_from_st", "text": "Telo pri prostem padu v 3 s opravi pot 9,0 m. Kolikšen je gravitacijski pospešek?", "target": "g", "answer": 2.0, "unit": "m/s²", "s": 9.0, "t": 3}, {"id": 46, "type": "g_from_st", "text": "Telo pri prostem padu v 2,5 s opravi pot 5,0 m. Kolikšen je gravitacijski pospešek?", "target": "g", "answer": 1.6, "unit": "m/s²", "s": 5.0, "t": 2.5}, {"id": 47, "type": "v_from_height", "text": "Kamen spustimo z višine 11,25 m. S kolikšno hitrostjo prileti do tal? Uporabi g = 10 m/s².", "target": "v", "answer": 15.0, "unit": "m/s", "s": 11.25, "g": 10, "t": 1.5}, {"id": 48, "type": "v_from_height", "text": "Kamen spustimo z višine 20,0 m. S kolikšno hitrostjo prileti do tal? Uporabi g = 10 m/s².", "target": "v", "answer": 20.0, "unit": "m/s", "s": 20.0, "g": 10, "t": 2}, {"id": 49, "type": "v_from_height", "text": "Kamen spustimo z višine 45,0 m. S kolikšno hitrostjo prileti do tal? Uporabi g = 10 m/s².", "target": "v", "answer": 30.0, "unit": "m/s", "s": 45.0, "g": 10, "t": 3}, {"id": 50, "type": "v_from_height", "text": "Kamen spustimo z višine 80,0 m. S kolikšno hitrostjo prileti do tal? Uporabi g = 10 m/s².", "target": "v", "answer": 40.0, "unit": "m/s", "s": 80.0, "g": 10, "t": 4}];
+const $=id=>document.getElementById(id);
+const fmt=(n,d=2)=>(Math.round((n+Number.EPSILON)*10**d)/10**d)
+  .toLocaleString("sl-SI",{maximumFractionDigits:d});
+const parseNum=v=>Number(String(v).replace(",","."));
+const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
+
+/* =========================================
+   SIMULACIJA
+========================================= */
+// Main rule: one mode = one clear physics story. No UI soup.
+const G=10;
+const sim={
+  mode:"drop",
+  height:45,
+  running:false,
+  raf:null,
+  massRaf:null
+};
+
+const modeChoices=[...document.querySelectorAll("[data-sim-mode]")];
+const dropPane=$("dropPane"),massPane=$("massPane");
+
+const heightSlider=$("heightSlider"),heightValue=$("heightValue"),heightMinus=$("heightMinus"),heightPlus=$("heightPlus");
+const dropBtn=$("dropBtn"),dropObject=$("dropObject"),speedTag=$("speedTag"),clock=$("clock");
+const fallPath=$("fallPath"),traceLayer=$("traceLayer"),heightScale=$("heightScale");
+const resultEmpty=$("resultEmpty"),resultsGrid=$("resultsGrid"),resHeight=$("resHeight"),resTime=$("resTime"),resSpeed=$("resSpeed");
+
+const massDropBtn=$("massDropBtn"),lightBody=$("lightBody"),heavyBody=$("heavyBody"),massResultText=$("massResultText");
+
+function updateSliderFill(sl){
+  const min=Number(sl.min),max=Number(sl.max),value=Number(sl.value);
+  sl.style.setProperty("--fill",((value-min)/(max-min))*100+"%");
+}
+
+function setSimMode(mode){
+  if(sim.running)return;
+  sim.mode=mode;
+  modeChoices.forEach(btn=>btn.classList.toggle("active",btn.dataset.simMode===mode));
+  dropPane.hidden=mode!=="drop";
+  massPane.hidden=mode!=="mass";
+
+  if(mode==="drop"){
+    resetDropVisual(false);
+  }else{
+    resetMass();
+  }
+}
+
+function updateHeight(){
+  sim.height=Number(heightSlider.value);
+  heightValue.textContent=`${fmt(sim.height,0)} m`;
+  updateSliderFill(heightSlider);
+  resetDropVisual(false);
+  renderScale();
+}
+
+function stepHeight(dir){
+  if(sim.running)return;
+  heightSlider.value=clamp(
+    Number(heightSlider.value)+dir*Number(heightSlider.step),
+    Number(heightSlider.min),
+    Number(heightSlider.max)
+  );
+  updateHeight();
+}
+
+function resetDropVisual(clearResults=true){
+  cancelAnimationFrame(sim.raf);
+  sim.running=false;
+  dropObject.style.transform="translate3d(-50%,0,0)";
+  speedTag.style.transform="translate3d(0,0,0)";
+  speedTag.textContent="0,0 m/s";
+  clock.textContent="t = 0,00 s";
+  traceLayer.innerHTML="";
+
+  if(clearResults){
+    resultsGrid.hidden=true;
+    resultEmpty.hidden=false;
+  }
+}
+
+function renderScale(){
+  heightScale.innerHTML="";
+  [0,.25,.5,.75,1].forEach(fr=>{
+    const mark=document.createElement("div");
+    mark.className="scale-mark";
+    mark.style.top=`${fr*100}%`;
+
+    const label=document.createElement("span");
+    label.textContent=`${fmt(sim.height*(1-fr),1)} m`;
+
+    mark.appendChild(label);
+    heightScale.appendChild(mark);
+  });
+}
+
+function fallTravelPx(){
+  return Math.max(0,fallPath.clientHeight-dropObject.offsetHeight);
+}
+
+function createTrace(t,frac,travelPx){
+  const d=document.createElement("div");
+  d.className="trace-dot";
+  d.style.top=`${frac*travelPx+dropObject.offsetHeight/2}px`;
+
+  const label=document.createElement("span");
+  label.textContent=`${fmt(t,1)} s`;
+  d.appendChild(label);
+  traceLayer.appendChild(d);
+}
+
+function runDrop(){
+  if(sim.running)return;
+
+  resetDropVisual(true);
+  sim.running=true;
+  dropBtn.disabled=true;
+  heightSlider.disabled=true;
+  heightMinus.disabled=true;
+  heightPlus.disabled=true;
+
+  const totalTime=Math.sqrt(2*sim.height/G);
+
+  // Smooth drop: travel izračunamo samo enkrat, da browser ne dela layout dance na vsak frame.
+  const travelPx=fallTravelPx();
+  const start=performance.now();
+  let nextTrace=.5;
+
+  const tick=now=>{
+    const t=Math.min((now-start)/1000,totalTime);
+    const s=.5*G*t*t;
+    const frac=clamp(s/sim.height,0,1);
+    const y=frac*travelPx;
+    const v=G*t;
+
+    dropObject.style.transform=`translate3d(-50%,${y}px,0)`;
+    speedTag.style.transform=`translate3d(0,${y}px,0)`;
+    speedTag.textContent=`${fmt(v,1)} m/s`;
+    clock.textContent=`t = ${fmt(t,2)} s`;
+
+    while(nextTrace<=t+0.0001 && nextTrace<totalTime){
+      const ts=nextTrace;
+      const ss=.5*G*ts*ts;
+      createTrace(ts,clamp(ss/sim.height,0,1),travelPx);
+      nextTrace+=.5;
+    }
+
+    if(t>=totalTime){
+      // hard stop at ground — no bounce, no image swap, no weird last-frame jerk.
+      dropObject.style.transform=`translate3d(-50%,${travelPx}px,0)`;
+      speedTag.style.transform=`translate3d(0,${travelPx}px,0)`;
+
+      sim.running=false;
+      dropBtn.disabled=false;
+      heightSlider.disabled=false;
+      heightMinus.disabled=false;
+      heightPlus.disabled=false;
+
+      resHeight.textContent=`${fmt(sim.height,0)} m`;
+      resTime.textContent=`${fmt(totalTime,2)} s`;
+      resSpeed.textContent=`${fmt(G*totalTime,1)} m/s`;
+      resultEmpty.hidden=true;
+      resultsGrid.hidden=false;
+      return;
+    }
+
+    sim.raf=requestAnimationFrame(tick);
+  };
+
+  sim.raf=requestAnimationFrame(tick);
+}
+
+heightSlider.addEventListener("input",()=>{if(!sim.running)updateHeight()});
+heightMinus.addEventListener("click",()=>stepHeight(-1));
+heightPlus.addEventListener("click",()=>stepHeight(1));
+dropBtn.addEventListener("click",runDrop);
+
+modeChoices.forEach(btn=>{
+  btn.addEventListener("click",()=>setSimMode(btn.dataset.simMode));
+});
+
+window.addEventListener("resize",()=>{
+  // resize reset je intentional: bolj čist kot da žoga po resize "teleporta".
+  if(!sim.running){
+    if(sim.mode==="drop")resetDropVisual(false);
+    else resetMass();
+  }
+});
+
+/* mass check — same size balls, ker spreminjamo maso, ne vizualne velikosti */
+function resetMass(){
+  cancelAnimationFrame(sim.massRaf);
+  lightBody.style.transform="translate3d(-50%,0,0)";
+  heavyBody.style.transform="translate3d(-50%,0,0)";
+  massDropBtn.disabled=false;
+  massResultText.textContent="Opazuj, ali telesi dosežeta tla hkrati.";
+}
+
+function massTravel(body){
+  const lane=body.parentElement;
+  const ground=lane.querySelector(".mass-ground");
+  const startTop=body.offsetTop;
+  const groundTop=ground.offsetTop;
+  return Math.max(0,groundTop-startTop-body.offsetHeight);
+}
+
+function runMassDrop(){
+  if(sim.running)return;
+  sim.running=true;
+  massDropBtn.disabled=true;
+  massResultText.textContent="Opazuj padec …";
+
+  const lightTravel=massTravel(lightBody);
+  const heavyTravel=massTravel(heavyBody);
+
+  // Same-size bodies => isti geometric travel. Physics point ostane crystal clear.
+  const duration=2200;
+  const start=performance.now();
+
+  const tick=now=>{
+    const f=clamp((now-start)/duration,0,1);
+    const progress=f*f; // constant-acceleration vibe; oba imata isti g
+
+    lightBody.style.transform=`translate3d(-50%,${progress*lightTravel}px,0)`;
+    heavyBody.style.transform=`translate3d(-50%,${progress*heavyTravel}px,0)`;
+
+    if(f>=1){
+      // exact ground contact, zero bounce. Just stop.
+      lightBody.style.transform=`translate3d(-50%,${lightTravel}px,0)`;
+      heavyBody.style.transform=`translate3d(-50%,${heavyTravel}px,0)`;
+      sim.running=false;
+      massDropBtn.disabled=false;
+      massResultText.textContent="Če zračni upor zanemarimo, masa ne vpliva na gravitacijski pospešek.";
+      return;
+    }
+
+    sim.massRaf=requestAnimationFrame(tick);
+  };
+
+  sim.massRaf=requestAnimationFrame(tick);
+}
+
+massDropBtn.addEventListener("click",runMassDrop);
+
+updateHeight();
+setSimMode("drop");
+
+/* =========================================
+   RAČUNANJE
+========================================= */
+const chipMap={
+  v_from_t:"Hitrost",
+  t_from_v:"Čas",
+  s_from_t:"Pot",
+  t_from_s:"Čas iz višine",
+  g_from_vt:"Gravitacijski pospešek",
+  g_from_st:"Gravitacijski pospešek",
+  v_from_height:"Višina → čas → hitrost"
+};
+const targetLabels={
+  v:"Hitrost v",
+  t:"Čas t",
+  s:"Pot s",
+  g:"Gravitacijski pospešek g"
+};
+
+const taskChip=$("taskChip"),taskText=$("taskText"),targetChoices=$("targetChoices");
+const stepIntermediate=$("stepIntermediate"),intermediateTitle=$("intermediateTitle"),intermediateChoices=$("intermediateChoices");
+const stepMagic=$("stepMagic"),magicTitle=$("magicTitle"),magicFeedback=$("magicFeedback");
+const stepGuide=$("stepGuide"),guideTitle=$("guideTitle"),guideLine=$("guideLine"),checkDataBtn=$("checkDataBtn"),dataFeedback=$("dataFeedback");
+const resultStage=$("resultStage"),answerInput=$("answerInput"),answerUnit=$("answerUnit"),checkAnswerBtn=$("checkAnswerBtn"),feedback=$("feedback");
+const hintBtn=$("hintBtn"),hintText=$("hintText"),prevTask=$("prevTask"),nextTask=$("nextTask");
+let taskIndex=0,taskHistory=[0],hintIndex=0;
+
+function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
+function usesMagic(t){return["v_from_t","t_from_v","g_from_vt"].includes(t.type)}
+function isMulti(t){return t.type==="v_from_height"}
+
+function targetOptions(){
+  return shuffle([
+    {key:"v",html:"Hitrost v"},
+    {key:"t",html:"Čas t"},
+    {key:"s",html:"Pot s"},
+    {key:"g",html:"Gravitacijski pospešek g"}
+  ]);
+}
+
+// Solver side: keep it step-by-step; formula dump na začetku bi bil too much.
+function renderTask(){
+  const t=TASKS[taskIndex];
+  hintIndex=0;
+  taskChip.textContent=chipMap[t.type];
+  taskText.textContent=t.text;
+  stepIntermediate.hidden=true;stepMagic.hidden=true;stepGuide.hidden=true;resultStage.hidden=true;
+  magicFeedback.textContent="";dataFeedback.textContent="";feedback.textContent="";
+  answerInput.value="";answerUnit.textContent=t.unit;
+  hintText.textContent="Poskusi najprej sam.";hintBtn.textContent="Pokaži namig";
+  prevTask.disabled=taskHistory.length<=1;
+  document.querySelectorAll("[data-magic]").forEach(b=>b.classList.remove("good","bad"));
+  targetChoices.innerHTML="";
+
+  targetOptions().forEach(opt=>{
+    const b=document.createElement("button");b.type="button";b.className="choice";b.innerHTML=opt.html;
+    b.addEventListener("click",()=>{
+      targetChoices.querySelectorAll("button").forEach(x=>x.classList.remove("good","bad"));
+      if(opt.key===t.target){
+        b.classList.add("good");
+        if(isMulti(t))renderIntermediate(t);
+        else if(usesMagic(t))showMagic(t,2);
+        else showGuide(t,2);
+      }else b.classList.add("bad");
+    });
+    targetChoices.appendChild(b);
+  });
+}
+
+function renderIntermediate(t){
+  stepIntermediate.hidden=false;
+  intermediateTitle.textContent="2. Kaj moramo izračunati najprej?";
+  intermediateChoices.innerHTML="";
+  const opts=shuffle([
+    {key:"t",html:"Čas padanja t"},
+    {key:"g",html:"Gravitacijski pospešek g"},
+    {key:"m",html:"Maso telesa m"}
+  ]);
+  opts.forEach(opt=>{
+    const b=document.createElement("button");b.type="button";b.className="choice";b.innerHTML=opt.html;
+    b.addEventListener("click",()=>{
+      intermediateChoices.querySelectorAll("button").forEach(x=>x.classList.remove("good","bad"));
+      if(opt.key==="t"){
+        b.classList.add("good");
+        showGuide(t,3);
+      }else b.classList.add("bad");
+    });
+    intermediateChoices.appendChild(b);
+  });
+}
+
+function showMagic(t,n){
+  stepMagic.hidden=false;
+  magicTitle.textContent=`${n}. V magičnem trikotniku klikni količino, ki jo iščemo.`;
+  magicFeedback.textContent="";
+  document.querySelectorAll("[data-magic]").forEach(b=>b.classList.remove("good","bad"));
+}
+
+function magicTarget(t){
+  if(t.type==="v_from_t")return"v";
+  if(t.type==="t_from_v")return"t";
+  if(t.type==="g_from_vt")return"g";
+  return null;
+}
+
+document.querySelectorAll("[data-magic]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const t=TASKS[taskIndex];
+    document.querySelectorAll("[data-magic]").forEach(b=>b.classList.remove("good","bad"));
+    if(btn.dataset.magic===magicTarget(t)){
+      btn.classList.add("good");
+      magicFeedback.textContent="Tako je. Zdaj vstavi podatke.";
+      magicFeedback.className="step-feedback ok";
+      showGuide(t,3);
+    }else{
+      btn.classList.add("bad");
+      magicFeedback.textContent="Klikni količino, ki jo iščemo.";
+      magicFeedback.className="step-feedback err";
+      stepGuide.hidden=true;
+    }
+  });
+});
+
+function guideSpec(t){
+  if(t.type==="v_from_t"){
+    return {lhs:"v",op:"·",fields:[
+      {key:"g",unit:"m/s²",expected:t.g},
+      {key:"t",unit:"s",expected:t.t}
+    ]};
+  }
+  if(t.type==="t_from_v"){
+    return {lhs:"t",op:"/",fields:[
+      {key:"v",unit:"m/s",expected:t.v},
+      {key:"g",unit:"m/s²",expected:t.g}
+    ]};
+  }
+  if(t.type==="g_from_vt"){
+    return {lhs:"g",op:"/",fields:[
+      {key:"v",unit:"m/s",expected:t.v},
+      {key:"t",unit:"s",expected:t.t}
+    ]};
+  }
+  if(t.type==="s_from_t"){
+    return {lhs:"s",prefix:"½ ·",op:"·",fields:[
+      {key:"g",unit:"m/s²",expected:t.g},
+      {key:"t2",unit:"s²",expected:t.t*t.t}
+    ],note:`Najprej izračunaj t² = ${fmt(t.t,2)}².`};
+  }
+  if(t.type==="t_from_s"){
+    return {lhs:"t²",op:"/",fields:[
+      {key:"2s",unit:"m",expected:2*t.s},
+      {key:"g",unit:"m/s²",expected:t.g}
+    ],sqrt:true,note:"Najprej izračunaj t² = 2s / g. Nato iz rezultata izračunaj kvadratni koren."};
+  }
+  if(t.type==="g_from_st"){
+    return {lhs:"g",op:"/",fields:[
+      {key:"2s",unit:"m",expected:2*t.s},
+      {key:"t2",unit:"s²",expected:t.t*t.t}
+    ],note:`Uporabi g = 2s / t². Najprej izračunaj t² = ${fmt(t.t,2)}².`};
+  }
+  if(t.type==="v_from_height"){
+    return {lhs:"t²",op:"/",fields:[
+      {key:"2s",unit:"m",expected:2*t.s},
+      {key:"g",unit:"m/s²",expected:t.g}
+    ],sqrt:true,multi:true,note:"Najprej iz višine določi čas: t² = 2s / g. Nato uporabi v = g · t."};
+  }
+}
+
+function showGuide(t,n){
+  stepGuide.hidden=false;
+  guideTitle.textContent=`${n}. Vstavi podatke.`;
+  const spec=guideSpec(t);
+  guideLine.innerHTML="";
+  if(spec.note){
+    const note=document.createElement("div");
+    note.style.width="100%";note.style.color="var(--muted)";note.style.fontSize=".95rem";note.style.marginBottom="5px";
+    note.textContent=spec.note;guideLine.appendChild(note);
+  }
+  const lhs=document.createElement("span");lhs.textContent=spec.lhs;guideLine.appendChild(lhs);
+  const eq=document.createElement("span");eq.textContent="=";guideLine.appendChild(eq);
+  if(spec.prefix){
+    const pr=document.createElement("span");pr.textContent=spec.prefix;guideLine.appendChild(pr);
+  }
+  spec.fields.forEach((f,i)=>{
+    const wrap=document.createElement("span");wrap.style.display="inline-flex";wrap.style.alignItems="center";wrap.style.gap="6px";
+    const inp=document.createElement("input");inp.className="guide-input";inp.inputMode="decimal";inp.dataset.expected=String(f.expected);inp.dataset.key=f.key;wrap.appendChild(inp);
+    const unit=document.createElement("span");unit.className="guide-unit";unit.textContent=f.unit;wrap.appendChild(unit);
+    guideLine.appendChild(wrap);
+    if(i===0){const op=document.createElement("span");op.textContent=spec.op;guideLine.appendChild(op);}
+  });
+  dataFeedback.textContent="";dataFeedback.className="step-feedback";resultStage.hidden=true;
+}
+
+function checkGuideData(){
+  const inputs=[...guideLine.querySelectorAll(".guide-input")];
+  let ok=true;
+  inputs.forEach(inp=>{
+    inp.classList.remove("good","bad");
+    const v=parseNum(inp.value),exp=Number(inp.dataset.expected),tol=Math.max(.015,Math.abs(exp)*.003);
+    if(Number.isFinite(v)&&Math.abs(v-exp)<=tol)inp.classList.add("good");
+    else{inp.classList.add("bad");ok=false;}
+  });
+  if(ok){
+    dataFeedback.textContent="Podatki so pravilno vstavljeni.";
+    dataFeedback.className="step-feedback ok";
+    resultStage.hidden=false;
+    setTimeout(()=>answerInput.focus(),80);
+  }else{
+    dataFeedback.textContent="Preveri podatke oziroma vmesni račun.";
+    dataFeedback.className="step-feedback err";
+    resultStage.hidden=true;
+  }
+}
+checkDataBtn.addEventListener("click",checkGuideData);
+guideLine.addEventListener("keydown",e=>{if(e.key==="Enter")checkGuideData()});
+
+// Tiny tolerance je intentional — decimal comma / rounding naj ne kaznuje učenca.
+function checkAnswer(){
+  const t=TASKS[taskIndex],v=parseNum(answerInput.value);
+  if(!Number.isFinite(v)){
+    feedback.textContent="Vpiši številski rezultat.";feedback.className="feedback err";return;
+  }
+  const tol=Math.max(.02,Math.abs(t.answer)*.004);
+  if(Math.abs(v-t.answer)<=tol){
+    feedback.textContent=`Pravilno. Rezultat je ${fmt(t.answer,3)} ${t.unit}.`;
+    feedback.className="feedback ok";
+  }else{
+    feedback.textContent="Še ne. Preveri račun ali odpri namig.";
+    feedback.className="feedback err";
+  }
+}
+checkAnswerBtn.addEventListener("click",checkAnswer);
+answerInput.addEventListener("keydown",e=>{if(e.key==="Enter")checkAnswer()});
+
+function hintsFor(t){
+  if(t.type==="v_from_t")return[
+    "Pri prostem padu z začetno hitrostjo 0 hitrost narašča za g vsako sekundo.",
+    "Uporabi zvezo v = g · t.",
+    `Vstavi g = ${fmt(t.g,1)} m/s² in t = ${fmt(t.t,2)} s.`
+  ];
+  if(t.type==="t_from_v")return[
+    "Uporabi zvezo v = g · t in poišči čas.",
+    "Čas dobiš tako, da hitrost deliš z g.",
+    `t = ${fmt(t.v,2)} / ${fmt(t.g,2)}.`
+  ];
+  if(t.type==="s_from_t")return[
+    "Pri padcu iz mirovanja uporabimo s = g · t² / 2.",
+    "Najprej kvadriraj čas.",
+    `t² = ${fmt(t.t,2)}² = ${fmt(t.t*t.t,2)} s².`
+  ];
+  if(t.type==="t_from_s")return[
+    "Za pot velja s = g · t² / 2.",
+    "Izrazi t²: t² = 2s / g.",
+    `Najprej izračunaj 2 · ${fmt(t.s,2)} / ${fmt(t.g,2)}, nato izračunaj kvadratni koren.`
+  ];
+  if(t.type==="g_from_vt")return[
+    "Hitrost pri prostem padu povezujejo v, g in t.",
+    "Iz v = g · t sledi g = v / t.",
+    `g = ${fmt(t.v,2)} / ${fmt(t.t,2)}.`
+  ];
+  if(t.type==="g_from_st")return[
+    "Za pot pri prostem padu velja s = g · t² / 2.",
+    "Izrazi g: g = 2s / t².",
+    `Najprej izračunaj t² = ${fmt(t.t,2)}².`
+  ];
+  return[
+    "Najprej iz višine določi čas padanja.",
+    "Uporabi t² = 2s / g in nato izračunaj t.",
+    `Ko dobiš t = ${fmt(t.t,2)} s, izračunaj še v = g · t.`
+  ];
+}
+hintBtn.addEventListener("click",()=>{
+  const hs=hintsFor(TASKS[taskIndex]);
+  hintIndex=Math.min(hintIndex+1,hs.length);
+  hintText.textContent=hs[hintIndex-1];
+  hintBtn.textContent=hintIndex>=hs.length?"Zadnji namig":"Naslednji namig";
+});
+
+prevTask.addEventListener("click",()=>{
+  if(taskHistory.length<=1)return;
+  taskHistory.pop();taskIndex=taskHistory[taskHistory.length-1];renderTask();
+});
+nextTask.addEventListener("click",()=>{
+  const recent=new Set(taskHistory.slice(-7));
+  let candidates=TASKS.map((_,i)=>i).filter(i=>i!==taskIndex&&!recent.has(i));
+  if(!candidates.length)candidates=TASKS.map((_,i)=>i).filter(i=>i!==taskIndex);
+  taskIndex=candidates[Math.floor(Math.random()*candidates.length)];
+  taskHistory.push(taskIndex);renderTask();
+});
+
+updateHeight();
+renderTask();
+})();
+</script>
+</body>
+</html>

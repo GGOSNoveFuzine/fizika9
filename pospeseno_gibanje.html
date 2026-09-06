@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dirka pospeškov – Fizika 9</title>
+<meta name="description" content="Dirka treh enakomerno pospešenih formul z grafi a(t), v(t), s(t), video ponovitvijo in vodenimi računskimi nalogami.">
+<meta name="theme-color" content="#f5f1ea">
+<style>
+:root {
+  --paper:#f5f1ea;
+  --card:#fffdf9;
+  --ink:#223746;
+  --muted:#687886;
+  --line:#d8d1c8;
+  --orange:#e34a12;
+  --orange2:#f4773b;
+  --blue:#2775d8;
+  --purple:#7b4bd8;
+  --green:#1a9b6d;
+  --track:#252b31;
+  --track2:#30373e;
+  --cream:#fff8ed;
+  --shadow:0 18px 55px rgba(44,53,60,.12);
+  --radius:24px;
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  margin:0;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(227,74,18,.08), transparent 32rem),
+    radial-gradient(circle at 95% 15%, rgba(39,117,216,.08), transparent 26rem),
+    var(--paper);
+  color:var(--ink);
+  font:16px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+button, input, select { font:inherit; }
+button { cursor:pointer; }
+a { color:inherit; }
+.wrap { width:min(1500px, calc(100% - 56px)); margin:0 auto 80px; }
+.topbar {
+  display:flex; align-items:center; justify-content:space-between; gap:20px;
+  padding:24px 0 12px;
+}
+.brand {
+  display:flex; align-items:center; gap:12px; text-decoration:none; font-weight:900;
+}
+.brand-mark {
+  width:44px; height:44px; border-radius:14px; display:grid; place-items:center;
+  background:var(--ink); color:#fff; font-weight:950;
+}
+.back {
+  text-decoration:none; padding:10px 15px; border:1px solid var(--line);
+  border-radius:999px; background:#ffffff88; font-weight:800;
+}
+.hero {
+  display:grid; grid-template-columns:1.2fr .8fr; gap:26px; align-items:end;
+  padding:34px 0 26px;
+}
+.eyebrow {
+  text-transform:uppercase; letter-spacing:.16em; font-weight:900; font-size:.78rem; color:var(--orange);
+}
+h1 {
+  margin:8px 0 12px;
+  font:700 clamp(3.4rem,7vw,7.4rem)/.92 Georgia, "Times New Roman", serif;
+  letter-spacing:-.055em;
+}
+.hero p { font-size:1.12rem; color:var(--muted); max-width:72ch; margin:0; }
+.principle {
+  align-self:center; border-left:4px solid var(--orange); padding:8px 0 8px 20px;
+  color:var(--muted); font-weight:650;
+}
+.panel {
+  background:#fffdf9ee; border:1px solid #2437461f; border-radius:var(--radius); box-shadow:var(--shadow);
+}
+.race-panel, .tasks-section { padding:24px; }
+.section-head {
+  display:flex; align-items:flex-end; justify-content:space-between; gap:18px; flex-wrap:wrap;
+  margin-bottom:20px;
+}
+.section-head h2 {
+  margin:0; font:700 clamp(2rem,3.5vw,3.5rem)/1 Georgia, "Times New Roman", serif; letter-spacing:-.035em;
+}
+.section-head p { margin:7px 0 0; color:var(--muted); max-width:70ch; }
+.micro-note { font-size:.9rem; color:var(--muted); }
+
+.instruction-card {
+  margin-bottom:18px;
+  background:linear-gradient(135deg, #fff7ea, #fffdfa);
+  border:1px solid #f0d7bb;
+  border-radius:20px;
+  padding:16px 18px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.instruction-card strong { font-size:1.05rem; }
+.instruction-step {
+  display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px;
+  border-radius:50%; background:var(--orange); color:#fff; font-weight:950; margin-right:10px;
+}
+.instruction-main { display:flex; align-items:center; gap:0; font-weight:900; }
+.instruction-sub { color:var(--muted); font-size:.94rem; margin-top:4px; }
+.instruction-pill {
+  padding:8px 12px; border-radius:999px; background:#fff; border:1px solid var(--line); font-weight:850;
+}
+
+.controls {
+  display:grid;
+  grid-template-columns:minmax(320px,1.35fr) minmax(240px,.85fr) minmax(190px,.7fr);
+  gap:14px; margin-bottom:18px;
+}
+.control-card {
+  border:1px solid var(--line); border-radius:18px; padding:14px 16px; background:#fffdfa;
+}
+.control-label {
+  display:block; font-weight:900; font-size:.82rem; text-transform:uppercase; letter-spacing:.08em; margin-bottom:9px;
+}
+.segmented { display:flex; gap:7px; flex-wrap:wrap; }
+.segmented button {
+  border:1px solid var(--line); background:#fff; border-radius:999px; padding:10px 14px;
+  font-weight:850; color:var(--ink);
+}
+.segmented button.active {
+  background:var(--ink); color:#fff; border-color:var(--ink);
+}
+.predict-buttons button[data-car="0"].active { background:var(--blue); border-color:var(--blue); }
+.predict-buttons button[data-car="1"].active { background:var(--orange); border-color:var(--orange); }
+.predict-buttons button[data-car="2"].active { background:var(--purple); border-color:var(--purple); }
+
+.toolbar {
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:12px 0 18px;
+}
+.btn {
+  border:0; border-radius:999px; padding:12px 18px; font-weight:900;
+  background:var(--ink); color:#fff; box-shadow:0 7px 18px rgba(36,55,70,.12);
+}
+.btn.primary { background:linear-gradient(135deg, var(--orange), var(--orange2)); }
+.btn.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:none; }
+.btn:disabled { opacity:.42; cursor:not-allowed; }
+.switch {
+  margin-left:auto; display:flex; align-items:center; gap:8px; font-weight:800; color:var(--muted);
+}
+.switch input { width:20px; height:20px; accent-color:var(--orange); }
+.countdown {
+  min-height:48px; display:flex; align-items:center; justify-content:center;
+  font:900 2.5rem/1 Georgia, serif; color:var(--orange);
+}
+.race-shell {
+  position:relative; border-radius:22px; overflow:hidden; border:1px solid #161b1f; background:var(--track);
+}
+.lane {
+  display:grid; grid-template-columns:180px minmax(700px,1fr);
+  min-height:118px; border-bottom:1px solid rgba(255,255,255,.12);
+}
+.lane:last-child { border-bottom:0; }
+.lane-info {
+  padding:16px; background:#171c21; color:#fff; display:flex; flex-direction:column; justify-content:center;
+  border-right:1px solid rgba(255,255,255,.12);
+}
+.lane-name { font-weight:950; font-size:1.05rem; display:flex; align-items:center; gap:9px; }
+.car-dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+.lane-data {
+  font-variant-numeric:tabular-nums; color:#c7d0d6; font-weight:720; margin-top:7px;
+}
+.track {
+  position:relative; min-width:700px; overflow:hidden;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 54px, rgba(255,255,255,.06) 54px 56px),
+    linear-gradient(180deg, var(--track2), var(--track));
+}
+.track::before {
+  content:""; position:absolute; left:18px; right:18px; top:50%; height:3px; transform:translateY(-50%);
+  background:repeating-linear-gradient(90deg, rgba(255,255,255,.78) 0 28px, transparent 28px 58px);
+  opacity:.45;
+}
+.finish-line {
+  position:absolute; right:18px; top:0; bottom:0; width:18px;
+  background:conic-gradient(#fff 25%, #111 0 50%, #fff 0 75%, #111 0) 0 0 / 12px 12px;
+  opacity:.88;
+}
+.car {
+  position:absolute; left:20px; top:50%; width:132px; height:66px; transform:translate(0,-50%);
+  will-change:transform; filter:drop-shadow(0 8px 7px rgba(0,0,0,.26));
+}
+.car svg { width:100%; height:100%; display:block; }
+.speed-label {
+  font:950 22px ui-sans-serif,system-ui;
+  fill:#fff;
+  text-anchor:middle;
+  dominant-baseline:middle;
+  paint-order:stroke;
+  stroke:#1f2930;
+  stroke-width:3px;
+  stroke-linejoin:round;
+}
+.distance-scale {
+  display:grid; grid-template-columns:180px minmax(700px,1fr); background:#151a1f; color:#fff;
+  border-top:1px solid rgba(255,255,255,.13);
+}
+.scale-title { padding:10px 16px; color:#aeb8bf; font-weight:800; }
+.scale-track { position:relative; height:48px; min-width:700px; }
+.scale-mark {
+  position:absolute; top:6px; transform:translateX(-50%); font-variant-numeric:tabular-nums;
+  color:#cfd6da; font-weight:800;
+}
+.scale-mark::before {
+  content:""; display:block; width:1px; height:10px; background:#8e9aa1; margin:0 auto 3px;
+}
+.race-clock {
+  display:flex; justify-content:center; align-items:center; gap:10px; margin-top:14px;
+  font-weight:950; font-size:1.25rem; font-variant-numeric:tabular-nums;
+}
+
+.result-area { margin-top:22px; }
+.result-banner {
+  display:flex; justify-content:space-between; gap:16px; align-items:center; flex-wrap:wrap;
+  padding:18px 20px; border-radius:18px; background:var(--cream); border:1px solid #f2d4b9;
+}
+.result-banner strong { font-size:1.15rem; }
+.result-table-wrap { overflow:auto; margin-top:12px; }
+table { border-collapse:collapse; width:100%; min-width:650px; }
+th, td {
+  padding:11px 13px; text-align:left; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums;
+}
+th { font-size:.8rem; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
+td:first-child { font-weight:900; }
+
+.analysis {
+  margin-top:24px; padding-top:22px; border-top:1px solid var(--line);
+}
+.analysis-toolbar {
+  display:grid; grid-template-columns:1fr auto; gap:14px; align-items:center; margin:14px 0;
+}
+.video-controls {
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.icon-btn {
+  width:44px; height:44px; border-radius:50%; border:1px solid var(--line); background:#fff; color:var(--ink); font-weight:950;
+}
+.time-readout { font-weight:900; font-variant-numeric:tabular-nums; min-width:140px; text-align:center; }
+.timeline { width:100%; accent-color:var(--orange); }
+.graph-options { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.car-check {
+  display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border:1px solid var(--line);
+  border-radius:999px; background:#fff; font-weight:850;
+}
+.car-check input { accent-color:currentColor; }
+.graphs { display:grid; gap:13px; }
+.graph-card {
+  background:#fff; border:1px solid var(--line); border-radius:18px; padding:12px 14px 10px; overflow:hidden;
+}
+.graph-title { font-weight:950; font-size:1.18rem; margin-bottom:4px; }
+.graph-sub { color:var(--muted); font-size:.92rem; margin-bottom:8px; }
+.graph-svg { display:block; width:100%; height:270px; background:#fcfbf8; border-radius:12px; }
+.axis { stroke:#86939b; stroke-width:1.35; }
+.gridline { stroke:#e6e2dc; stroke-width:1; }
+.tick-text { font:14px ui-sans-serif,system-ui; fill:#657783; }
+.axis-unit { font:950 17px ui-sans-serif,system-ui; fill:#445a68; }
+.cursor-line { stroke:#2e3f4c; stroke-width:1.3; stroke-dasharray:5 5; opacity:.7; }
+.graph-path { fill:none; stroke-width:3.4; stroke-linecap:round; stroke-linejoin:round; }
+.graph-marker { stroke:#fff; stroke-width:2; }
+
+.tasks-section { margin-top:34px; }
+.task-layout { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr); gap:22px; }
+.task-card {
+  border:1px solid var(--line); border-radius:20px; background:#fff; padding:22px;
+}
+.task-top { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+.task-label { font-weight:950; font-size:1.15rem; }
+.task-chip {
+  display:inline-block; background:#f1ece5; color:var(--ink); border-radius:999px; padding:6px 10px; font-weight:850; font-size:.82rem;
+}
+.task-text {
+  font:650 1.28rem/1.55 Georgia,"Times New Roman",serif; margin:22px 0; color:#273a48;
+}
+.step { margin-top:14px; border-top:1px dashed var(--line); padding-top:15px; }
+.step h3 { font-size:1rem; margin:0 0 10px; }
+.choice-grid { display:flex; gap:8px; flex-wrap:wrap; }
+.choice {
+  border:1px solid var(--line); background:#fff; border-radius:12px; padding:10px 13px; font-weight:850; color:var(--ink);
+}
+.choice.good { background:#e8f7ef; border-color:#8fd4b3; color:#146345; }
+.choice.bad { background:#fff0ee; border-color:#e9aaa3; color:#8c3028; }
+.formula-choice { font-family:"Trebuchet MS",ui-sans-serif,sans-serif; font-size:1.04rem; }
+.answer-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:12px; }
+.answer-input {
+  width:170px; border:2px solid #cfc7bd; border-radius:12px; padding:11px 13px; font-size:1.1rem; font-weight:850; color:var(--ink); background:#fff;
+}
+.answer-unit { font-weight:950; }
+.feedback { min-height:30px; margin-top:10px; font-weight:850; }
+.feedback.ok { color:#16734e; }
+.feedback.err { color:#a43b32; }
+.hint-box {
+  min-height:180px; border-radius:20px; padding:20px; background:#253847; color:#fff;
+}
+.hint-box h3 { margin:0 0 10px; font:700 1.5rem/1.1 Georgia,serif; }
+.hint-box p { color:#d9e1e6; }
+.hint-text {
+  background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.12); border-radius:14px;
+  padding:13px; margin-top:12px; min-height:78px;
+}
+.task-nav { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+footer { padding:30px 0; color:var(--muted); text-align:center; font-size:.92rem; }
+
+@media(max-width:1050px) {
+  .hero { grid-template-columns:1fr; }
+  .controls { grid-template-columns:1fr 1fr; }
+  .controls .control-card:first-child { grid-column:1/-1; }
+  .task-layout { grid-template-columns:1fr; }
+  .analysis-toolbar { grid-template-columns:1fr; }
+}
+@media(max-width:800px) {
+  .wrap { width:min(100% - 24px,1500px); }
+  .race-panel,.tasks-section { padding:15px; }
+  .controls { grid-template-columns:1fr; }
+  .lane { grid-template-columns:130px minmax(650px,1fr); }
+  .distance-scale { grid-template-columns:130px minmax(650px,1fr); }
+  .race-shell { overflow:auto; }
+  .lane-info { position:sticky; left:0; z-index:3; }
+  .scale-title { position:sticky; left:0; z-index:3; background:#151a1f; }
+}
+@media(prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark">F9</span><span>Fizika 9</span></a>
+    <a class="back" href="index.html">← Nazaj na poglavja</a>
+  </div>
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">1. poglavje · Enakomerno pospešeno gibanje</div>
+      <h1>Dirka pospeškov</h1>
+      <p>Napovej zmagovalca, opazuj trenutno hitrost na dirkalnikih, nato isto gibanje zavrti nazaj in ga preberi še iz grafov <strong>a(t)</strong>, <strong>v(t)</strong> in <strong>s(t)</strong>.</p>
+    </div>
+    <div class="principle">Najprej opazuj gibanje. Nato ga poveži z grafom. Šele potem računaj.</div>
+  </header>
+
+  <main>
+    <section class="panel race-panel" aria-labelledby="raceTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="raceTitle">1 · Dirka</h2>
+          <p>Vsi trije dirkalniki se gibljejo <strong>enakomerno pospešeno</strong>. Izberi način štarta in razdaljo, nato napovej zmagovalca.</p>
+        </div>
+        <div class="micro-note">Na dirkalniku je med vožnjo prikazana samo trenutna hitrost.</div>
+      </div>
+
+      <div class="instruction-card" id="instructionCard">
+        <div>
+          <div class="instruction-main"><span class="instruction-step">1</span><strong id="instructionTitle">Napovej zmagovalca.</strong></div>
+          <div class="instruction-sub" id="instructionSub">Najprej izberi A, B ali C. Nato bo gumb START postal aktiven.</div>
+        </div>
+        <div class="instruction-pill" id="instructionPill">Čakam na napoved</div>
+      </div>
+
+      <div class="controls">
+        <div class="control-card">
+          <span class="control-label">Način štarta</span>
+          <div class="segmented" id="modeButtons">
+            <button type="button" data-mode="rest" class="active">Start iz mirovanja</button>
+            <button type="button" data-mode="flying">Leteči start</button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <span class="control-label">Dolžina proge</span>
+          <div class="segmented" id="distanceButtons">
+            <button type="button" data-distance="20">20 m</button>
+            <button type="button" data-distance="50">50 m</button>
+            <button type="button" data-distance="100">100 m</button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <span class="control-label">Napovej zmagovalca</span>
+          <div class="predict-buttons segmented" id="predictButtons">
+            <button type="button" data-car="0">A</button>
+            <button type="button" data-car="1">B</button>
+            <button type="button" data-car="2">C</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn secondary" id="newRaceBtn" type="button">↻ Nova postavitev</button>
+        <button class="btn primary" id="startBtn" type="button" disabled>START</button>
+        <label class="switch"><input type="checkbox" id="soundToggle" checked> Zvok</label>
+      </div>
+
+      <div class="countdown" id="countdown" aria-live="polite"></div>
+
+      <div class="race-shell">
+        <div id="lanes"></div>
+        <div class="distance-scale">
+          <div class="scale-title">Razdalja</div>
+          <div class="scale-track" id="distanceScale"></div>
+        </div>
+      </div>
+
+      <div class="race-clock">⏱ <span id="raceTime">0,00 s</span></div>
+
+      <div class="result-area" id="resultArea" hidden>
+        <div class="result-banner">
+          <div>
+            <strong id="winnerText"></strong>
+            <div id="predictionText" class="micro-note"></div>
+          </div>
+          <button class="btn primary" id="replayWithGraphsBtn" type="button">▶ Ponovi z grafi</button>
+        </div>
+
+        <div class="result-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Dirkalnik</th>
+                <th>v<sub>z</sub></th>
+                <th>a</th>
+                <th>Čas do cilja</th>
+                <th>v<sub>k</sub></th>
+              </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+          </table>
+        </div>
+
+        <section class="analysis" id="analysis">
+          <div class="section-head">
+            <div>
+              <h2>2 · Posnetek + grafi</h2>
+              <p>Previj dirko nazaj. Ista časovna črta se premika čez vse tri grafe.</p>
+            </div>
+          </div>
+
+          <div class="analysis-toolbar">
+            <div>
+              <div class="video-controls">
+                <button class="icon-btn" id="replayHome" type="button" title="Na začetek">⏮</button>
+                <button class="icon-btn" id="replayPlay" type="button" title="Predvajaj/Pavza">▶</button>
+                <button class="icon-btn" id="replayEnd" type="button" title="Na konec">⏭</button>
+                <span class="time-readout" id="replayTime">0,00 s / 0,00 s</span>
+              </div>
+              <input class="timeline" id="timeline" type="range" min="0" max="1" step="0.01" value="0" aria-label="Časovni trak ponovitve">
+            </div>
+
+            <div class="graph-options">
+              <span class="micro-note"><strong>Prikaži:</strong></span>
+              <label class="car-check" style="color:var(--blue)"><input type="checkbox" data-graph-car="0" checked> A</label>
+              <label class="car-check" style="color:var(--orange)"><input type="checkbox" data-graph-car="1" checked> B</label>
+              <label class="car-check" style="color:var(--purple)"><input type="checkbox" data-graph-car="2" checked> C</label>
+            </div>
+          </div>
+
+          <div class="graphs">
+            <div class="graph-card">
+              <div class="graph-title">Pospešek v odvisnosti od časa: a(t)</div>
+              <div class="graph-sub">Pri enakomerno pospešenem gibanju je pospešek stalen.</div>
+              <svg class="graph-svg" id="graphA" viewBox="0 0 1000 270" role="img" aria-label="Graf pospeška v odvisnosti od časa"></svg>
+            </div>
+            <div class="graph-card">
+              <div class="graph-title">Hitrost v odvisnosti od časa: v(t)</div>
+              <div class="graph-sub">Začetna hitrost določa, kje se premica začne; pospešek pa njeno strmino.</div>
+              <svg class="graph-svg" id="graphV" viewBox="0 0 1000 270" role="img" aria-label="Graf hitrosti v odvisnosti od časa"></svg>
+            </div>
+            <div class="graph-card">
+              <div class="graph-title">Pot v odvisnosti od časa: s(t)</div>
+              <div class="graph-sub">Pot do cilja narašča vedno hitreje.</div>
+              <svg class="graph-svg" id="graphS" viewBox="0 0 1000 270" role="img" aria-label="Graf poti v odvisnosti od časa"></svg>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="panel tasks-section" aria-labelledby="tasksTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="tasksTitle">3 · Računanje po korakih</h2>
+          <p>Rešuj naloge po korakih in po potrebi odpri pomoč.</p>
+        </div>
+      </div>
+
+      <div class="task-layout">
+        <div class="task-card">
+          <div class="task-top">
+            <span class="task-label">Računska naloga</span>
+            <span class="task-chip" id="taskChip">Pospešek</span>
+          </div>
+
+          <div class="task-text" id="taskText"></div>
+
+          <div class="step" id="stepTarget">
+            <h3>1. Kaj moramo izračunati?</h3>
+            <div class="choice-grid" id="targetChoices"></div>
+          </div>
+
+          <div class="step" id="stepFormula" hidden>
+            <h3>2. Izberi pravo zvezo.</h3>
+            <div class="choice-grid" id="formulaChoices"></div>
+          </div>
+
+          <div class="step" id="stepAnswer" hidden>
+            <h3>3. Izračunaj rezultat.</h3>
+            <div id="calcScaffold" class="micro-note"></div>
+            <div class="answer-row">
+              <input class="answer-input" id="answerInput" inputmode="decimal" autocomplete="off" placeholder="rezultat">
+              <span class="answer-unit" id="answerUnit"></span>
+              <button class="btn primary" id="checkAnswer" type="button">Preveri</button>
+            </div>
+            <div class="feedback" id="feedback" aria-live="polite"></div>
+          </div>
+
+          <div class="task-nav">
+            <button class="btn secondary" id="prevTask" type="button">← Prejšnja</button>
+            <button class="btn secondary" id="nextTask" type="button">Naslednja →</button>
+          </div>
+        </div>
+
+        <aside class="hint-box">
+          <h3>Pomoč pri računanju</h3>
+          <p>Namig se razkriva po korakih. Poskusi najprej sam.</p>
+          <button class="btn secondary" id="hintBtn" type="button">Pokaži namig</button>
+          <div class="hint-text" id="hintText">Namig še ni prikazan.</div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer>Fizika 9 · enakomerno pospešeno gibanje · opazuj → grafično prikaži → izračunaj</footer>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const TASKS = [{"id": 1, "type": "deltaV", "vehicle": "Dirkalnik", "vz": 0, "vk": 6, "speedUnit": "m/s", "answer": 6, "answerUnit": "m/s"}, {"id": 2, "type": "deltaV", "vehicle": "Avtomobil", "vz": 2, "vk": 10, "speedUnit": "m/s", "answer": 8, "answerUnit": "m/s"}, {"id": 3, "type": "deltaV", "vehicle": "Motorist", "vz": 4, "vk": 13, "speedUnit": "m/s", "answer": 9, "answerUnit": "m/s"}, {"id": 4, "type": "deltaV", "vehicle": "Kolesar", "vz": 6, "vk": 18, "speedUnit": "m/s", "answer": 12, "answerUnit": "m/s"}, {"id": 5, "type": "deltaV", "vehicle": "Vlak", "vz": 12, "vk": 20, "speedUnit": "m/s", "answer": 8, "answerUnit": "m/s"}, {"id": 6, "type": "deltaV", "vehicle": "Vozilo", "vz": 36, "vk": 72, "speedUnit": "km/h", "answer": 36, "answerUnit": "km/h"}, {"id": 7, "type": "deltaV", "vehicle": "Dirkalnik", "vz": 54, "vk": 90, "speedUnit": "km/h", "answer": 36, "answerUnit": "km/h"}, {"id": 8, "type": "deltaV", "vehicle": "Avtomobil", "vz": 80, "vk": 110, "speedUnit": "km/h", "answer": 30, "answerUnit": "km/h"}, {"id": 9, "type": "accel", "vehicle": "Avtomobil", "vz": 0, "vk": 8, "t": 4, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "answer": 2.0, "answerUnit": "m/s²"}, {"id": 10, "type": "accel", "vehicle": "Motorist", "vz": 2, "vk": 10, "t": 4, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "answer": 2.0, "answerUnit": "m/s²"}, {"id": 11, "type": "accel", "vehicle": "Kolesar", "vz": 3, "vk": 15, "t": 6, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "answer": 2.0, "answerUnit": "m/s²"}, {"id": 12, "type": "accel", "vehicle": "Vlak", "vz": 5, "vk": 17, "t": 4, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "answer": 3.0, "answerUnit": "m/s²"}, {"id": 13, "type": "accel", "vehicle": "Vozilo", "vz": 4, "vk": 14, "t": 5, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "answer": 2.0, "answerUnit": "m/s²"}, {"id": 14, "type": "accel", "vehicle": "Dirkalnik", "vz": 6, "vk": 18, "t": 3, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "answer": 4.0, "answerUnit": "m/s²"}, {"id": 15, "type": "accel", "vehicle": "Avtomobil", "vz": 10, "vk": 22, "t": 6, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "answer": 2.0, "answerUnit": "m/s²"}, {"id": 16, "type": "accel", "vehicle": "Motorist", "vz": 2, "vk": 17, "t": 5, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "answer": 3.0, "answerUnit": "m/s²"}, {"id": 17, "type": "finalV", "vehicle": "Motorist", "vz": 0, "a": 2, "t": 5, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "vk": 10, "answer": 10, "answerUnit": "m/s"}, {"id": 18, "type": "finalV", "vehicle": "Kolesar", "vz": 3, "a": 1.5, "t": 4, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "vk": 9.0, "answer": 9.0, "answerUnit": "m/s"}, {"id": 19, "type": "finalV", "vehicle": "Vlak", "vz": 5, "a": 2, "t": 3, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "vk": 11, "answer": 11, "answerUnit": "m/s"}, {"id": 20, "type": "finalV", "vehicle": "Vozilo", "vz": 2, "a": 0.5, "t": 8, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "vk": 6.0, "answer": 6.0, "answerUnit": "m/s"}, {"id": 21, "type": "finalV", "vehicle": "Dirkalnik", "vz": 7, "a": 1, "t": 5, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "vk": 12, "answer": 12, "answerUnit": "m/s"}, {"id": 22, "type": "finalV", "vehicle": "Avtomobil", "vz": 4, "a": 2.5, "t": 4, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "vk": 14.0, "answer": 14.0, "answerUnit": "m/s"}, {"id": 23, "type": "initialV", "vehicle": "Kolesar", "vk": 14, "a": 2, "t": 5, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "vz": 4, "answer": 4, "answerUnit": "m/s"}, {"id": 24, "type": "initialV", "vehicle": "Vlak", "vk": 11, "a": 1.5, "t": 4, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "vz": 5.0, "answer": 5.0, "answerUnit": "m/s"}, {"id": 25, "type": "initialV", "vehicle": "Vozilo", "vk": 20, "a": 3, "t": 4, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "vz": 8, "answer": 8, "answerUnit": "m/s"}, {"id": 26, "type": "initialV", "vehicle": "Dirkalnik", "vk": 9, "a": 1, "t": 6, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "vz": 3, "answer": 3, "answerUnit": "m/s"}, {"id": 27, "type": "time", "vehicle": "Vlak", "vz": 0, "vk": 12, "a": 3, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "t": 4.0, "answer": 4.0, "answerUnit": "s"}, {"id": 28, "type": "time", "vehicle": "Vozilo", "vz": 2, "vk": 10, "a": 2, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "t": 4.0, "answer": 4.0, "answerUnit": "s"}, {"id": 29, "type": "time", "vehicle": "Dirkalnik", "vz": 5, "vk": 17, "a": 3, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "t": 4.0, "answer": 4.0, "answerUnit": "s"}, {"id": 30, "type": "time", "vehicle": "Avtomobil", "vz": 4, "vk": 14, "a": 2, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "t": 5.0, "answer": 5.0, "answerUnit": "s"}, {"id": 31, "type": "time", "vehicle": "Motorist", "vz": 3, "vk": 15, "a": 1.5, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "t": 8.0, "answer": 8.0, "answerUnit": "s"}, {"id": 32, "type": "time", "vehicle": "Kolesar", "vz": 10, "vk": 22, "a": 2, "speedUnit": "m/s", "timeUnit": "s", "accelUnit": "m/s²", "t": 6.0, "answer": 6.0, "answerUnit": "s"}, {"id": 33, "type": "avgV", "vehicle": "Vozilo", "vz": 0, "vk": 12, "speedUnit": "m/s", "answer": 6.0, "answerUnit": "m/s"}, {"id": 34, "type": "avgV", "vehicle": "Dirkalnik", "vz": 4, "vk": 16, "speedUnit": "m/s", "answer": 10.0, "answerUnit": "m/s"}, {"id": 35, "type": "avgV", "vehicle": "Avtomobil", "vz": 3, "vk": 15, "speedUnit": "m/s", "answer": 9.0, "answerUnit": "m/s"}, {"id": 36, "type": "avgV", "vehicle": "Motorist", "vz": 36, "vk": 72, "speedUnit": "km/h", "answer": 54.0, "answerUnit": "km/h"}, {"id": 37, "type": "avgV", "vehicle": "Kolesar", "vz": 54, "vk": 90, "speedUnit": "km/h", "answer": 72.0, "answerUnit": "km/h"}, {"id": 38, "type": "avgV", "vehicle": "Vlak", "vz": 60, "vk": 100, "speedUnit": "km/h", "answer": 80.0, "answerUnit": "km/h"}, {"id": 39, "type": "distanceAvg", "vehicle": "Dirkalnik", "vz": 0, "vk": 10, "t": 5, "speedUnit": "m/s", "timeUnit": "s", "distanceUnit": "m", "answer": 25.0, "answerUnit": "m"}, {"id": 40, "type": "distanceAvg", "vehicle": "Avtomobil", "vz": 4, "vk": 12, "t": 4, "speedUnit": "m/s", "timeUnit": "s", "distanceUnit": "m", "answer": 32.0, "answerUnit": "m"}, {"id": 41, "type": "distanceAvg", "vehicle": "Motorist", "vz": 6, "vk": 18, "t": 5, "speedUnit": "m/s", "timeUnit": "s", "distanceUnit": "m", "answer": 60.0, "answerUnit": "m"}, {"id": 42, "type": "distanceAvg", "vehicle": "Kolesar", "vz": 40, "vk": 80, "t": 0.5, "speedUnit": "km/h", "timeUnit": "h", "distanceUnit": "km", "answer": 30.0, "answerUnit": "km"}, {"id": 43, "type": "distanceAvg", "vehicle": "Vlak", "vz": 60, "vk": 100, "t": 0.25, "speedUnit": "km/h", "timeUnit": "h", "distanceUnit": "km", "answer": 20.0, "answerUnit": "km"}, {"id": 44, "type": "distanceAvg", "vehicle": "Vozilo", "vz": 50, "vk": 70, "t": 1.5, "speedUnit": "km/h", "timeUnit": "h", "distanceUnit": "km", "answer": 90.0, "answerUnit": "km"}, {"id": 45, "type": "distanceFormula", "vehicle": "Avtomobil", "vz": 0, "a": 2, "t": 4, "speedUnit": "m/s", "timeUnit": "s", "distanceUnit": "m", "accelUnit": "m/s²", "answer": 16.0, "answerUnit": "m"}, {"id": 46, "type": "distanceFormula", "vehicle": "Motorist", "vz": 0, "a": 3, "t": 4, "speedUnit": "m/s", "timeUnit": "s", "distanceUnit": "m", "accelUnit": "m/s²", "answer": 24.0, "answerUnit": "m"}, {"id": 47, "type": "distanceFormula", "vehicle": "Kolesar", "vz": 0, "a": 1.5, "t": 6, "speedUnit": "m/s", "timeUnit": "s", "distanceUnit": "m", "accelUnit": "m/s²", "answer": 27.0, "answerUnit": "m"}, {"id": 48, "type": "distanceFormula", "vehicle": "Vlak", "vz": 2, "a": 2, "t": 4, "speedUnit": "m/s", "timeUnit": "s", "distanceUnit": "m", "accelUnit": "m/s²", "answer": 24.0, "answerUnit": "m"}, {"id": 49, "type": "distanceFormula", "vehicle": "Vozilo", "vz": 5, "a": 1, "t": 6, "speedUnit": "m/s", "timeUnit": "s", "distanceUnit": "m", "accelUnit": "m/s²", "answer": 48.0, "answerUnit": "m"}, {"id": 50, "type": "distanceFormula", "vehicle": "Dirkalnik", "vz": 4, "a": 2, "t": 5, "speedUnit": "m/s", "timeUnit": "s", "distanceUnit": "m", "accelUnit": "m/s²", "answer": 45.0, "answerUnit": "m"}];
+
+  const fmt = (n, digits = 2) => {
+    const rounded = Math.round((n + Number.EPSILON) * 10 ** digits) / 10 ** digits;
+    return rounded.toLocaleString("sl-SI", { maximumFractionDigits: digits });
+  };
+  const num = value => Number(String(value).replace(",", "."));
+  const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+  const COLORS = ["#2775d8", "#e34a12", "#7b4bd8"];
+  const NAMES = ["A", "B", "C"];
+
+  let audioCtx = null;
+  const soundToggle = document.getElementById("soundToggle");
+  function getAudio() {
+    if (!soundToggle.checked) return null;
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }
+  function beep(freq = 500, duration = .12, volume = .08) {
+    const ctx = getAudio(); if (!ctx) return;
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.frequency.value = freq; osc.type = "sine";
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + duration);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + duration);
+  }
+  let engineLoop = null;
+
+  function engineRev() {
+    const ctx = getAudio(); if (!ctx) return;
+    const osc = ctx.createOscillator(), osc2 = ctx.createOscillator();
+    const gain = ctx.createGain(), filter = ctx.createBiquadFilter();
+    const now = ctx.currentTime;
+    osc.type = "sawtooth"; osc2.type = "square";
+    osc.frequency.setValueAtTime(75, now);
+    osc.frequency.exponentialRampToValueAtTime(230, now + .7);
+    osc2.frequency.setValueAtTime(38, now);
+    osc2.frequency.exponentialRampToValueAtTime(110, now + .7);
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(950, now);
+    gain.gain.setValueAtTime(.001, now);
+    gain.gain.exponentialRampToValueAtTime(.11, now + .05);
+    gain.gain.exponentialRampToValueAtTime(.001, now + .78);
+    osc.connect(filter); osc2.connect(filter); filter.connect(gain).connect(ctx.destination);
+    osc.start(now); osc2.start(now); osc.stop(now + .82); osc2.stop(now + .82);
+  }
+
+  function startEngineLoop() {
+    stopEngineLoop(true);
+    const ctx = getAudio();
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    osc.type = "sawtooth";
+    osc2.type = "triangle";
+    osc.frequency.value = 95;
+    osc2.frequency.value = 48;
+    filter.type = "lowpass";
+    filter.frequency.value = 1050;
+
+    const now = ctx.currentTime;
+    gain.gain.setValueAtTime(.001, now);
+    gain.gain.exponentialRampToValueAtTime(.055, now + .12);
+
+    osc.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc2.start(now);
+
+    engineLoop = { ctx, osc, osc2, gain, filter };
+  }
+
+  function updateEngineLoop(t) {
+    if (!engineLoop || !soundToggle.checked || !state.cars.length) return;
+
+    const active = state.cars.map(car => motionAt(car, t).v);
+    const current = Math.max(...active);
+    const maxFinal = Math.max(...state.cars.map(car => car.v0 + car.a * car.finish), 1);
+    const ratio = clamp(current / maxFinal, 0, 1);
+
+    const mainHz = 95 + 245 * ratio;
+    const subHz = 48 + 112 * ratio;
+    const now = engineLoop.ctx.currentTime;
+
+    engineLoop.osc.frequency.setTargetAtTime(mainHz, now, .05);
+    engineLoop.osc2.frequency.setTargetAtTime(subHz, now, .06);
+    engineLoop.filter.frequency.setTargetAtTime(850 + 900 * ratio, now, .08);
+  }
+
+  function stopEngineLoop(immediate = false) {
+    if (!engineLoop) return;
+    const { ctx, osc, osc2, gain } = engineLoop;
+    const now = ctx.currentTime;
+    try {
+      if (immediate) {
+        gain.gain.cancelScheduledValues(now);
+        gain.gain.setValueAtTime(.001, now);
+        osc.stop(now + .01);
+        osc2.stop(now + .01);
+      } else {
+        const currentGain = Math.max(.001, gain.gain.value || .055);
+        gain.gain.cancelScheduledValues(now);
+        gain.gain.setValueAtTime(currentGain, now);
+        gain.gain.exponentialRampToValueAtTime(.001, now + .22);
+        osc.stop(now + .24);
+        osc2.stop(now + .24);
+      }
+    } catch (_) {}
+    engineLoop = null;
+  }
+
+  function finishSound() {
+    beep(660,.13,.06);
+    setTimeout(() => beep(880,.18,.055), 120);
+  }
+
+  const REST_SCENARIOS = [
+    [{v0:0,a:1.0},{v0:0,a:1.5},{v0:0,a:2.0}],
+    [{v0:0,a:1.2},{v0:0,a:1.8},{v0:0,a:2.4}],
+    [{v0:0,a:0.8},{v0:0,a:1.4},{v0:0,a:2.2}],
+    [{v0:0,a:1.0},{v0:0,a:2.0},{v0:0,a:1.6}],
+    [{v0:0,a:1.3},{v0:0,a:0.9},{v0:0,a:2.1}],
+    [{v0:0,a:1.6},{v0:0,a:2.3},{v0:0,a:1.1}]
+  ];
+
+  const FLYING_SCENARIOS = [
+    [{v0:6,a:0.7},{v0:4,a:1.2},{v0:2,a:1.8}],
+    [{v0:7,a:0.6},{v0:3,a:1.5},{v0:5,a:1.1}],
+    [{v0:5,a:0.8},{v0:2,a:1.8},{v0:4,a:1.2}],
+    [{v0:8,a:0.5},{v0:4,a:1.3},{v0:2,a:1.9}],
+    [{v0:6,a:1.0},{v0:3,a:1.6},{v0:7,a:0.55}],
+    [{v0:4,a:1.4},{v0:7,a:0.7},{v0:2,a:2.0}]
+  ];
+
+  const DISTANCES = [20, 50, 100];
+
+  const state = {
+    mode: "rest",
+    distance: 50,
+    scenarioIndex: 0,
+    cars: [],
+    prediction: null,
+    running: false,
+    raceRaf: null,
+    raceStartStamp: 0,
+    raceTime: 0,
+    maxFinish: 0,
+    replayTime: 0,
+    replayPlaying: false,
+    replayRaf: null,
+    replayStamp: 0,
+    lastReplayTime: 0
+  };
+
+  const lanesEl = document.getElementById("lanes");
+  const distanceScale = document.getElementById("distanceScale");
+  const startBtn = document.getElementById("startBtn");
+  const newRaceBtn = document.getElementById("newRaceBtn");
+  const countdown = document.getElementById("countdown");
+  const raceTimeEl = document.getElementById("raceTime");
+  const resultArea = document.getElementById("resultArea");
+  const resultBody = document.getElementById("resultBody");
+  const winnerText = document.getElementById("winnerText");
+  const predictionText = document.getElementById("predictionText");
+  const replayWithGraphsBtn = document.getElementById("replayWithGraphsBtn");
+  const timeline = document.getElementById("timeline");
+  const replayTimeEl = document.getElementById("replayTime");
+  const replayHome = document.getElementById("replayHome");
+  const replayPlay = document.getElementById("replayPlay");
+  const replayEnd = document.getElementById("replayEnd");
+  const instructionTitle = document.getElementById("instructionTitle");
+  const instructionSub = document.getElementById("instructionSub");
+  const instructionPill = document.getElementById("instructionPill");
+
+  function positiveFinishTime(v0, a, s) {
+    return (-v0 + Math.sqrt(v0 * v0 + 2 * a * s)) / a;
+  }
+
+  function makeCarSvg(color, idx) {
+    return `
+      <svg viewBox="0 0 220 95" aria-hidden="true">
+        <g>
+          <rect x="14" y="8" width="42" height="26" rx="5" fill="#1d252a"></rect>
+          <rect x="14" y="61" width="42" height="26" rx="5" fill="#1d252a"></rect>
+          <rect x="159" y="8" width="42" height="26" rx="5" fill="#1d252a"></rect>
+          <rect x="159" y="61" width="42" height="26" rx="5" fill="#1d252a"></rect>
+          <rect x="2" y="27" width="30" height="41" rx="3" fill="${color}"></rect>
+          <rect x="191" y="28" width="25" height="39" rx="3" fill="${color}"></rect>
+          <path d="M30 48 L68 30 Q77 22 92 26 L122 36 Q141 39 190 41 Q211 42 211 48 Q211 54 190 55 Q141 57 122 60 L92 70 Q77 74 68 66 Z" fill="${color}"></path>
+          <rect x="84" y="34" width="46" height="28" rx="14" fill="#273138"></rect>
+          <rect x="72" y="36" width="10" height="24" rx="5" fill="#273138"></rect>
+          <text class="speed-label" data-speed-text="${idx}" x="107" y="48">0,0 m/s</text>
+        </g>
+      </svg>`;
+  }
+
+  function applyDistanceButtons() {
+    document.querySelectorAll("#distanceButtons button").forEach(btn => {
+      btn.classList.toggle("active", Number(btn.dataset.distance) === state.distance);
+    });
+  }
+
+  function applyModeButtons() {
+    document.querySelectorAll("#modeButtons button").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.mode === state.mode);
+    });
+  }
+
+  function updateInstructionCard() {
+    if (state.prediction === null) {
+      instructionTitle.textContent = "Napovej zmagovalca.";
+      instructionSub.textContent = "Najprej izberi A, B ali C. Nato bo gumb START postal aktiven.";
+      instructionPill.textContent = "Čakam na napoved";
+    } else {
+      instructionTitle.textContent = `Napoved: dirkalnik ${NAMES[state.prediction]}.`;
+      instructionSub.textContent = "Odlično. Zdaj klikni START in preveri, ali si napovedal pravilno.";
+      instructionPill.textContent = "START je pripravljen";
+    }
+  }
+
+  function getScenarioPool() {
+    return state.mode === "rest" ? REST_SCENARIOS : FLYING_SCENARIOS;
+  }
+
+  function scenario() {
+    const pool = getScenarioPool();
+    return pool[state.scenarioIndex % pool.length].map((c, i) => ({
+      ...c,
+      color: COLORS[i],
+      name: NAMES[i],
+      finish: positiveFinishTime(c.v0, c.a, state.distance)
+    }));
+  }
+
+  function renderRace() {
+    state.cars = scenario();
+    state.maxFinish = Math.max(...state.cars.map(c => c.finish));
+    lanesEl.innerHTML = "";
+    state.cars.forEach((car, i) => {
+      const lane = document.createElement("div");
+      lane.className = "lane";
+      lane.innerHTML = `
+        <div class="lane-info">
+          <div class="lane-name"><span class="car-dot" style="background:${car.color}"></span>Dirkalnik ${car.name}</div>
+          <div class="lane-data">v<sub>z</sub> = ${fmt(car.v0,1)} m/s<br>a = ${fmt(car.a,1)} m/s²</div>
+        </div>
+        <div class="track" data-track="${i}">
+          <div class="finish-line" aria-hidden="true"></div>
+          <div class="car" data-car-el="${i}" style="color:${car.color}">${makeCarSvg(car.color, i)}</div>
+        </div>`;
+      lanesEl.appendChild(lane);
+    });
+    renderDistanceScale();
+    updateScene(0);
+  }
+
+  function renderDistanceScale() {
+    distanceScale.innerHTML = "";
+    [0, .25, .5, .75, 1].forEach(frac => {
+      const mark = document.createElement("div");
+      mark.className = "scale-mark";
+      mark.style.left = `${3 + frac * 94}%`;
+      mark.textContent = `${fmt(state.distance * frac, 0)} m`;
+      distanceScale.appendChild(mark);
+    });
+  }
+
+  function trackTravelPx(i) {
+    const track = document.querySelector(`[data-track="${i}"]`);
+    const car = document.querySelector(`[data-car-el="${i}"]`);
+    if (!track || !car) return 0;
+    return Math.max(0, track.clientWidth - car.offsetWidth - 58);
+  }
+
+  function motionAt(car, t) {
+    const tt = Math.min(t, car.finish);
+    const s = Math.min(state.distance, car.v0 * tt + .5 * car.a * tt * tt);
+    const v = car.v0 + car.a * tt;
+    return { t: tt, s, v, a: car.a };
+  }
+
+  function updateScene(t) {
+    state.cars.forEach((car, i) => {
+      const m = motionAt(car, t);
+      const progress = clamp(m.s / state.distance, 0, 1);
+      const carEl = document.querySelector(`[data-car-el="${i}"]`);
+      if (carEl) carEl.style.transform = `translate(${progress * trackTravelPx(i)}px,-50%)`;
+      const label = document.querySelector(`[data-speed-text="${i}"]`);
+      if (label) label.textContent = `${fmt(m.v,1)} m/s`;
+    });
+    raceTimeEl.textContent = `${fmt(t,2)} s`;
+  }
+
+  function setControlsDisabled(disabled) {
+    document.querySelectorAll("#modeButtons button,#distanceButtons button,#predictButtons button").forEach(b => b.disabled = disabled);
+    newRaceBtn.disabled = disabled;
+    startBtn.disabled = disabled || state.prediction === null;
+  }
+
+  function randomizeDistance() {
+    state.distance = DISTANCES[Math.floor(Math.random() * DISTANCES.length)];
+    applyDistanceButtons();
+  }
+
+  function resetRace(advance = false) {
+    cancelAnimationFrame(state.raceRaf);
+    cancelAnimationFrame(state.replayRaf);
+    stopEngineLoop(true);
+    state.running = false;
+    state.replayPlaying = false;
+    if (advance) {
+      const pool = getScenarioPool();
+      state.scenarioIndex = Math.floor(Math.random() * pool.length);
+      randomizeDistance();
+    }
+    state.prediction = null;
+    document.querySelectorAll("#predictButtons button").forEach(b => b.classList.remove("active"));
+    startBtn.disabled = true;
+    resultArea.hidden = true;
+    countdown.textContent = "";
+    raceTimeEl.textContent = "0,00 s";
+    updateInstructionCard();
+    renderRace();
+    setControlsDisabled(false);
+  }
+
+  function countdownStart() {
+    if (state.prediction === null || state.running) return;
+    setControlsDisabled(true);
+    resultArea.hidden = true;
+    const seq = ["3", "2", "1", "START!"];
+    let i = 0;
+    const next = () => {
+      countdown.textContent = seq[i];
+      if (i < 3) beep(390 + i * 60, .12, .07);
+      if (i === 3) {
+        engineRev();
+        setTimeout(() => { countdown.textContent = ""; beginRace(); }, 430);
+        return;
+      }
+      i++;
+      setTimeout(next, 600);
+    };
+    next();
+  }
+
+  function beginRace() {
+    state.running = true;
+    startEngineLoop();
+    state.raceStartStamp = performance.now();
+    state.cars.forEach(c => c.didFinish = false);
+    const tick = stamp => {
+      if (!state.running) return;
+      const t = (stamp - state.raceStartStamp) / 1000;
+      state.raceTime = Math.min(t, state.maxFinish);
+      updateScene(state.raceTime);
+      updateEngineLoop(state.raceTime);
+      state.cars.forEach(c => {
+        if (!c.didFinish && t >= c.finish) {
+          c.didFinish = true;
+          if (Math.abs(c.finish - Math.min(...state.cars.map(x => x.finish))) < .03) finishSound();
+        }
+      });
+      if (t >= state.maxFinish) {
+        state.running = false;
+        updateScene(state.maxFinish);
+        stopEngineLoop(false);
+        finishRace();
+        return;
+      }
+      state.raceRaf = requestAnimationFrame(tick);
+    };
+    state.raceRaf = requestAnimationFrame(tick);
+  }
+
+  function finishRace() {
+    const ordered = state.cars.map((c, i) => ({ ...c, i })).sort((a, b) => a.finish - b.finish);
+    const winner = ordered[0];
+    winnerText.textContent = `Zmagovalec: dirkalnik ${winner.name} · ${fmt(winner.finish,2)} s`;
+    predictionText.textContent = state.prediction === winner.i
+      ? "Tvoja napoved je bila pravilna."
+      : `Napovedal si ${NAMES[state.prediction]}, najhitrejši pa je bil ${winner.name}.`;
+    resultBody.innerHTML = ordered.map(c => {
+      const vk = c.v0 + c.a * c.finish;
+      return `<tr>
+        <td style="color:${c.color}">Dirkalnik ${c.name}</td>
+        <td>${fmt(c.v0,1)} m/s</td>
+        <td>${fmt(c.a,1)} m/s²</td>
+        <td>${fmt(c.finish,2)} s</td>
+        <td>${fmt(vk,1)} m/s</td>
+      </tr>`;
+    }).join("");
+    resultArea.hidden = false;
+    state.replayTime = state.maxFinish;
+    timeline.max = state.maxFinish.toFixed(3);
+    timeline.value = state.maxFinish;
+    replayPlay.textContent = "▶";
+    drawAllGraphs();
+    updateReplayReadout();
+    setControlsDisabled(false);
+    startBtn.disabled = false;
+  }
+
+  document.getElementById("modeButtons").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-mode]");
+    if (!btn || state.running) return;
+    state.mode = btn.dataset.mode;
+    applyModeButtons();
+    resetRace(true);
+  });
+
+  document.getElementById("distanceButtons").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-distance]");
+    if (!btn || state.running) return;
+    state.distance = Number(btn.dataset.distance);
+    applyDistanceButtons();
+    resetRace(false);
+  });
+
+  document.getElementById("predictButtons").addEventListener("click", e => {
+    const btn = e.target.closest("button[data-car]");
+    if (!btn || state.running) return;
+    state.prediction = Number(btn.dataset.car);
+    document.querySelectorAll("#predictButtons button").forEach(b => b.classList.toggle("active", b === btn));
+    startBtn.disabled = false;
+    updateInstructionCard();
+  });
+
+  newRaceBtn.addEventListener("click", () => resetRace(true));
+  startBtn.addEventListener("click", countdownStart);
+  window.addEventListener("resize", () => updateScene(resultArea.hidden ? (state.running ? state.raceTime : 0) : state.replayTime));
+  soundToggle.addEventListener("change", () => {
+    if (!soundToggle.checked) {
+      stopEngineLoop(true);
+    } else if (state.running) {
+      startEngineLoop();
+      updateEngineLoop(state.raceTime);
+    }
+  });
+
+  const selectedCars = () => [...document.querySelectorAll("[data-graph-car]")]
+    .map((el, i) => el.checked ? i : null)
+    .filter(v => v !== null);
+
+  function updateReplayReadout() {
+    replayTimeEl.textContent = `${fmt(state.replayTime,2)} s / ${fmt(state.maxFinish,2)} s`;
+  }
+
+  function setReplayTime(t) {
+    state.replayTime = clamp(t, 0, state.maxFinish);
+    timeline.value = state.replayTime;
+    updateScene(state.replayTime);
+    updateReplayReadout();
+    drawAllGraphs();
+  }
+
+  function playReplay() {
+    if (state.replayPlaying) {
+      state.replayPlaying = false;
+      cancelAnimationFrame(state.replayRaf);
+      replayPlay.textContent = "▶";
+      return;
+    }
+    if (state.replayTime >= state.maxFinish - .001) setReplayTime(0);
+    state.replayPlaying = true;
+    replayPlay.textContent = "⏸";
+    state.replayStamp = performance.now();
+    state.lastReplayTime = state.replayTime;
+    const tick = stamp => {
+      if (!state.replayPlaying) return;
+      const t = state.lastReplayTime + (stamp - state.replayStamp) / 1000;
+      setReplayTime(t);
+      if (t >= state.maxFinish) {
+        state.replayPlaying = false;
+        replayPlay.textContent = "▶";
+        return;
+      }
+      state.replayRaf = requestAnimationFrame(tick);
+    };
+    state.replayRaf = requestAnimationFrame(tick);
+  }
+
+  replayWithGraphsBtn.addEventListener("click", () => {
+    document.getElementById("analysis").scrollIntoView({ behavior: "smooth", block: "start" });
+    setReplayTime(0);
+    setTimeout(playReplay, 250);
+  });
+  replayPlay.addEventListener("click", playReplay);
+  replayHome.addEventListener("click", () => {
+    state.replayPlaying = false;
+    cancelAnimationFrame(state.replayRaf);
+    replayPlay.textContent = "▶";
+    setReplayTime(0);
+  });
+  replayEnd.addEventListener("click", () => {
+    state.replayPlaying = false;
+    cancelAnimationFrame(state.replayRaf);
+    replayPlay.textContent = "▶";
+    setReplayTime(state.maxFinish);
+  });
+  timeline.addEventListener("input", () => {
+    state.replayPlaying = false;
+    cancelAnimationFrame(state.replayRaf);
+    replayPlay.textContent = "▶";
+    setReplayTime(Number(timeline.value));
+  });
+  document.querySelectorAll("[data-graph-car]").forEach(el => el.addEventListener("change", drawAllGraphs));
+
+  function svgEl(name, attrs = {}) {
+    const el = document.createElementNS("http://www.w3.org/2000/svg", name);
+    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+    return el;
+  }
+
+  function drawGraph(svg, type) {
+    const W = 1000, H = 270, L = 94, R = 28, T = 20, B = 58;
+    const pw = W - L - R, ph = H - T - B;
+    svg.innerHTML = "";
+    const xMax = Math.max(1, state.maxFinish);
+    let yMax = 1, unit = "";
+    if (type === "a") { yMax = Math.max(...state.cars.map(c => c.a)) * 1.18; unit = "m/s²"; }
+    if (type === "v") { yMax = Math.max(...state.cars.map(c => c.v0 + c.a * c.finish)) * 1.12; unit = "m/s"; }
+    if (type === "s") { yMax = state.distance * 1.08; unit = "m"; }
+
+    const sx = t => L + (t / xMax) * pw;
+    const sy = v => T + ph - (v / yMax) * ph;
+
+    for (let i = 0; i <= 5; i++) {
+      const x = L + (i / 5) * pw;
+      const val = xMax * i / 5;
+      svg.appendChild(svgEl("line", { x1: x, y1: T, x2: x, y2: T + ph, class: "gridline" }));
+      const tx = svgEl("text", { x, y: T + ph + 24, "text-anchor": "middle", class: "tick-text" });
+      tx.textContent = fmt(val, 1);
+      svg.appendChild(tx);
+    }
+    for (let i = 0; i <= 4; i++) {
+      const y = T + ph - (i / 4) * ph;
+      const val = yMax * i / 4;
+      svg.appendChild(svgEl("line", { x1: L, y1: y, x2: W - R, y2: y, class: "gridline" }));
+      const ty = svgEl("text", { x: L - 10, y: y + 4, "text-anchor": "end", class: "tick-text" });
+      ty.textContent = fmt(val, 1);
+      svg.appendChild(ty);
+    }
+
+    svg.appendChild(svgEl("line", { x1: L, y1: T + ph, x2: W - R, y2: T + ph, class: "axis" }));
+    svg.appendChild(svgEl("line", { x1: L, y1: T, x2: L, y2: T + ph, class: "axis" }));
+
+    const yQuantity = type === "a" ? "a" : (type === "v" ? "v" : "s");
+    const yLabel = svgEl("text", {
+      x: 24,
+      y: T + ph / 2,
+      "text-anchor": "middle",
+      class: "axis-unit",
+      transform: `rotate(-90 24 ${T + ph / 2})`
+    });
+    yLabel.textContent = `${yQuantity} [${unit}]`;
+    svg.appendChild(yLabel);
+
+    const timeText = svgEl("text", {
+      x: L + pw / 2,
+      y: H - 8,
+      "text-anchor": "middle",
+      class: "axis-unit"
+    });
+    timeText.textContent = "t [s]";
+    svg.appendChild(timeText);
+
+    const selected = selectedCars();
+    selected.forEach(i => {
+      const car = state.cars[i];
+      const end = Math.min(state.replayTime, car.finish);
+      if (end <= 0) return;
+      const steps = 100;
+      let d = "";
+      for (let k = 0; k <= steps; k++) {
+        const tt = end * k / steps;
+        let y;
+        if (type === "a") y = car.a;
+        if (type === "v") y = car.v0 + car.a * tt;
+        if (type === "s") y = Math.min(state.distance, car.v0 * tt + .5 * car.a * tt * tt);
+        d += (k ? "L" : "M") + sx(tt).toFixed(2) + "," + sy(y).toFixed(2) + " ";
+      }
+      svg.appendChild(svgEl("path", { d, class: "graph-path", stroke: car.color }));
+
+      const tm = Math.min(state.replayTime, car.finish);
+      let ym;
+      if (type === "a") ym = car.a;
+      if (type === "v") ym = car.v0 + car.a * tm;
+      if (type === "s") ym = Math.min(state.distance, car.v0 * tm + .5 * car.a * tm * tm);
+      svg.appendChild(svgEl("circle", { cx: sx(tm), cy: sy(ym), r: 5.5, fill: car.color, class: "graph-marker" }));
+    });
+
+    svg.appendChild(svgEl("line", { x1: sx(state.replayTime), y1: T, x2: sx(state.replayTime), y2: T + ph, class: "cursor-line" }));
+  }
+
+  function drawAllGraphs() {
+    if (resultArea.hidden) return;
+    drawGraph(document.getElementById("graphA"), "a");
+    drawGraph(document.getElementById("graphV"), "v");
+    drawGraph(document.getElementById("graphS"), "s");
+  }
+
+  const taskChip = document.getElementById("taskChip");
+  const taskText = document.getElementById("taskText");
+  const targetChoices = document.getElementById("targetChoices");
+  const formulaChoices = document.getElementById("formulaChoices");
+  const stepFormula = document.getElementById("stepFormula");
+  const stepAnswer = document.getElementById("stepAnswer");
+  const calcScaffold = document.getElementById("calcScaffold");
+  const answerInput = document.getElementById("answerInput");
+  const answerUnit = document.getElementById("answerUnit");
+  const feedback = document.getElementById("feedback");
+  const hintBtn = document.getElementById("hintBtn");
+  const hintText = document.getElementById("hintText");
+  let taskIndex = 0;
+  let hintIndex = 0;
+  let taskHistory = [0];
+
+  const TARGETS = {
+    deltaV: { label: "Spremembo hitrosti Δv", chip: "Sprememba hitrosti" },
+    accel: { label: "Pospešek a", chip: "Pospešek" },
+    finalV: { label: "Končno hitrost v<sub>k</sub>", chip: "Končna hitrost" },
+    initialV: { label: "Začetno hitrost v<sub>z</sub>", chip: "Začetna hitrost" },
+    time: { label: "Čas t", chip: "Čas" },
+    avgV: { label: "Povprečno hitrost v̄", chip: "Povprečna hitrost" },
+    distanceAvg: { label: "Pot s", chip: "Pot" },
+    distanceFormula: { label: "Pot s", chip: "Pot" }
+  };
+
+  const FORMULAS = {
+    deltaV: ["Δv = v<sub>k</sub> − v<sub>z</sub>", "Δv = v<sub>k</sub> + v<sub>z</sub>", "Δv = v<sub>k</sub> / v<sub>z</sub>"],
+    accel: ["a = (v<sub>k</sub> − v<sub>z</sub>) / t", "a = (v<sub>k</sub> + v<sub>z</sub>) / t", "a = t / (v<sub>k</sub> − v<sub>z</sub>)"],
+    finalV: ["v<sub>k</sub> = v<sub>z</sub> + a · t", "v<sub>k</sub> = v<sub>z</sub> − a · t", "v<sub>k</sub> = a · t / v<sub>z</sub>"],
+    initialV: ["v<sub>z</sub> = v<sub>k</sub> − a · t", "v<sub>z</sub> = v<sub>k</sub> + a · t", "v<sub>z</sub> = a / (v<sub>k</sub> · t)"],
+    time: ["t = (v<sub>k</sub> − v<sub>z</sub>) / a", "t = a / (v<sub>k</sub> − v<sub>z</sub>)", "t = (v<sub>k</sub> + v<sub>z</sub>) · a"],
+    avgV: ["v̄ = (v<sub>z</sub> + v<sub>k</sub>) / 2", "v̄ = v<sub>k</sub> − v<sub>z</sub>", "v̄ = (v<sub>k</sub> − v<sub>z</sub>) / 2"],
+    distanceAvg: ["s = v̄ · t", "s = v̄ / t", "s = t / v̄"],
+    distanceFormula: ["s = v<sub>z</sub> · t + a · t² / 2", "s = (v<sub>z</sub> + a) · t / 2", "s = a · t / 2"]
+  };
+
+  function taskPrompt(t) {
+    const V = t.vehicle;
+    switch (t.type) {
+      case "deltaV":
+        return `${V} poveča hitrost z <strong>${fmt(t.vz,2)} ${t.speedUnit}</strong> na <strong>${fmt(t.vk,2)} ${t.speedUnit}</strong>. Kolikšna je sprememba hitrosti?`;
+      case "accel":
+        return `${V} enakomerno pospešuje: hitrost se v <strong>${fmt(t.t,2)} s</strong> poveča z <strong>${fmt(t.vz,2)} m/s</strong> na <strong>${fmt(t.vk,2)} m/s</strong>. Izračunaj pospešek.`;
+      case "finalV":
+        return `${V} ima začetno hitrost <strong>${fmt(t.vz,2)} m/s</strong> in ${fmt(t.t,2)} s pospešuje s pospeškom <strong>${fmt(t.a,2)} m/s²</strong>. Kolikšna je končna hitrost?`;
+      case "initialV":
+        return `${V} po ${fmt(t.t,2)} s enakomernega pospeševanja s pospeškom <strong>${fmt(t.a,2)} m/s²</strong> doseže <strong>${fmt(t.vk,2)} m/s</strong>. Kolikšna je bila začetna hitrost?`;
+      case "time":
+        return `${V} poveča hitrost z <strong>${fmt(t.vz,2)} m/s</strong> na <strong>${fmt(t.vk,2)} m/s</strong> pri pospešku <strong>${fmt(t.a,2)} m/s²</strong>. Koliko časa pospešuje?`;
+      case "avgV":
+        return `${V} enakomerno pospešuje od <strong>${fmt(t.vz,2)} ${t.speedUnit}</strong> do <strong>${fmt(t.vk,2)} ${t.speedUnit}</strong>. Izračunaj povprečno hitrost med pospeševanjem.`;
+      case "distanceAvg":
+        return `${V} v času <strong>${fmt(t.t,2)} ${t.timeUnit}</strong> enakomerno pospeši z <strong>${fmt(t.vz,2)} ${t.speedUnit}</strong> na <strong>${fmt(t.vk,2)} ${t.speedUnit}</strong>. Kolikšno pot opravi?`;
+      case "distanceFormula":
+        if (t.vz === 0) return `${V} spelje iz mirovanja in ${fmt(t.t,2)} s pospešuje s pospeškom <strong>${fmt(t.a,2)} m/s²</strong>. Kolikšno pot opravi?`;
+        return `${V} ima začetno hitrost <strong>${fmt(t.vz,2)} m/s</strong> in ${fmt(t.t,2)} s pospešuje s pospeškom <strong>${fmt(t.a,2)} m/s²</strong>. Kolikšno pot opravi?`;
+    }
+  }
+
+  function targetOptions(correctType) {
+    const correct = TARGETS[correctType].label;
+    const pool = [...new Set(Object.values(TARGETS).map(x => x.label))].filter(x => x !== correct);
+    const distractors = [pool[(taskIndex+1)%pool.length], pool[(taskIndex+3)%pool.length], pool[(taskIndex+5)%pool.length]];
+    return [correct, ...new Set(distractors)].slice(0,4).sort(() => .5 - Math.random());
+  }
+
+  function hints(t) {
+    switch (t.type) {
+      case "deltaV":
+        return [
+          "Sprememba hitrosti je razlika med končno in začetno hitrostjo.",
+          `Zapiši: Δv = ${fmt(t.vk)} − ${fmt(t.vz)} ${t.speedUnit}.`,
+          "Od končne hitrosti odštej začetno."
+        ];
+      case "accel": {
+        const dv = t.vk - t.vz;
+        return [
+          "Najprej poišči spremembo hitrosti: Δv = vₖ − v<sub>z</sub>.",
+          `Δv = ${fmt(t.vk)} − ${fmt(t.vz)} = ${fmt(dv)} m/s.`,
+          `Nato uporabi: a = Δv / t = ${fmt(dv)} / ${fmt(t.t)}.`
+        ];
+      }
+      case "finalV": {
+        const dv = t.a * t.t;
+        return [
+          "Najprej izračunaj spremembo hitrosti: Δv = a · t.",
+          `Δv = ${fmt(t.a)} · ${fmt(t.t)} = ${fmt(dv)} m/s.`,
+          `Končna hitrost: v<sub>k</sub> = v<sub>z</sub> + Δv = ${fmt(t.vz)} + ${fmt(dv)}.`
+        ];
+      }
+      case "initialV": {
+        const dv = t.a * t.t;
+        return [
+          "Najprej izračunaj spremembo hitrosti: Δv = a · t.",
+          `Δv = ${fmt(t.a)} · ${fmt(t.t)} = ${fmt(dv)} m/s.`,
+          `Začetna hitrost: v<sub>z</sub> = v<sub>k</sub> − Δv = ${fmt(t.vk)} − ${fmt(dv)}.`
+        ];
+      }
+      case "time": {
+        const dv = t.vk - t.vz;
+        return [
+          "Najprej izračunaj spremembo hitrosti.",
+          `Δv = ${fmt(t.vk)} − ${fmt(t.vz)} = ${fmt(dv)} m/s.`,
+          `Čas: t = Δv / a = ${fmt(dv)} / ${fmt(t.a)}.`
+        ];
+      }
+      case "avgV":
+        return [
+          "Pri enakomerno pospešenem gibanju je povprečna hitrost aritmetična sredina začetne in končne hitrosti.",
+          `Seštej ${fmt(t.vz)} in ${fmt(t.vk)} ${t.speedUnit}.`,
+          "Vsoto deli z 2."
+        ];
+      case "distanceAvg": {
+        const av = (t.vz + t.vk) / 2;
+        return [
+          "Najprej izračunaj povprečno hitrost.",
+          `v̄ = (${fmt(t.vz)} + ${fmt(t.vk)}) / 2 = ${fmt(av)} ${t.speedUnit}.`,
+          `Pot: s = v̄ · t = ${fmt(av)} · ${fmt(t.t)}.`
+        ];
+      }
+      case "distanceFormula":
+        if (t.vz === 0) return [
+          "Ker telo začne iz mirovanja, lahko uporabiš s = a · t² / 2.",
+          `Najprej izračunaj t² = ${fmt(t.t)}².`,
+          `Vstavi: s = ${fmt(t.a)} · ${fmt(t.t)}² / 2.`
+        ];
+        return [
+          "Pri letečem štartu je pomembna tudi začetna hitrost.",
+          "Uporabi s = v<sub>z</sub> · t + a · t² / 2.",
+          `Vstavi: s = ${fmt(t.vz)} · ${fmt(t.t)} + ${fmt(t.a)} · ${fmt(t.t)}² / 2.`
+        ];
+    }
+  }
+
+  function scaffold(t) {
+    switch (t.type) {
+      case "deltaV": return `Δv = ${fmt(t.vk)} ${t.speedUnit} − ${fmt(t.vz)} ${t.speedUnit}`;
+      case "accel": return `Najprej Δv = ${fmt(t.vk)} − ${fmt(t.vz)} m/s, nato a = Δv / ${fmt(t.t)} s.`;
+      case "finalV": return `Δv = ${fmt(t.a)} · ${fmt(t.t)} m/s, nato v<sub>k</sub> = v<sub>z</sub> + Δv.`;
+      case "initialV": return `Δv = ${fmt(t.a)} · ${fmt(t.t)} m/s, nato v<sub>z</sub> = v<sub>k</sub> − Δv.`;
+      case "time": return `Δv = ${fmt(t.vk)} − ${fmt(t.vz)} m/s, nato t = Δv / ${fmt(t.a)} m/s².`;
+      case "avgV": return `v̄ = (${fmt(t.vz)} + ${fmt(t.vk)}) / 2 ${t.speedUnit}`;
+      case "distanceAvg": return `Najprej v̄ = (${fmt(t.vz)} + ${fmt(t.vk)}) / 2 ${t.speedUnit}, nato s = v̄ · ${fmt(t.t)} ${t.timeUnit}.`;
+      case "distanceFormula":
+        return t.vz === 0
+          ? `s = ${fmt(t.a)} · ${fmt(t.t)}² / 2`
+          : `s = ${fmt(t.vz)} · ${fmt(t.t)} + ${fmt(t.a)} · ${fmt(t.t)}² / 2`;
+    }
+  }
+
+  function renderTask() {
+    const t = TASKS[taskIndex];
+    hintIndex = 0;
+    taskChip.textContent = TARGETS[t.type].chip;
+    taskText.innerHTML = taskPrompt(t);
+    stepFormula.hidden = true;
+    stepAnswer.hidden = true;
+    feedback.textContent = "";
+    feedback.className = "feedback";
+    answerInput.value = "";
+    answerUnit.textContent = t.answerUnit;
+    hintText.textContent = "Namig še ni prikazan.";
+    hintBtn.textContent = "Pokaži namig";
+    document.getElementById("prevTask").disabled = taskHistory.length <= 1;
+
+    targetChoices.innerHTML = "";
+    targetOptions(t.type).forEach(label => {
+      const b = document.createElement("button");
+      b.className = "choice";
+      b.type = "button";
+      b.innerHTML = label;
+      b.addEventListener("click", () => {
+        targetChoices.querySelectorAll("button").forEach(x => x.classList.remove("good","bad"));
+        if (label === TARGETS[t.type].label) {
+          b.classList.add("good");
+          stepFormula.hidden = false;
+          renderFormulaChoices(t);
+        } else {
+          b.classList.add("bad");
+        }
+      });
+      targetChoices.appendChild(b);
+    });
+  }
+
+  function renderFormulaChoices(t) {
+    formulaChoices.innerHTML = "";
+    [...FORMULAS[t.type]].sort(() => .5 - Math.random()).forEach(formula => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "choice formula-choice";
+      b.innerHTML = formula;
+      b.addEventListener("click", () => {
+        formulaChoices.querySelectorAll("button").forEach(x => x.classList.remove("good","bad"));
+        if (formula === FORMULAS[t.type][0]) {
+          b.classList.add("good");
+          stepAnswer.hidden = false;
+          calcScaffold.innerHTML = scaffold(t);
+          setTimeout(() => answerInput.focus(), 80);
+        } else {
+          b.classList.add("bad");
+        }
+      });
+      formulaChoices.appendChild(b);
+    });
+  }
+
+  function checkCurrentAnswer() {
+    const t = TASKS[taskIndex];
+    const value = num(answerInput.value);
+    if (!Number.isFinite(value)) {
+      feedback.textContent = "Vpiši številski rezultat.";
+      feedback.className = "feedback err";
+      return;
+    }
+    const tol = Math.max(.015, Math.abs(t.answer) * .003);
+    if (Math.abs(value - t.answer) <= tol) {
+      feedback.textContent = `Pravilno. Rezultat je ${fmt(t.answer,2)} ${t.answerUnit}.`;
+      feedback.className = "feedback ok";
+    } else {
+      feedback.textContent = "Še ne. Preveri račun ali odpri naslednji namig.";
+      feedback.className = "feedback err";
+    }
+  }
+
+  document.getElementById("checkAnswer").addEventListener("click", checkCurrentAnswer);
+  answerInput.addEventListener("keydown", e => { if (e.key === "Enter") checkCurrentAnswer(); });
+
+  hintBtn.addEventListener("click", () => {
+    const hs = hints(TASKS[taskIndex]);
+    hintIndex = Math.min(hintIndex + 1, hs.length);
+    hintText.innerHTML = hs[hintIndex - 1];
+    hintBtn.textContent = hintIndex >= hs.length ? "Zadnji namig" : "Naslednji namig";
+  });
+
+  document.getElementById("prevTask").addEventListener("click", () => {
+    if (taskHistory.length <= 1) return;
+    taskHistory.pop();
+    taskIndex = taskHistory[taskHistory.length - 1];
+    renderTask();
+  });
+
+  document.getElementById("nextTask").addEventListener("click", () => {
+    const recent = new Set(taskHistory.slice(-6));
+    let candidates = TASKS.map((_, i) => i).filter(i => i !== taskIndex && !recent.has(i));
+    if (!candidates.length) candidates = TASKS.map((_, i) => i).filter(i => i !== taskIndex);
+    taskIndex = candidates[Math.floor(Math.random() * candidates.length)];
+    taskHistory.push(taskIndex);
+    renderTask();
+  });
+
+  state.scenarioIndex = Math.floor(Math.random() * getScenarioPool().length);
+  randomizeDistance();
+  applyModeButtons();
+  updateInstructionCard();
+  renderRace();
+  renderTask();
+})();
+</script>
+</body>
+</html>

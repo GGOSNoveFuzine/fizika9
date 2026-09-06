@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2. Newtonov zakon – Fizika 9</title>
+<meta name="description" content="Interaktivna aplikacija za drugi Newtonov zakon: vpliv sile in mase na pospešek ter vodeno računanje.">
+<meta name="theme-color" content="#eef1ed">
+<style>
+:root{
+  --bg:#e8f1f8;--paper:#fffdf9;--ink:#203440;--muted:#687983;--line:#cfd8de;
+  --steel:#304a57;--teal:#0f766e;--teal2:#14a18f;--amber:#e99b1c;--green:#17805a;
+  --shadow:0 18px 52px rgba(36,52,62,.12)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);background:radial-gradient(circle at 8% 0%,rgba(28,100,242,.12),transparent 28rem),radial-gradient(circle at 92% 10%,rgba(15,118,110,.12),transparent 26rem),var(--bg);font:16px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input{font:inherit}button{cursor:pointer}a{color:inherit}
+.wrap{width:min(1480px,calc(100% - 54px));margin:0 auto 72px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 0 12px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:950}
+.brand-mark{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--steel);color:#fff;font-weight:950}
+.back{text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:10px 15px;background:#ffffff8c;font-weight:850}
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:end;padding:32px 0 25px}
+.eyebrow{color:var(--teal);font-size:.78rem;font-weight:950;letter-spacing:.15em;text-transform:uppercase}
+h1{margin:7px 0 11px;font:700 clamp(3.5rem,7vw,7rem)/.93 Georgia,"Times New Roman",serif;letter-spacing:-.055em}
+.hero p{margin:0;color:var(--muted);font-size:1.12rem;max-width:68ch}
+.hero-note{border-left:4px solid var(--amber);padding:8px 0 8px 19px;color:var(--muted);font-weight:700}
+.panel{background:rgba(255,253,249,.94);border:1px solid rgba(32,52,64,.13);border-radius:25px;box-shadow:var(--shadow)}
+.sim-panel,.tasks-panel{padding:25px}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.section-head h2{margin:0;font:700 clamp(2rem,3.5vw,3.35rem)/1 Georgia,"Times New Roman",serif;letter-spacing:-.035em}
+.section-head p{margin:7px 0 0;color:var(--muted)}
+.mode-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.mode-btn{border:2px solid var(--line);border-radius:20px;background:#fff;padding:18px 20px;color:var(--ink);font-weight:950;font-size:1.2rem;text-align:left;transition:.15s}
+.mode-btn small{display:block;margin-top:4px;font-weight:650;font-size:.88rem;color:var(--muted)}
+.mode-btn.active{border-color:var(--teal);background:linear-gradient(135deg,#e7f6f2,#fff);box-shadow:0 10px 26px rgba(15,118,110,.12)}
+.action-strip{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:16px;padding:15px 18px;border:1px solid #dbe2de;border-radius:18px;background:#f7f9f7}
+.action-main{font-weight:950;font-size:1.1rem}
+.action-main span{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--teal);color:#fff;margin-right:10px}
+.action-status{color:var(--muted);font-weight:800}
+.controls{display:grid;grid-template-columns:minmax(250px,.7fr) minmax(360px,1.3fr);gap:18px;margin-bottom:20px}
+.quantity-card{position:relative;border:1px solid var(--line);border-radius:20px;background:#fff;padding:18px}
+.quantity-card.locked{background:#f3f5f3}
+.quantity-label{font-size:.8rem;text-transform:uppercase;letter-spacing:.09em;font-weight:950;color:var(--muted)}
+.quantity-value{margin-top:4px;font-weight:950;font-size:clamp(2rem,3.4vw,3.6rem);letter-spacing:-.04em}
+.lock{position:absolute;right:16px;top:14px;border-radius:999px;background:#e4e8e5;padding:6px 9px;font-size:.78rem;font-weight:900;color:#5b6a63}
+.slider-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:18px;margin-top:18px}
+.range{
+  -webkit-appearance:none;appearance:none;width:100%;height:18px;border-radius:999px;
+  background:linear-gradient(90deg,#1f8a80 0%, #1f8a80 var(--fill,50%), #dfe6e8 var(--fill,50%), #dfe6e8 100%);
+  outline:none;border:1px solid #c9d5d9;
+}
+.range::-webkit-slider-runnable-track{
+  height:18px;border-radius:999px;background:transparent;
+}
+.range::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;margin-top:-9px;
+  width:36px;height:36px;border-radius:50%;
+  background:#1f8a80;border:4px solid #ffffff;box-shadow:0 6px 14px rgba(31,138,128,.28);
+}
+.range::-moz-range-track{
+  height:18px;border-radius:999px;background:#dfe6e8;border:1px solid #c9d5d9;
+}
+.range::-moz-range-progress{
+  height:18px;border-radius:999px;background:#1f8a80;
+}
+.range::-moz-range-thumb{
+  width:36px;height:36px;border-radius:50%;background:#1f8a80;border:4px solid #ffffff;box-shadow:0 6px 14px rgba(31,138,128,.28);
+}
+.step-btn{width:56px;height:56px;border:1px solid var(--line);border-radius:18px;background:#fff;color:var(--ink);font-size:1.8rem;font-weight:950}
+.lab{overflow:hidden;border:1px solid #cbd3cf;border-radius:24px;background:#e7ebe8}
+.lab-top{display:grid;grid-template-columns:1fr 290px;gap:0;border-bottom:1px solid #cbd3cf}
+.track-wrap{position:relative;height:370px;overflow:hidden;background:linear-gradient(#edf1ef 0 68%,transparent 68%),linear-gradient(180deg,#dfe5e2,#cbd2ce)}
+.track-line{position:absolute;left:5%;right:4%;bottom:66px;height:9px;border-radius:10px;background:linear-gradient(180deg,#8d9994,#66756f)}
+.track-line::before{content:"";position:absolute;left:0;right:0;top:-10px;height:3px;background:repeating-linear-gradient(90deg,#7b8882 0 38px,transparent 38px 62px);opacity:.55}
+.finish-mark{position:absolute;right:5%;bottom:58px;width:3px;height:80px;background:#89958f;opacity:.65}
+.cart-group{position:absolute;left:6%;bottom:75px;width:270px;height:185px;will-change:transform}
+.force-arrow-wrap{position:absolute;left:24px;top:0;height:68px;display:flex;align-items:center}
+.force-arrow{position:relative;height:16px;border-radius:10px;background:var(--amber);width:120px;min-width:72px;max-width:225px;filter:drop-shadow(0 4px 6px rgba(110,73,15,.16))}
+.force-arrow::after{content:"";position:absolute;right:-24px;top:50%;transform:translateY(-50%);border-left:28px solid var(--amber);border-top:19px solid transparent;border-bottom:19px solid transparent}
+.force-label{position:absolute;left:4px;top:-35px;white-space:nowrap;font-weight:950;font-size:1.15rem;color:#8a5b0a}
+.cart{position:absolute;left:12px;bottom:0;width:215px;height:95px}
+.cart-body{position:absolute;left:20px;bottom:25px;width:175px;height:55px;border-radius:12px 12px 18px 18px;background:linear-gradient(180deg,#2c6f77,#245660);border:3px solid #1d4650;box-shadow:0 9px 16px rgba(37,64,73,.18)}
+.cart-body::after{content:"";position:absolute;left:18px;right:18px;bottom:9px;height:5px;border-radius:5px;background:#8bc7c4aa}
+.wheel{position:absolute;bottom:5px;width:38px;height:38px;border-radius:50%;background:#27343a;border:7px solid #53626a}
+.wheel.one{left:38px}.wheel.two{right:26px}
+.cargo{position:absolute;bottom:77px;left:54px;display:flex;gap:5px;align-items:end}
+.cargo-box{width:34px;height:32px;border-radius:5px;background:linear-gradient(145deg,#d8a84e,#b9791c);border:2px solid #906015;box-shadow:inset 0 0 0 3px #f2c66d55}
+.cart-mass{position:absolute;left:57px;bottom:42px;z-index:2;color:#fff;font-weight:950;font-size:1.18rem}
+.trail-dot{position:absolute;bottom:105px;width:13px;height:13px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 5px rgba(15,118,110,.12)}
+.trail-dot::after{content:attr(data-time);position:absolute;top:18px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:.75rem;font-weight:850;color:#60716a}
+.accel-meter{padding:24px;background:#f8faf8;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.meter-label{text-transform:uppercase;letter-spacing:.1em;font-size:.78rem;font-weight:950;color:var(--muted)}
+.meter-value{margin-top:8px;font-weight:950;font-size:clamp(2.7rem,4vw,4.4rem);letter-spacing:-.05em;color:var(--teal)}
+.meter-unit{font-weight:900;font-size:1.15rem;color:#46616a}
+.test-btn{margin-top:18px;border:0;border-radius:18px;padding:18px 28px;width:100%;background:linear-gradient(135deg,var(--teal),var(--teal2));color:#fff;font-size:1.32rem;font-weight:950;box-shadow:0 12px 24px rgba(15,118,110,.22)}
+.test-btn:disabled{opacity:.5;cursor:not-allowed}
+.measurements{display:flex;gap:10px;flex-wrap:wrap;padding:15px;border-top:1px solid #cbd3cf;background:#f7f9f7;min-height:64px}
+.measure-chip{padding:9px 13px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:850}
+.measure-empty{color:var(--muted);font-weight:750;padding:9px 2px}
+.discovery{margin-top:16px;padding:18px;border-radius:20px;background:#edf7f4;border:1px solid #a9d7ce}
+.discovery-title{font-weight:950;font-size:1.12rem}
+.discovery-relation{margin-top:6px;font:700 clamp(1.7rem,3vw,2.6rem)/1.1 Georgia,serif;color:#145d57}
+.discovery-formula{margin-top:10px;display:inline-block;background:#fff;border:1px solid #bcdad4;border-radius:13px;padding:9px 13px;font-weight:950;font-size:1.2rem}
+.tasks-panel{margin-top:32px}
+.task-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:20px}
+.task-card{border:1px solid var(--line);border-radius:20px;background:#fff;padding:22px}
+.task-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.task-heading{font-weight:950;font-size:1.15rem}
+.task-chip{border-radius:999px;padding:6px 10px;background:#edf1ef;font-size:.82rem;font-weight:900}
+.task-text{margin:22px 0;font:650 1.28rem/1.55 Georgia,"Times New Roman",serif;color:#263b47}
+.step{margin-top:14px;border-top:1px dashed var(--line);padding-top:15px}
+.step h3{margin:0 0 10px;font-size:1rem}
+.choices{display:flex;gap:8px;flex-wrap:wrap}
+.choice{border:1px solid var(--line);border-radius:13px;background:#fff;padding:10px 14px;color:var(--ink);font-weight:850}
+.choice.good{background:#e8f7ef;border-color:#8fd4b3;color:#146345}
+.choice.bad{background:#fff0ee;border-color:#e7aaa3;color:#91382f}
+
+.formula-choice{font-family:"Trebuchet MS",ui-sans-serif,sans-serif;font-size:1.05rem}
+.magic-wrap{
+  display:grid;
+  grid-template-columns:minmax(280px,420px) minmax(260px,1fr);
+  gap:22px;
+  align-items:center;
+}
+.magic-triangle{
+  position:relative;
+  width:min(100%,390px);
+  aspect-ratio:1.18/1;
+  margin:8px auto 4px;
+}
+.magic-triangle svg{
+  position:absolute;inset:0;width:100%;height:100%;display:block
+}
+.magic-btn{
+  position:absolute;
+  width:92px;height:70px;
+  border:2px solid #b9cbc7;
+  border-radius:18px;
+  background:#fff;
+  color:var(--ink);
+  font-size:1.65rem;
+  font-weight:950;
+  box-shadow:0 7px 16px rgba(32,52,64,.10);
+  z-index:2;
+}
+.magic-btn:hover{border-color:var(--teal)}
+.magic-btn.good{background:#e6f7f2;border-color:#65c8b7;color:#12675e}
+.magic-btn.bad{background:#fff0ee;border-color:#e5a69e;color:#96392f}
+.magic-btn.fr{left:50%;top:17%;transform:translate(-50%,-50%)}
+.magic-btn.m{left:28%;bottom:9%;transform:translate(-50%,50%)}
+.magic-btn.a{left:72%;bottom:9%;transform:translate(-50%,50%)}
+.magic-memory{
+  text-align:center;
+  margin-top:5px;
+  font-weight:950;
+  font-size:1.08rem;
+  color:#31535c;
+}
+.magic-help{
+  border-left:4px solid var(--teal);
+  padding:12px 0 12px 17px;
+  color:var(--muted);
+  font-weight:750;
+}
+.magic-help strong{display:block;color:var(--ink);font-size:1.05rem;margin-bottom:4px}
+.triangle-feedback{
+  min-height:28px;
+  margin-top:8px;
+  font-weight:850;
+  color:var(--muted);
+}
+.triangle-feedback.ok{color:var(--green)}
+.triangle-feedback.err{color:#a23b31}
+
+.equation-stage{
+  border:1px solid #cfdad6;
+  border-radius:18px;
+  background:#f8fbfa;
+  padding:18px;
+}
+.equation-stage-title{
+  font-weight:900;
+  margin-bottom:9px;
+}
+.equation-line{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  font-size:1.35rem;
+  font-weight:950;
+  min-height:58px;
+}
+.eq-input{
+  width:120px;
+  border:2px solid #bfcfca;
+  border-radius:12px;
+  padding:9px 11px;
+  background:#fff;
+  color:var(--ink);
+  font-size:1.1rem;
+  font-weight:900;
+  text-align:center;
+}
+.eq-input.good{border-color:#68c2a2;background:#effaf5}
+.eq-input.bad{border-color:#e4a19a;background:#fff3f1}
+.eq-unit{font-size:.95rem;color:#556a73;font-weight:850}
+.data-feedback{
+  min-height:30px;margin-top:9px;font-weight:850
+}
+.data-feedback.ok{color:var(--green)}
+.data-feedback.err{color:#a23b31}
+.result-stage{
+  margin-top:16px;
+  padding-top:16px;
+  border-top:1px dashed var(--line);
+}
+.result-stage h4{
+  margin:0 0 10px;
+  font-size:1rem;
+}
+.big-check{
+  padding:13px 20px;
+  min-width:165px;
+}
+@media(max-width:860px){
+  .magic-wrap{grid-template-columns:1fr}
+}
+.answer-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.answer-input{width:180px;border:2px solid #cbd3cf;border-radius:12px;padding:11px 13px;font-size:1.12rem;font-weight:900;color:var(--ink)}
+.answer-unit{font-weight:950}
+.feedback{min-height:31px;margin-top:10px;font-weight:850}.feedback.ok{color:var(--green)}.feedback.err{color:#a23b31}
+.task-nav{display:flex;gap:10px;margin-top:18px}
+.task-nav .btn{min-width:145px}
+.btn{border:0;border-radius:999px;padding:12px 18px;background:var(--steel);color:#fff;font-weight:900}
+.btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.help-card{border-radius:20px;background:#263f4c;color:#fff;padding:21px;min-height:250px}
+.help-card h3{margin:0 0 8px;font:700 1.55rem/1.1 Georgia,serif}
+.help-card p{margin:0 0 14px;color:#d8e1e5}
+.help-text{min-height:92px;border:1px solid #ffffff22;border-radius:14px;background:#ffffff12;padding:13px;margin-top:12px}
+.triangle-help{margin:14px auto 0;width:250px;max-width:100%;background:#fff;border-radius:18px;padding:12px;border:2px solid #b7d7d2;display:none}
+.triangle-help.show{display:block}.triangle-help svg{display:block;width:100%;height:auto}
+footer{padding:28px 0;color:var(--muted);text-align:center;font-size:.92rem}
+@media(max-width:1050px){.hero{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.lab-top{grid-template-columns:1fr}.accel-meter{border-top:1px solid #cbd3cf}.task-layout{grid-template-columns:1fr}}
+@media(max-width:760px){.wrap{width:min(100% - 22px,1480px)}.sim-panel,.tasks-panel{padding:15px}.mode-buttons{grid-template-columns:1fr}.track-wrap{min-width:700px}.lab{overflow:auto}.lab-top{min-width:700px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="topbar"><a class="brand" href="index.html"><span class="brand-mark">F9</span><span>Fizika 9</span></a><a class="back" href="index.html">← Nazaj na poglavja</a></div>
+<header class="hero"><div><div class="eyebrow">Sila · masa · pospešek</div><h1>2. Newtonov zakon</h1><p>Spremeni silo ali maso. Opazuj, kako se spremeni pospešek. Nato isto zvezo uporabi pri računskih nalogah.</p></div><div class="hero-note">Pokaži fizikalni pojav → nato pomagaj pri računanju.</div></header>
+<main>
+<section class="panel sim-panel">
+<div class="section-head"><div><h2>1 · Razišči povezavo</h2><p>Izberi, katero količino želiš spreminjati.</p></div></div>
+<div class="mode-buttons">
+<button class="mode-btn active" type="button" data-mode="force">Vpliv sile<small>Masa ostane enaka.</small></button>
+<button class="mode-btn" type="button" data-mode="mass">Vpliv mase<small>Rezultanta sil ostane enaka.</small></button>
+</div>
+<div class="action-strip"><div class="action-main"><span>1</span><strong id="actionText">Spremeni rezultanto sile.</strong></div><div class="action-status" id="actionStatus">Nato klikni PREIZKUSI.</div></div>
+<div class="controls">
+<div class="quantity-card locked"><span class="lock">🔒 nespremenjeno</span><div class="quantity-label" id="lockedLabel">Masa</div><div class="quantity-value" id="lockedValue">20 kg</div></div>
+<div class="quantity-card"><div class="quantity-label" id="variableLabel">Rezultanta sil F<sub>R</sub></div><div class="quantity-value" id="variableValue">40 N</div><div class="slider-row"><button class="step-btn" id="minusBtn" type="button">−</button><input class="range" id="valueSlider" type="range" min="10" max="100" step="10" value="40"><button class="step-btn" id="plusBtn" type="button">+</button></div></div>
+</div>
+<div class="lab">
+<div class="lab-top">
+<div class="track-wrap" id="trackWrap"><div class="track-line"></div><div class="finish-mark"></div><div id="trail"></div>
+<div class="cart-group" id="cartGroup">
+<div class="force-arrow-wrap"><div class="force-arrow" id="forceArrow"><span class="force-label" id="forceLabel">F_R = 40 N</span></div></div>
+<div class="cart"><div class="cargo" id="cargo"></div><div class="cart-body"></div><div class="cart-mass" id="cartMass">20 kg</div><div class="wheel one"></div><div class="wheel two"></div></div>
+</div></div>
+<div class="accel-meter"><div class="meter-label">Izmerjeni pospešek</div><div class="meter-value" id="accelValue">—</div><div class="meter-unit">m/s²</div><button class="test-btn" id="testBtn" type="button">PREIZKUSI</button></div>
+</div>
+<div class="measurements" id="measurements"><span class="measure-empty">Tukaj se bodo shranile zadnje meritve.</span></div>
+</div>
+<div class="discovery" id="discovery" hidden><div class="discovery-title">Kaj pokažejo meritve?</div><div class="discovery-relation" id="discoveryRelation"></div><div class="discovery-formula">F<sub>R</sub> = m · a <span style="display:block;font-size:.88rem;font-weight:800;color:#5d6d77;margin-top:4px;">Fičo je mali avto</span></div></div>
+</section>
+
+<section class="panel tasks-panel">
+<div class="section-head"><div><h2>2 · Računanje po korakih</h2><p>Najprej ugotovi, kaj iščeš. Formula se pokaže šele, ko jo potrebuješ.</p></div></div>
+<div class="task-layout">
+<div class="task-card">
+<div class="task-top"><span class="task-heading">Računska naloga</span><span class="task-chip" id="taskChip"></span></div>
+<div class="task-text" id="taskText"></div>
+<div class="step"><h3>1. Kaj moramo izračunati?</h3><div class="choices" id="targetChoices"></div></div>
+<div class="step" id="stepFirst" hidden>
+  <h3 id="firstStepTitle">2. Kaj moramo narediti najprej?</h3>
+  <div class="choices" id="firstChoices"></div>
+</div>
+
+<div class="step" id="stepTriangle" hidden>
+  <h3 id="triangleStepTitle">2. V magičnem trikotniku klikni količino, ki jo iščemo.</h3>
+  <div class="magic-wrap">
+    <div>
+      <div class="magic-triangle" aria-label="Magični trikotnik drugega Newtonovega zakona">
+        <svg viewBox="0 0 360 305" aria-hidden="true">
+          <path d="M180 18 L338 280 L22 280 Z" fill="#f8fbfa" stroke="#0f766e" stroke-width="6"/>
+          <line x1="73" y1="185" x2="287" y2="185" stroke="#0f766e" stroke-width="5"/>
+          <line x1="180" y1="185" x2="180" y2="280" stroke="#0f766e" stroke-width="5"/>
+        </svg>
+        <button class="magic-btn fr" type="button" data-magic="FR">F<sub>R</sub></button>
+        <button class="magic-btn m" type="button" data-magic="m">m</button>
+        <button class="magic-btn a" type="button" data-magic="a">a</button>
+      </div>
+      <div class="magic-memory">Fičo je mali avto.</div>
+      <div class="triangle-feedback" id="triangleFeedback"></div>
+    </div>
+    <div class="magic-help">
+      <strong>Kako ga uporabiš?</strong>
+      Klikni količino, ki jo iščeš. Trikotnik ti nato pripravi pravo enačbo.
+    </div>
+  </div>
+</div>
+
+<div class="step" id="stepEquation" hidden>
+  <h3 id="equationStepTitle">3. Tvoja enačba je pripravljena.</h3>
+  <div class="equation-stage">
+    <div class="equation-stage-title">Vpiši ustrezne podatke iz naloge.</div>
+    <div class="equation-line" id="equationLine"></div>
+    <button class="btn big-check" id="checkDataBtn" type="button">Preveri podatke</button>
+    <div class="data-feedback" id="dataFeedback"></div>
+
+    <div class="result-stage" id="resultStage" hidden>
+      <h4>Zdaj izračunaj rezultat.</h4>
+      <div class="answer-row">
+        <input class="answer-input" id="answerInput" inputmode="decimal" autocomplete="off" placeholder="rezultat">
+        <span class="answer-unit" id="answerUnit"></span>
+        <button class="btn" id="checkBtn" type="button">Preveri rezultat</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </div>
+</div>
+<div class="task-nav"><button class="btn secondary" id="prevTask" type="button">← Prejšnja</button><button class="btn secondary" id="nextTask" type="button">Naslednja →</button></div>
+</div>
+<aside class="help-card">
+  <h3>Pomoč pri računanju</h3>
+  <p>Če se zatakne, odpri namig.</p>
+  <button class="btn secondary" id="hintBtn" type="button">Pokaži namig</button>
+  <div class="help-text" id="hintText">Poskusi najprej sam.</div>
+</aside>
+</div>
+</section>
+</main>
+<footer>Fizika 9 · Drugi Newtonov zakon · opazuj povezavo → računaj</footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+const TASKS=[{"id": 1, "type": "force", "text": "Voziček z maso 2 kg se giblje s pospeškom 3 m/s². Kolikšna je rezultanta sil?", "target": "FR", "answer": 6, "unit": "N", "m": 2, "a": 3}, {"id": 2, "type": "force", "text": "Zaboj z maso 5 kg se giblje s pospeškom 2 m/s². Kolikšna je rezultanta sil?", "target": "FR", "answer": 10, "unit": "N", "m": 5, "a": 2}, {"id": 3, "type": "force", "text": "Sani z maso 10 kg se gibljejo s pospeškom 1,5 m/s². Kolikšna je rezultanta sil?", "target": "FR", "answer": 15.0, "unit": "N", "m": 10, "a": 1.5}, {"id": 4, "type": "force", "text": "Voziček z maso 20 kg se giblje s pospeškom 2,5 m/s². Kolikšna je rezultanta sil?", "target": "FR", "answer": 50.0, "unit": "N", "m": 20, "a": 2.5}, {"id": 5, "type": "force", "text": "Telo z maso 25 kg se giblje s pospeškom 4 m/s². Kolikšna je rezultanta sil?", "target": "FR", "answer": 100, "unit": "N", "m": 25, "a": 4}, {"id": 6, "type": "force", "text": "Voziček z maso 40 kg se giblje s pospeškom 1,5 m/s². Kolikšna je rezultanta sil?", "target": "FR", "answer": 60.0, "unit": "N", "m": 40, "a": 1.5}, {"id": 7, "type": "force", "text": "Prikolica z maso 50 kg se giblje s pospeškom 2 m/s². Kolikšna je rezultanta sil?", "target": "FR", "answer": 100, "unit": "N", "m": 50, "a": 2}, {"id": 8, "type": "force", "text": "Voziček z maso 80 kg se giblje s pospeškom 0,5 m/s². Kolikšna je rezultanta sil?", "target": "FR", "answer": 40.0, "unit": "N", "m": 80, "a": 0.5}, {"id": 9, "type": "force", "text": "Telo z maso 100 kg se giblje s pospeškom 1,2 m/s². Kolikšna je rezultanta sil?", "target": "FR", "answer": 120.0, "unit": "N", "m": 100, "a": 1.2}, {"id": 10, "type": "force", "text": "Voziček z maso 200 kg se giblje s pospeškom 0,75 m/s². Kolikšna je rezultanta sil?", "target": "FR", "answer": 150.0, "unit": "N", "m": 200, "a": 0.75}, {"id": 11, "type": "force", "text": "Žogica ima maso 200 g in se giblje s pospeškom 5 m/s². Kolikšna je rezultanta sil?", "target": "FR", "answer": 1.0, "unit": "N", "m": 0.2, "a": 5}, {"id": 12, "type": "force", "text": "Telo ima maso 500 g in se giblje s pospeškom 4 m/s². Kolikšna je rezultanta sil?", "target": "FR", "answer": 2.0, "unit": "N", "m": 0.5, "a": 4}, {"id": 13, "type": "accel", "text": "Na telo z maso 3 kg deluje rezultanta sil 12 N. Kolikšen je pospešek telesa?", "target": "a", "answer": 4.0, "unit": "m/s²", "F": 12, "m": 3}, {"id": 14, "type": "accel", "text": "Na telo z maso 5 kg deluje rezultanta sil 20 N. Kolikšen je pospešek telesa?", "target": "a", "answer": 4.0, "unit": "m/s²", "F": 20, "m": 5}, {"id": 15, "type": "accel", "text": "Na telo z maso 10 kg deluje rezultanta sil 30 N. Kolikšen je pospešek telesa?", "target": "a", "answer": 3.0, "unit": "m/s²", "F": 30, "m": 10}, {"id": 16, "type": "accel", "text": "Na telo z maso 15 kg deluje rezultanta sil 45 N. Kolikšen je pospešek telesa?", "target": "a", "answer": 3.0, "unit": "m/s²", "F": 45, "m": 15}, {"id": 17, "type": "accel", "text": "Na telo z maso 20 kg deluje rezultanta sil 60 N. Kolikšen je pospešek telesa?", "target": "a", "answer": 3.0, "unit": "m/s²", "F": 60, "m": 20}, {"id": 18, "type": "accel", "text": "Na telo z maso 40 kg deluje rezultanta sil 80 N. Kolikšen je pospešek telesa?", "target": "a", "answer": 2.0, "unit": "m/s²", "F": 80, "m": 40}, {"id": 19, "type": "accel", "text": "Na telo z maso 30 kg deluje rezultanta sil 90 N. Kolikšen je pospešek telesa?", "target": "a", "answer": 3.0, "unit": "m/s²", "F": 90, "m": 30}, {"id": 20, "type": "accel", "text": "Na telo z maso 25 kg deluje rezultanta sil 100 N. Kolikšen je pospešek telesa?", "target": "a", "answer": 4.0, "unit": "m/s²", "F": 100, "m": 25}, {"id": 21, "type": "accel", "text": "Na telo z maso 50 kg deluje rezultanta sil 150 N. Kolikšen je pospešek telesa?", "target": "a", "answer": 3.0, "unit": "m/s²", "F": 150, "m": 50}, {"id": 22, "type": "accel", "text": "Na telo z maso 80 kg deluje rezultanta sil 240 N. Kolikšen je pospešek telesa?", "target": "a", "answer": 3.0, "unit": "m/s²", "F": 240, "m": 80}, {"id": 23, "type": "mass", "text": "Rezultanta sil 24 N povzroči pospešek 3 m/s². Kolikšna je masa telesa?", "target": "m", "answer": 8.0, "unit": "kg", "F": 24, "a": 3}, {"id": 24, "type": "mass", "text": "Rezultanta sil 30 N povzroči pospešek 2 m/s². Kolikšna je masa telesa?", "target": "m", "answer": 15.0, "unit": "kg", "F": 30, "a": 2}, {"id": 25, "type": "mass", "text": "Rezultanta sil 45 N povzroči pospešek 1,5 m/s². Kolikšna je masa telesa?", "target": "m", "answer": 30.0, "unit": "kg", "F": 45, "a": 1.5}, {"id": 26, "type": "mass", "text": "Rezultanta sil 60 N povzroči pospešek 4 m/s². Kolikšna je masa telesa?", "target": "m", "answer": 15.0, "unit": "kg", "F": 60, "a": 4}, {"id": 27, "type": "mass", "text": "Rezultanta sil 72 N povzroči pospešek 1,2 m/s². Kolikšna je masa telesa?", "target": "m", "answer": 60.0, "unit": "kg", "F": 72, "a": 1.2}, {"id": 28, "type": "mass", "text": "Rezultanta sil 90 N povzroči pospešek 3 m/s². Kolikšna je masa telesa?", "target": "m", "answer": 30.0, "unit": "kg", "F": 90, "a": 3}, {"id": 29, "type": "mass", "text": "Rezultanta sil 120 N povzroči pospešek 2 m/s². Kolikšna je masa telesa?", "target": "m", "answer": 60.0, "unit": "kg", "F": 120, "a": 2}, {"id": 30, "type": "mass", "text": "Rezultanta sil 200 N povzroči pospešek 2,5 m/s². Kolikšna je masa telesa?", "target": "m", "answer": 80.0, "unit": "kg", "F": 200, "a": 2.5}, {"id": 31, "type": "resultant_accel", "text": "Na voziček z maso 20 kg delujeta vodoravni sili: 70 N v desno in 30 N v levo. Kolikšen je pospešek vozička?", "target": "a", "answer": 2.0, "unit": "m/s²", "Fright": 70, "Fleft": 30, "FR": 40, "m": 20}, {"id": 32, "type": "resultant_accel", "text": "Na voziček z maso 25 kg delujeta vodoravni sili: 90 N v desno in 40 N v levo. Kolikšen je pospešek vozička?", "target": "a", "answer": 2.0, "unit": "m/s²", "Fright": 90, "Fleft": 40, "FR": 50, "m": 25}, {"id": 33, "type": "resultant_accel", "text": "Na voziček z maso 30 kg delujeta vodoravni sili: 120 N v desno in 60 N v levo. Kolikšen je pospešek vozička?", "target": "a", "answer": 2.0, "unit": "m/s²", "Fright": 120, "Fleft": 60, "FR": 60, "m": 30}, {"id": 34, "type": "resultant_accel", "text": "Na voziček z maso 50 kg delujeta vodoravni sili: 150 N v desno in 50 N v levo. Kolikšen je pospešek vozička?", "target": "a", "answer": 2.0, "unit": "m/s²", "Fright": 150, "Fleft": 50, "FR": 100, "m": 50}, {"id": 35, "type": "resultant_accel", "text": "Na voziček z maso 15 kg delujeta vodoravni sili: 80 N v desno in 20 N v levo. Kolikšen je pospešek vozička?", "target": "a", "answer": 4.0, "unit": "m/s²", "Fright": 80, "Fleft": 20, "FR": 60, "m": 15}, {"id": 36, "type": "resultant_accel", "text": "Na voziček z maso 40 kg delujeta vodoravni sili: 200 N v desno in 80 N v levo. Kolikšen je pospešek vozička?", "target": "a", "answer": 3.0, "unit": "m/s²", "Fright": 200, "Fleft": 80, "FR": 120, "m": 40}, {"id": 37, "type": "resultant_accel", "text": "Na voziček z maso 20 kg delujeta vodoravni sili: 65 N v desno in 25 N v levo. Kolikšen je pospešek vozička?", "target": "a", "answer": 2.0, "unit": "m/s²", "Fright": 65, "Fleft": 25, "FR": 40, "m": 20}, {"id": 38, "type": "resultant_accel", "text": "Na voziček z maso 30 kg delujeta vodoravni sili: 110 N v desno in 50 N v levo. Kolikšen je pospešek vozička?", "target": "a", "answer": 2.0, "unit": "m/s²", "Fright": 110, "Fleft": 50, "FR": 60, "m": 30}, {"id": 39, "type": "motion_force", "text": "Telo z maso 20 kg poveča hitrost z 0 m/s na 8 m/s v 4 s. Kolikšna rezultanta sil povzroča to spremembo gibanja?", "target": "FR", "answer": 40.0, "unit": "N", "m": 20, "vz": 0, "vk": 8, "t": 4, "a": 2.0}, {"id": 40, "type": "motion_force", "text": "Telo z maso 30 kg poveča hitrost z 2 m/s na 10 m/s v 4 s. Kolikšna rezultanta sil povzroča to spremembo gibanja?", "target": "FR", "answer": 60.0, "unit": "N", "m": 30, "vz": 2, "vk": 10, "t": 4, "a": 2.0}, {"id": 41, "type": "motion_force", "text": "Telo z maso 40 kg poveča hitrost z 3 m/s na 15 m/s v 6 s. Kolikšna rezultanta sil povzroča to spremembo gibanja?", "target": "FR", "answer": 80.0, "unit": "N", "m": 40, "vz": 3, "vk": 15, "t": 6, "a": 2.0}, {"id": 42, "type": "motion_force", "text": "Telo z maso 50 kg poveča hitrost z 5 m/s na 17 m/s v 4 s. Kolikšna rezultanta sil povzroča to spremembo gibanja?", "target": "FR", "answer": 150.0, "unit": "N", "m": 50, "vz": 5, "vk": 17, "t": 4, "a": 3.0}, {"id": 43, "type": "motion_force", "text": "Telo z maso 60 kg poveča hitrost z 4 m/s na 14 m/s v 5 s. Kolikšna rezultanta sil povzroča to spremembo gibanja?", "target": "FR", "answer": 120.0, "unit": "N", "m": 60, "vz": 4, "vk": 14, "t": 5, "a": 2.0}, {"id": 44, "type": "motion_force", "text": "Telo z maso 75 kg poveča hitrost z 6 m/s na 18 m/s v 3 s. Kolikšna rezultanta sil povzroča to spremembo gibanja?", "target": "FR", "answer": 300.0, "unit": "N", "m": 75, "vz": 6, "vk": 18, "t": 3, "a": 4.0}, {"id": 45, "type": "motion_force", "text": "Telo z maso 100 kg poveča hitrost z 10 m/s na 22 m/s v 6 s. Kolikšna rezultanta sil povzroča to spremembo gibanja?", "target": "FR", "answer": 200.0, "unit": "N", "m": 100, "vz": 10, "vk": 22, "t": 6, "a": 2.0}, {"id": 46, "type": "motion_force", "text": "Telo z maso 120 kg poveča hitrost z 2 m/s na 17 m/s v 5 s. Kolikšna rezultanta sil povzroča to spremembo gibanja?", "target": "FR", "answer": 360.0, "unit": "N", "m": 120, "vz": 2, "vk": 17, "t": 5, "a": 3.0}, {"id": 47, "type": "kmh_force", "text": "Avtomobil z maso 800 kg poveča hitrost z 0 km/h na 36 km/h v 5 s. Kolikšna rezultanta sil povzroča to pospeševanje?", "target": "FR", "answer": 1600.0, "unit": "N", "m": 800, "vz_kmh": 0, "vk_kmh": 36, "vz": 0.0, "vk": 10.0, "t": 5, "a": 2.0}, {"id": 48, "type": "kmh_force", "text": "Avtomobil z maso 1000 kg poveča hitrost z 18 km/h na 54 km/h v 5 s. Kolikšna rezultanta sil povzroča to pospeševanje?", "target": "FR", "answer": 2000.0, "unit": "N", "m": 1000, "vz_kmh": 18, "vk_kmh": 54, "vz": 5.0, "vk": 15.0, "t": 5, "a": 2.0}, {"id": 49, "type": "kmh_force", "text": "Avtomobil z maso 1200 kg poveča hitrost z 36 km/h na 72 km/h v 10 s. Kolikšna rezultanta sil povzroča to pospeševanje?", "target": "FR", "answer": 1200.0, "unit": "N", "m": 1200, "vz_kmh": 36, "vk_kmh": 72, "vz": 10.0, "vk": 20.0, "t": 10, "a": 1.0}, {"id": 50, "type": "kmh_force", "text": "Avtomobil z maso 1500 kg poveča hitrost z 54 km/h na 90 km/h v 5 s. Kolikšna rezultanta sil povzroča to pospeševanje?", "target": "FR", "answer": 3000.0, "unit": "N", "m": 1500, "vz_kmh": 54, "vk_kmh": 90, "vz": 15.0, "vk": 25.0, "t": 5, "a": 2.0}];
+const $=id=>document.getElementById(id);
+const fmt=(n,d=2)=>(Math.round((n+Number.EPSILON)*10**d)/10**d).toLocaleString("sl-SI",{maximumFractionDigits:d});
+const parseNum=v=>Number(String(v).replace(",","."));
+const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
+function updateSliderFill(sl){
+  const min=Number(sl.min), max=Number(sl.max), value=Number(sl.value);
+  const percent=((value-min)/(max-min))*100;
+  sl.style.setProperty("--fill", percent + "%");
+}
+
+const state={mode:"force",force:40,mass:20,running:false,raf:null,records:{force:[],mass:[]}};
+const modeButtons=[...document.querySelectorAll(".mode-btn")];
+const lockedLabel=$("lockedLabel"),lockedValue=$("lockedValue"),variableLabel=$("variableLabel"),variableValue=$("variableValue"),slider=$("valueSlider"),minusBtn=$("minusBtn"),plusBtn=$("plusBtn"),testBtn=$("testBtn"),cartGroup=$("cartGroup"),forceArrow=$("forceArrow"),forceLabel=$("forceLabel"),cartMass=$("cartMass"),cargo=$("cargo"),accelValue=$("accelValue"),trail=$("trail"),measurements=$("measurements"),discovery=$("discovery"),discoveryRelation=$("discoveryRelation"),actionText=$("actionText"),actionStatus=$("actionStatus");
+
+function setupMode(mode){
+  if(state.running)return;
+  state.mode=mode;modeButtons.forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
+  if(mode==="force"){
+    state.mass=20;state.force=40;lockedLabel.textContent="Masa";lockedValue.textContent="20 kg";
+    variableLabel.innerHTML='Rezultanta sil F<sub>R</sub>';slider.min="10";slider.max="100";slider.step="10";slider.value="40";
+    actionText.textContent="Spremeni rezultanto sile.";
+  }else{
+    state.force=60;state.mass=30;lockedLabel.innerHTML='Rezultanta sil F<sub>R</sub>';lockedValue.textContent="60 N";
+    variableLabel.textContent="Masa";slider.min="15";slider.max="60";slider.step="5";slider.value="30";
+    actionText.textContent="Spremeni maso vozička.";
+  }
+  actionStatus.textContent="Nato klikni PREIZKUSI.";accelValue.textContent="—";trail.innerHTML="";cartGroup.style.transform="translateX(0px)";updateValues();updateSliderFill(slider);renderRecords();
+}
+function updateValues(){
+  if(state.mode==="force"){state.force=Number(slider.value);variableValue.textContent=`${fmt(state.force,0)} N`;}
+  else{state.mass=Number(slider.value);variableValue.textContent=`${fmt(state.mass,0)} kg`;}
+  cartMass.textContent=`${fmt(state.mass,0)} kg`;forceLabel.innerHTML=`F<sub>R</sub> = ${fmt(state.force,0)} N`;
+  forceArrow.style.width=`${72+(state.force/100)*145}px`;
+  const boxes=state.mode==="mass"?clamp(Math.round((state.mass-15)/15),0,3):1;
+  cargo.innerHTML="";for(let i=0;i<boxes;i++){const b=document.createElement("div");b.className="cargo-box";cargo.appendChild(b);}updateSliderFill(slider);
+}
+function stepValue(direction){
+  if(state.running)return;
+  slider.value=clamp(Number(slider.value)+direction*Number(slider.step),Number(slider.min),Number(slider.max));
+  updateValues();accelValue.textContent="—";trail.innerHTML="";cartGroup.style.transform="translateX(0px)";actionStatus.textContent="Nato klikni PREIZKUSI.";
+}
+function getAcceleration(){return state.force/state.mass}
+function maxTravelPx(){const track=$("trackWrap");return Math.max(0,track.clientWidth-cartGroup.offsetWidth-65)}
+function createTrailDots(a){
+  trail.innerHTML="";const totalTrackDistance=24;
+  [1,2,3].forEach(t=>{const s=.5*a*t*t,frac=clamp(s/totalTrackDistance,0,1),d=document.createElement("div");d.className="trail-dot";d.dataset.time=`${t} s`;d.style.left=`calc(6% + ${frac*82}%)`;trail.appendChild(d);});
+}
+function addRecord(){
+  const r={force:state.force,mass:state.mass,a:getAcceleration()},arr=state.records[state.mode];
+  const same=arr.findIndex(x=>x.force===r.force&&x.mass===r.mass);if(same>=0)arr.splice(same,1);arr.push(r);while(arr.length>3)arr.shift();renderRecords();
+}
+function renderRecords(){
+  const arr=state.records[state.mode];measurements.innerHTML="";
+  if(!arr.length)measurements.innerHTML='<span class="measure-empty">Tukaj se bodo shranile zadnje meritve.</span>';
+  else arr.forEach(r=>{const c=document.createElement("span");c.className="measure-chip";c.innerHTML=state.mode==="force"?`F<sub>R</sub> = ${fmt(r.force,0)} N → a = ${fmt(r.a,2)} m/s²`:`m = ${fmt(r.mass,0)} kg → a = ${fmt(r.a,2)} m/s²`;measurements.appendChild(c);});
+  discovery.hidden=arr.length<2;
+  if(arr.length>=2)discoveryRelation.textContent=state.mode==="force"?"Večja rezultanta sil → večji pospešek.":"Večja masa → manjši pospešek.";
+}
+function runTest(){
+  if(state.running)return;state.running=true;testBtn.disabled=true;slider.disabled=true;minusBtn.disabled=true;plusBtn.disabled=true;accelValue.textContent="—";trail.innerHTML="";cartGroup.style.transform="translateX(0px)";actionStatus.textContent="Opazuj gibanje.";
+  const a=getAcceleration(),start=performance.now(),totalTrackDistance=24;
+  const tick=now=>{const elapsed=Math.min((now-start)/1000,3),s=.5*a*elapsed*elapsed,frac=clamp(s/totalTrackDistance,0,1);cartGroup.style.transform=`translateX(${frac*maxTravelPx()}px)`;
+    if(elapsed>=3){state.running=false;accelValue.textContent=fmt(a,2);createTrailDots(a);addRecord();actionStatus.textContent="Spremeni količino in preizkusi še enkrat.";testBtn.disabled=false;slider.disabled=false;minusBtn.disabled=false;plusBtn.disabled=false;return;}
+    state.raf=requestAnimationFrame(tick);
+  };state.raf=requestAnimationFrame(tick);
+}
+modeButtons.forEach(b=>b.addEventListener("click",()=>setupMode(b.dataset.mode)));
+slider.addEventListener("input",()=>{if(state.running)return;updateValues();accelValue.textContent="—";trail.innerHTML="";cartGroup.style.transform="translateX(0px)"});
+minusBtn.addEventListener("click",()=>stepValue(-1));plusBtn.addEventListener("click",()=>stepValue(1));testBtn.addEventListener("click",runTest);
+
+const targetMap={FR:'Rezultanto sil F<sub>R</sub>',a:'Pospešek a',m:'Maso m'};
+const chipMap={force:"Rezultanta sil",accel:"Pospešek",mass:"Masa",resultant_accel:"Rezultanta + pospešek",motion_force:"Gibanje + sila",kmh_force:"Pretvorba + sila"};
+const taskChip=$("taskChip"),taskText=$("taskText"),targetChoices=$("targetChoices"),
+stepFirst=$("stepFirst"),firstChoices=$("firstChoices"),firstStepTitle=$("firstStepTitle"),
+stepTriangle=$("stepTriangle"),triangleStepTitle=$("triangleStepTitle"),triangleFeedback=$("triangleFeedback"),
+stepEquation=$("stepEquation"),equationStepTitle=$("equationStepTitle"),equationLine=$("equationLine"),
+checkDataBtn=$("checkDataBtn"),dataFeedback=$("dataFeedback"),resultStage=$("resultStage"),
+answerInput=$("answerInput"),answerUnit=$("answerUnit"),feedback=$("feedback"),
+hintBtn=$("hintBtn"),hintText=$("hintText"),prevTask=$("prevTask"),nextTask=$("nextTask");
+let taskIndex=0,taskHistory=[0],hintIndex=0;
+
+function isMulti(t){return["resultant_accel","motion_force","kmh_force"].includes(t.type)}
+function correctFirst(t){if(t.type==="resultant_accel")return"FR";if(t.type==="motion_force")return"a";if(t.type==="kmh_force")return"convert";return null}
+function firstOptions(t){
+  if(t.type==="resultant_accel")return[{key:"FR",html:'Rezultanto sil F<sub>R</sub>'},{key:"m",html:'Maso m'},{key:"v",html:'Hitrost v'}];
+  if(t.type==="motion_force")return[{key:"a",html:'Pospešek a'},{key:"s",html:'Pot s'},{key:"m",html:'Maso m'}];
+  return[{key:"convert",html:'Pretvoriti hitrosti v m/s'},{key:"mass",html:'Pretvoriti maso v grame'},{key:"distance",html:'Izračunati pot'}];
+}
+function equationSpec(t){
+  if(t.target==="FR"){
+    return {
+      lhs:'F<sub>R</sub>',
+      op:'·',
+      fields:[
+        {key:"m",label:"m",unit:"kg",expected:t.m},
+        {key:"a",label:"a",unit:"m/s²",expected:t.a}
+      ]
+    };
+  }
+  if(t.target==="a"){
+    return {
+      lhs:'a',
+      op:'/',
+      fields:[
+        {key:"FR",label:'F<sub>R</sub>',unit:"N",expected:(t.FR ?? t.F)},
+        {key:"m",label:"m",unit:"kg",expected:t.m}
+      ]
+    };
+  }
+  return {
+    lhs:'m',
+    op:'/',
+    fields:[
+      {key:"FR",label:'F<sub>R</sub>',unit:"N",expected:t.F},
+      {key:"a",label:"a",unit:"m/s²",expected:t.a}
+    ]
+  };
+}
+
+function renderEquation(t){
+  const spec=equationSpec(t);
+  equationLine.innerHTML="";
+  const lhs=document.createElement("span");
+  lhs.innerHTML=spec.lhs;
+  equationLine.appendChild(lhs);
+
+  const equals=document.createElement("span");
+  equals.textContent="=";
+  equationLine.appendChild(equals);
+
+  spec.fields.forEach((field,index)=>{
+    const wrap=document.createElement("span");
+    wrap.style.display="inline-flex";
+    wrap.style.alignItems="center";
+    wrap.style.gap="6px";
+
+    const input=document.createElement("input");
+    input.className="eq-input";
+    input.inputMode="decimal";
+    input.autocomplete="off";
+    input.dataset.eqKey=field.key;
+    input.dataset.expected=String(field.expected);
+    input.setAttribute("aria-label",field.label.replace(/<[^>]*>/g,""));
+    wrap.appendChild(input);
+
+    const unit=document.createElement("span");
+    unit.className="eq-unit";
+    unit.textContent=field.unit;
+    wrap.appendChild(unit);
+    equationLine.appendChild(wrap);
+
+    if(index===0){
+      const op=document.createElement("span");
+      op.textContent=spec.op;
+      equationLine.appendChild(op);
+    }
+  });
+}
+
+function showTriangle(t,number){
+  stepTriangle.hidden=false;
+  triangleStepTitle.textContent=`${number}. V magičnem trikotniku klikni količino, ki jo iščemo.`;
+  triangleFeedback.textContent="";
+  triangleFeedback.className="triangle-feedback";
+  document.querySelectorAll("[data-magic]").forEach(b=>b.classList.remove("good","bad"));
+}
+
+function openEquation(t,number){
+  stepEquation.hidden=false;
+  equationStepTitle.textContent=`${number}. Tvoja enačba je pripravljena.`;
+  renderEquation(t);
+  dataFeedback.textContent="";
+  dataFeedback.className="data-feedback";
+  resultStage.hidden=true;
+  answerInput.value="";
+  answerUnit.textContent=t.unit;
+  setTimeout(()=>{
+    const first=equationLine.querySelector(".eq-input");
+    if(first)first.focus();
+  },80);
+}
+
+function checkEquationData(){
+  const inputs=[...equationLine.querySelectorAll(".eq-input")];
+  if(!inputs.length)return;
+  let allOk=true;
+
+  inputs.forEach(input=>{
+    input.classList.remove("good","bad");
+    const value=parseNum(input.value);
+    const expected=Number(input.dataset.expected);
+    const tol=Math.max(.01,Math.abs(expected)*.003);
+    if(Number.isFinite(value)&&Math.abs(value-expected)<=tol){
+      input.classList.add("good");
+    }else{
+      input.classList.add("bad");
+      allOk=false;
+    }
+  });
+
+  if(allOk){
+    dataFeedback.textContent="Tako je. Podatki so pravilno vstavljeni.";
+    dataFeedback.className="data-feedback ok";
+    resultStage.hidden=false;
+    setTimeout(()=>answerInput.focus(),80);
+  }else{
+    dataFeedback.textContent="Preveri, katere vrednosti sodijo v enačbo.";
+    dataFeedback.className="data-feedback err";
+    resultStage.hidden=true;
+  }
+}
+function hintsFor(t){
+  if(t.type==="force")return["Drugi Newtonov zakon povezuje rezultanto sil, maso in pospešek.","Če iščeš rezultanto sil, maso pomnožiš s pospeškom.",`F_R = m · a = ${fmt(t.m,2)} · ${fmt(t.a,2)}.`];
+  if(t.type==="accel")return["Pospešek je večji pri večji rezultanti in manjši pri večji masi.","Če iščeš pospešek, rezultanto deliš z maso.",`a = F_R / m = ${fmt(t.F,2)} / ${fmt(t.m,2)}.`];
+  if(t.type==="mass")return["Iz zveze F_R = m · a lahko izraziš maso.","Če iščeš maso, rezultanto deliš s pospeškom.",`m = F_R / a = ${fmt(t.F,2)} / ${fmt(t.a,2)}.`];
+  if(t.type==="resultant_accel")return["Najprej združi sili, ker delujeta v nasprotnih smereh.",`F_R = ${fmt(t.Fright,0)} N − ${fmt(t.Fleft,0)} N = ${fmt(t.FR,0)} N.`,`Nato a = F_R / m = ${fmt(t.FR,0)} / ${fmt(t.m,0)}.`];
+  if(t.type==="motion_force")return["Rezultante še ne moreš izračunati, ker najprej potrebuješ pospešek.",`Δv = v_k − v_z = ${fmt(t.vk,2)} − ${fmt(t.vz,2)} m/s; nato a = Δv / t.`,`Ko poznaš a = ${fmt(t.a,2)} m/s², uporabi F_R = m · a.`];
+  return["Hitrosti v km/h najprej pretvori v m/s. Deliš jih s 3,6.",`${fmt(t.vz_kmh,0)} km/h = ${fmt(t.vz,2)} m/s; ${fmt(t.vk_kmh,0)} km/h = ${fmt(t.vk,2)} m/s.`,`Nato izračunaj a = Δv/t in nazadnje F_R = m · a.`];
+}
+function shuffle(arr){return[...arr].sort(()=>Math.random()-.5)}
+function renderTask(){
+  const t=TASKS[taskIndex];
+  hintIndex=0;
+  taskChip.textContent=chipMap[t.type];
+  taskText.textContent=t.text;
+  stepFirst.hidden=true;
+  stepTriangle.hidden=true;
+  stepEquation.hidden=true;
+  resultStage.hidden=true;
+  triangleFeedback.textContent="";
+  dataFeedback.textContent="";
+  feedback.textContent="";
+  feedback.className="feedback";
+  answerInput.value="";
+  answerUnit.textContent=t.unit;
+  hintText.textContent="Poskusi najprej sam.";
+  hintBtn.textContent="Pokaži namig";
+  prevTask.disabled=taskHistory.length<=1;
+  targetChoices.innerHTML="";
+  document.querySelectorAll("[data-magic]").forEach(b=>b.classList.remove("good","bad"));
+
+  shuffle([
+    {key:"FR",html:'Rezultanto sil F<sub>R</sub>'},
+    {key:"a",html:'Pospešek a'},
+    {key:"m",html:'Maso m'}
+  ]).forEach(opt=>{
+    const b=document.createElement("button");
+    b.type="button";
+    b.className="choice";
+    b.innerHTML=opt.html;
+    b.addEventListener("click",()=>{
+      targetChoices.querySelectorAll("button").forEach(x=>x.classList.remove("good","bad"));
+      if(opt.key===t.target){
+        b.classList.add("good");
+        if(isMulti(t)){
+          stepFirst.hidden=false;
+          renderFirstStep(t);
+        }else{
+          showTriangle(t,2);
+        }
+      }else{
+        b.classList.add("bad");
+      }
+    });
+    targetChoices.appendChild(b);
+  });
+}
+function renderFirstStep(t){
+  firstChoices.innerHTML="";
+  firstStepTitle.textContent="2. Kaj moramo narediti najprej?";
+  shuffle(firstOptions(t)).forEach(opt=>{
+    const b=document.createElement("button");
+    b.type="button";
+    b.className="choice";
+    b.innerHTML=opt.html;
+    b.addEventListener("click",()=>{
+      firstChoices.querySelectorAll("button").forEach(x=>x.classList.remove("good","bad"));
+      if(opt.key===correctFirst(t)){
+        b.classList.add("good");
+        showTriangle(t,3);
+      }else{
+        b.classList.add("bad");
+      }
+    });
+    firstChoices.appendChild(b);
+  });
+}
+
+document.querySelectorAll("[data-magic]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const t=TASKS[taskIndex];
+    document.querySelectorAll("[data-magic]").forEach(b=>b.classList.remove("good","bad"));
+    if(btn.dataset.magic===t.target){
+      btn.classList.add("good");
+      triangleFeedback.textContent="Tako je! Tvoja enačba je pripravljena.";
+      triangleFeedback.className="triangle-feedback ok";
+      openEquation(t,isMulti(t)?4:3);
+    }else{
+      btn.classList.add("bad");
+      triangleFeedback.textContent="Poskusi še enkrat: klikni količino, ki jo iščemo.";
+      triangleFeedback.className="triangle-feedback err";
+      stepEquation.hidden=true;
+    }
+  });
+});
+
+checkDataBtn.addEventListener("click",checkEquationData);
+equationLine.addEventListener("keydown",e=>{
+  if(e.key==="Enter")checkEquationData();
+});
+
+function checkAnswer(){
+  const t=TASKS[taskIndex],v=parseNum(answerInput.value);if(!Number.isFinite(v)){feedback.textContent="Vpiši številski rezultat.";feedback.className="feedback err";return}
+  const tol=Math.max(.015,Math.abs(t.answer)*.003);if(Math.abs(v-t.answer)<=tol){feedback.textContent=`Pravilno. Rezultat je ${fmt(t.answer,3)} ${t.unit}.`;feedback.className="feedback ok"}else{feedback.textContent="Še ne. Preveri račun ali odpri naslednji namig.";feedback.className="feedback err"}
+}
+$("checkBtn").addEventListener("click",checkAnswer);answerInput.addEventListener("keydown",e=>{if(e.key==="Enter")checkAnswer()});
+hintBtn.addEventListener("click",()=>{const hs=hintsFor(TASKS[taskIndex]);hintIndex=Math.min(hintIndex+1,hs.length);hintText.innerHTML=hs[hintIndex-1];hintBtn.textContent=hintIndex>=hs.length?"Zadnji namig":"Naslednji namig"});
+prevTask.addEventListener("click",()=>{if(taskHistory.length<=1)return;taskHistory.pop();taskIndex=taskHistory[taskHistory.length-1];renderTask()});
+nextTask.addEventListener("click",()=>{const recent=new Set(taskHistory.slice(-7));let candidates=TASKS.map((_,i)=>i).filter(i=>i!==taskIndex&&!recent.has(i));if(!candidates.length)candidates=TASKS.map((_,i)=>i).filter(i=>i!==taskIndex);taskIndex=candidates[Math.floor(Math.random()*candidates.length)];taskHistory.push(taskIndex);renderTask()});
+
+setupMode("force");renderTask();
+})();
+</script>
+</body>
+</html>

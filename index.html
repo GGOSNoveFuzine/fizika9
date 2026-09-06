@@ -442,6 +442,53 @@
       text-align:center;
     }
 
+    .chapter-back-content{
+      width:100%;
+    }
+
+    .app-grid{
+      margin-top:22px;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .app-card{
+      min-height:112px;
+      padding:16px 17px;
+      border:1px solid rgba(35,56,74,.14);
+      border-radius:18px;
+      background:#fff;
+      text-decoration:none;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+
+    .app-card:hover{
+      transform:translateY(-2px);
+      border-color:rgba(201,54,87,.32);
+      box-shadow:0 10px 24px rgba(48,52,63,.09);
+    }
+
+    .app-card:focus-visible{
+      outline:3px solid rgba(201,54,87,.25);
+      outline-offset:2px;
+    }
+
+    .app-card strong{
+      font-size:1rem;
+      line-height:1.2;
+    }
+
+    .app-card span{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:.82rem;
+      line-height:1.35;
+    }
+
     .front-content{
       position:absolute;
       left:34px;
@@ -701,6 +748,7 @@
       .section-heading p{margin-top:12px}
       .review-card{padding:24px}
       .back-row{grid-template-columns:1fr}
+      .app-grid{grid-template-columns:1fr}
       .status{justify-self:start}
       .chapter-action{align-items:flex-start;flex-direction:column}
       .chapter-action p{max-width:none}
@@ -828,8 +876,35 @@
                 </span>
               </button>
 
-              <div class="chapter-face chapter-back" role="button" tabindex="0" aria-label="V pripravi. Obrni kartico nazaj.">
-                <div class="coming-soon">V pripravi</div>
+              <div class="chapter-face chapter-back" role="button" tabindex="0" aria-label="Aplikacije za poglavje Pospešeno gibanje.">
+                <div class="chapter-back-content">
+                  <div class="back-top">
+                    <div>
+                      <small>1. poglavje</small>
+                      <h3>Pospešeno gibanje</h3>
+                    </div>
+                    <button class="close-card" type="button" aria-label="Zapri kartico">×</button>
+                  </div>
+
+                  <div class="app-grid">
+                    <a class="app-card" href="pospeseno_gibanje.html">
+                      <strong>Pospešeno gibanje</strong>
+                      <span>Dirka pospeškov, grafi in računanje</span>
+                    </a>
+                    <a class="app-card" href="prosti_pad.html">
+                      <strong>Prosti pad</strong>
+                      <span>Hitrost, čas, pot in gravitacijski pospešek</span>
+                    </a>
+                    <a class="app-card" href="zveza_masa_teza.html">
+                      <strong>Masa in teža</strong>
+                      <span>Masa, gravitacijski pospešek in teža</span>
+                    </a>
+                    <a class="app-card" href="drugi_newtonov_zakon.html">
+                      <strong>2. Newtonov zakon</strong>
+                      <span>Sila, masa in pospešek</span>
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </article>
@@ -1082,6 +1157,11 @@
             closeBack();
           }
         });
+      });
+
+      document.querySelectorAll(".app-card").forEach(link => {
+        link.addEventListener("click", event => event.stopPropagation());
+        link.addEventListener("keydown", event => event.stopPropagation());
       });
 
       document.addEventListener("keydown", event => {

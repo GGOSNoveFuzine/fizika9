@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zveza med maso in težo – Fizika 9</title>
+<meta name="description" content="Interaktivni prikaz zveze med maso, gravitacijskim pospeškom in težo ter vpliva atmosfere na padanje.">
+<meta name="theme-color" content="#efe0cc">
+<style>
+:root{
+  --sand:#efe0cc;
+  --sand2:#f8eee0;
+  --paper:#fffdf8;
+  --ink:#253746;
+  --muted:#6f7b82;
+  --line:#ded4c5;
+  --navy:#263f59;
+  --teal:#188b8b;
+  --teal2:#42b8ad;
+  --rust:#c7683d;
+  --gold:#e9ae43;
+  --blue:#4385c4;
+  --green:#287e61;
+  --red:#aa4438;
+  --shadow:0 20px 56px rgba(73,56,38,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 8% 0%,rgba(199,104,61,.14),transparent 28rem),
+    radial-gradient(circle at 94% 15%,rgba(67,133,196,.12),transparent 25rem),
+    var(--sand);
+  font:16px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.wrap{width:min(1500px,calc(100% - 54px));margin:0 auto 78px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 0 12px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:950}
+.brand-mark{
+  width:46px;height:46px;border-radius:15px;display:grid;place-items:center;
+  background:var(--navy);color:#fff;font-weight:950
+}
+.back{
+  text-decoration:none;border:1px solid #d3c7b8;border-radius:999px;
+  padding:10px 15px;background:#ffffffa8;font-weight:850
+}
+.hero{
+  display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:end;padding:32px 0 26px
+}
+.eyebrow{
+  color:var(--rust);font-size:.78rem;font-weight:950;letter-spacing:.15em;text-transform:uppercase
+}
+h1{
+  margin:7px 0 11px;font:700 clamp(3.4rem,7vw,7rem)/.93 Georgia,"Times New Roman",serif;
+  letter-spacing:-.055em
+}
+.hero p{margin:0;color:var(--muted);font-size:1.12rem;max-width:70ch}
+.hero-note{
+  border-left:4px solid var(--rust);padding:8px 0 8px 19px;color:var(--muted);font-weight:700
+}
+.panel{
+  background:rgba(255,253,248,.96);border:1px solid rgba(37,55,70,.12);
+  border-radius:26px;box-shadow:var(--shadow)
+}
+.sim-panel,.tasks-panel{padding:25px}
+.section-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px
+}
+.section-head h2{
+  margin:0;font:700 clamp(2rem,3.5vw,3.35rem)/1 Georgia,"Times New Roman",serif;letter-spacing:-.035em
+}
+.section-head p{margin:7px 0 0;color:var(--muted)}
+
+/* mode switch — dva big obvious choices, ker hidden options = bad UX */
+.mode-switch{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px
+}
+.mode-btn{
+  border:2px solid var(--line);border-radius:20px;background:#fff;padding:18px 20px;
+  text-align:left;color:var(--ink);font-size:1.17rem;font-weight:950
+}
+.mode-btn small{display:block;margin-top:4px;color:var(--muted);font-size:.86rem;font-weight:700}
+.mode-btn.active{
+  border-color:var(--rust);background:linear-gradient(135deg,#fff1e7,#fff);
+  box-shadow:0 9px 23px rgba(199,104,61,.12)
+}
+
+.sim-grid{
+  display:grid;grid-template-columns:minmax(350px,.82fr) minmax(660px,1.55fr);gap:18px
+}
+.controls{display:flex;flex-direction:column;gap:13px}
+.control-card{
+  position:relative;border:1px solid var(--line);border-radius:21px;background:#fff;padding:19px
+}
+.control-card.locked{background:#f5f2ec}
+.lock{
+  position:absolute;right:15px;top:13px;border-radius:999px;padding:6px 9px;
+  background:#e7e3dd;color:#68736e;font-size:.77rem;font-weight:900
+}
+.label{
+  text-transform:uppercase;letter-spacing:.09em;font-size:.79rem;font-weight:950;color:var(--muted)
+}
+.big-value{
+  margin-top:2px;font-size:clamp(2.8rem,4.7vw,4.8rem);font-weight:950;letter-spacing:-.055em
+}
+.slider-row{
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:17px;margin-top:16px
+}
+.step-btn{
+  width:56px;height:56px;border:1px solid #d3c7b8;border-radius:18px;background:#fff;
+  color:var(--navy);font-size:1.75rem;font-weight:950
+}
+.range{
+  -webkit-appearance:none;appearance:none;width:100%;height:18px;border-radius:999px;
+  background:linear-gradient(90deg,var(--rust) 0%,var(--rust) var(--fill,50%),#e9e3da var(--fill,50%),#e9e3da 100%);
+  border:1px solid #d8cec1;outline:none
+}
+.range::-webkit-slider-runnable-track{height:18px;background:transparent;border-radius:999px}
+.range::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:38px;height:38px;border-radius:50%;margin-top:-10px;
+  background:var(--rust);border:4px solid #fff;box-shadow:0 6px 15px rgba(199,104,61,.26)
+}
+.range::-moz-range-track{height:18px;border-radius:999px;background:#e9e3da}
+.range::-moz-range-progress{height:18px;border-radius:999px;background:var(--rust)}
+.range::-moz-range-thumb{width:38px;height:38px;border-radius:50%;background:var(--rust);border:4px solid #fff}
+
+.planets{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:13px}
+.planet-btn{
+  border:1px solid var(--line);border-radius:17px;background:#fff;padding:13px 9px;
+  color:var(--ink);font-weight:900
+}
+.planet-btn span{display:block;font-size:1.9rem;margin-bottom:3px}
+.planet-btn small{display:block;color:var(--muted);font-weight:800}
+.planet-btn.active{border:2px solid var(--rust);background:#fff5ec}
+
+.atmosphere-card{
+  border:1px solid #d6d0c8;border-radius:21px;background:#fff;padding:18px
+}
+.atmo-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.atmo-readout{text-align:right}
+.atmo-readout strong{display:block;font-size:1.05rem}
+.atmo-readout small{color:var(--muted);font-weight:750}
+.atmo-scale{
+  display:flex;justify-content:space-between;margin-top:7px;color:var(--muted);font-size:.8rem;font-weight:850
+}
+.atmo-note{
+  margin-top:11px;border-radius:14px;background:#f1f5f6;border:1px solid #d7e0e3;
+  padding:10px 12px;color:#53676f;font-size:.9rem;font-weight:780
+}
+
+.summary-card{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  border:1px solid var(--line);border-radius:21px;background:#fff;padding:13px
+}
+.summary-box{border-radius:15px;background:#faf5ee;padding:11px}
+.summary-box small{display:block;color:var(--muted);font-weight:800}
+.summary-box strong{display:block;margin-top:3px;font-size:1.3rem;color:var(--navy)}
+
+.drop-btn{
+  border:0;border-radius:19px;padding:19px 23px;width:100%;
+  background:linear-gradient(135deg,var(--rust),#d9874d);color:#fff;
+  font-size:1.4rem;font-weight:950;box-shadow:0 12px 25px rgba(199,104,61,.22)
+}
+.drop-btn:disabled{opacity:.48;cursor:not-allowed}
+
+/* world / stage */
+.world{
+  --worldTop:#4a86b8;
+  --worldBottom:#95c5d1;
+  --ground:#55764c;
+  position:relative;
+  min-height:720px;
+  overflow:hidden;
+  border-radius:24px;
+  border:1px solid #384d5c;
+  background:linear-gradient(180deg,var(--worldTop),var(--worldBottom));
+  box-shadow:inset 0 0 64px rgba(0,0,0,.10)
+}
+.world.earth{--worldTop:#407caf;--worldBottom:#9acbd4;--ground:#547349}
+.world.mars{--worldTop:#8d503d;--worldBottom:#d69c70;--ground:#75402d}
+.world.moon{--worldTop:#2d3240;--worldBottom:#676b74;--ground:#69665f}
+.world.venus{--worldTop:#9a6338;--worldBottom:#e0b36e;--ground:#8a5932}
+.world.jupiter{--worldTop:#6f5549;--worldBottom:#c59f7a;--ground:#796252}
+.world.pluto{--worldTop:#252d3c;--worldBottom:#887a72;--ground:#a08f83}
+.world-title{
+  position:absolute;left:22px;top:17px;color:#fff;font-weight:950;font-size:1.08rem
+}
+.world-sub{
+  position:absolute;left:22px;top:46px;color:#ffffffcf;font-size:.84rem;font-weight:750
+}
+.drop-path{
+  position:absolute;left:105px;right:205px;top:80px;bottom:62px
+}
+.body{
+  position:absolute;left:50%;top:0;width:30px;height:30px;border-radius:50%;
+  transform:translate3d(-50%,0,0);
+  background:linear-gradient(145deg,#fff2b8,#e6a43d);
+  border:3px solid #fff4cb;
+  box-shadow:0 0 0 7px rgba(255,238,170,.10);
+  will-change:transform;backface-visibility:hidden
+}
+.body-tag{
+  position:absolute;left:calc(50% + 33px);top:-3px;white-space:nowrap;
+  background:#fff;border-radius:12px;padding:7px 10px;color:var(--navy);
+  font-weight:950;box-shadow:0 6px 17px rgba(0,0,0,.15);
+  will-change:transform;backface-visibility:hidden
+}
+.trace{
+  position:absolute;left:50%;width:24px;height:24px;border-radius:50%;
+  transform:translate(-50%,-50%);background:rgba(255,255,255,.55);
+  box-shadow:0 0 0 5px rgba(255,255,255,.08)
+}
+.trace span{
+  position:absolute;left:29px;top:-4px;white-space:nowrap;color:#fff;font-size:.78rem;font-weight:850
+}
+.ground{
+  position:absolute;left:0;right:0;bottom:0;height:56px;background:var(--ground);
+  border-top:5px solid rgba(255,255,255,.26)
+}
+.clock{
+  position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+  color:#fff;font-size:1.45rem;font-weight:950;font-variant-numeric:tabular-nums
+}
+
+/* forces = close to object, spatial contiguity ftw */
+.force-hud{
+  position:absolute;right:20px;top:90px;width:165px;border-radius:19px;
+  background:#ffffffed;padding:14px;color:var(--navy);box-shadow:0 10px 24px rgba(0,0,0,.14)
+}
+.force-hud-title{font-size:.77rem;text-transform:uppercase;letter-spacing:.08em;font-weight:950;color:#65757c}
+.force-row{margin-top:11px}
+.force-row strong{display:flex;justify-content:space-between;gap:8px;font-size:.98rem}
+.arrow-down,.arrow-up{
+  position:relative;width:11px;border-radius:8px;margin:7px auto 0
+}
+.arrow-down{height:var(--fgArrow,80px);background:var(--rust)}
+.arrow-down::after{
+  content:"";position:absolute;left:50%;bottom:-15px;transform:translateX(-50%);
+  border-top:20px solid var(--rust);border-left:13px solid transparent;border-right:13px solid transparent
+}
+.arrow-up{height:var(--dragArrow,0px);background:var(--teal2);margin-top:23px}
+.arrow-up::after{
+  content:"";position:absolute;left:50%;top:-15px;transform:translateX(-50%);
+  border-bottom:20px solid var(--teal2);border-left:13px solid transparent;border-right:13px solid transparent
+}
+.drag-row{display:none}.drag-row.show{display:block}
+.physics-status{
+  margin-top:15px;border-top:1px solid #d9e0e1;padding-top:11px;color:#52676f;font-size:.86rem;font-weight:780
+}
+
+/* discovery */
+.discovery{
+  margin-top:16px;padding:17px;border:1px solid #e4c8b3;border-radius:20px;background:#fff5ec
+}
+.discovery strong{display:block;font-size:1.05rem}
+.discovery-formula{
+  display:inline-block;margin-top:7px;border-radius:13px;background:#fff;padding:8px 12px;
+  border:1px solid #e2cabc;font-size:1.22rem;font-weight:950
+}
+
+/* solver */
+.tasks-panel{margin-top:34px;background:#fff9ef}
+.task-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:20px}
+.task-card{border:1px solid var(--line);border-radius:21px;background:#fff;padding:22px}
+.task-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.task-heading{font-weight:950;font-size:1.16rem}
+.task-chip{border-radius:999px;padding:6px 10px;background:#f3ece4;font-size:.82rem;font-weight:900}
+.task-text{margin:22px 0;font:650 1.28rem/1.55 Georgia,"Times New Roman",serif;color:#263b47}
+.step{margin-top:14px;border-top:1px dashed var(--line);padding-top:15px}
+.step h3{margin:0 0 10px;font-size:1rem}
+.choices{display:flex;gap:8px;flex-wrap:wrap}
+.choice{
+  border:1px solid var(--line);border-radius:13px;background:#fff;padding:10px 14px;color:var(--ink);font-weight:850
+}
+.choice.good{background:#e8f7ef;border-color:#8fd4b3;color:#146345}
+.choice.bad{background:#fff0ee;border-color:#e7aaa3;color:#91382f}
+.magic-wrap{
+  display:grid;grid-template-columns:minmax(280px,410px) minmax(250px,1fr);gap:22px;align-items:center
+}
+.magic-triangle{position:relative;width:min(100%,385px);aspect-ratio:1.18/1;margin:8px auto}
+.magic-triangle svg{position:absolute;inset:0;width:100%;height:100%}
+.magic-btn{
+  position:absolute;width:96px;height:70px;border:2px solid #cdbdaf;border-radius:18px;background:#fff;
+  color:var(--ink);font-size:1.55rem;font-weight:950;box-shadow:0 7px 16px rgba(58,45,31,.10);z-index:2
+}
+.magic-btn.good{background:#e6f7f2;border-color:#65c8b7;color:#12675e}
+.magic-btn.bad{background:#fff0ee;border-color:#e5a69e;color:#96392f}
+.magic-btn.fg{left:50%;top:17%;transform:translate(-50%,-50%)}
+.magic-btn.m{left:28%;bottom:9%;transform:translate(-50%,50%)}
+.magic-btn.g{left:72%;bottom:9%;transform:translate(-50%,50%)}
+.magic-help{border-left:4px solid var(--rust);padding:11px 0 11px 16px;color:var(--muted);font-weight:750}
+.magic-help strong{display:block;color:var(--ink);font-size:1.07rem}
+.step-feedback{min-height:28px;margin-top:8px;font-weight:850;color:var(--muted)}
+.step-feedback.ok{color:var(--green)}.step-feedback.err{color:var(--red)}
+.equation-card{border:1px solid #ded6cc;border-radius:18px;background:#faf8f4;padding:18px}
+.equation-line{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:1.25rem;font-weight:950}
+.eq-input{
+  width:122px;border:2px solid #cfc5b9;border-radius:12px;padding:9px 11px;background:#fff;
+  color:var(--ink);font-size:1.08rem;font-weight:900;text-align:center
+}
+.eq-input.good{background:#effaf5;border-color:#68c2a2}
+.eq-input.bad{background:#fff3f1;border-color:#e4a19a}
+.eq-unit{font-size:.93rem;color:#5d6c74;font-weight:850}
+.answer-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:13px}
+.answer-input{
+  width:180px;border:2px solid #cfc5b9;border-radius:12px;padding:11px 13px;
+  color:var(--ink);font-size:1.12rem;font-weight:900
+}
+.answer-unit{font-weight:950}
+.feedback{min-height:31px;margin-top:10px;font-weight:850}
+.feedback.ok{color:var(--green)}.feedback.err{color:var(--red)}
+.result-stage{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+.btn{border:0;border-radius:999px;padding:12px 18px;background:var(--navy);color:#fff;font-weight:900}
+.btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.task-nav{display:flex;gap:10px;margin-top:18px}.task-nav .btn{min-width:145px}
+.help-card{border-radius:21px;background:#31485a;color:#fff;padding:21px;min-height:250px}
+.help-card h3{margin:0 0 8px;font:700 1.55rem/1.1 Georgia,serif}
+.help-card p{margin:0 0 14px;color:#dce5e9}
+.help-text{min-height:96px;border:1px solid #ffffff22;border-radius:14px;background:#ffffff12;padding:13px;margin-top:12px}
+footer{padding:29px 0;color:var(--muted);text-align:center;font-size:.92rem}
+
+@media(max-width:1100px){
+  .hero{grid-template-columns:1fr}
+  .sim-grid{grid-template-columns:1fr}
+  .task-layout{grid-template-columns:1fr}
+  .magic-wrap{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .wrap{width:min(100% - 22px,1500px)}
+  .sim-panel,.tasks-panel{padding:15px}
+  .mode-switch{grid-template-columns:1fr}
+  .world{min-width:720px}
+  .sim-grid{overflow:auto}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark">F9</span><span>Fizika 9</span></a>
+    <a class="back" href="index.html">← Nazaj na poglavja</a>
+  </div>
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Masa · gravitacijski pospešek · teža</div>
+      <h1>Zveza med maso in težo</h1>
+      <p>Spremeni maso ali planet. Opazuj, kako se spremeni teža telesa — in kaj pri padanju naredi atmosfera.</p>
+    </div>
+    <div class="hero-note">Atmosfera spremeni gibanje, ne pa teže telesa.</div>
+  </header>
+
+  <main>
+    <section class="panel sim-panel" aria-labelledby="simTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="simTitle">1 · Opazuj povezavo</h2>
+          <p>Izberi, katero količino želiš spreminjati.</p>
+        </div>
+      </div>
+
+      <div class="mode-switch">
+        <button class="mode-btn active" type="button" data-mode="mass">
+          Spremeni maso
+          <small>Zemlja ostane enaka.</small>
+        </button>
+        <button class="mode-btn" type="button" data-mode="planet">
+          Spremeni planet
+          <small>Masa ostane enaka.</small>
+        </button>
+      </div>
+
+      <div class="sim-grid">
+        <div class="controls">
+          <div class="control-card" id="massCard">
+            <span class="label">Masa</span>
+            <div class="big-value" id="massValue">10 kg</div>
+            <div class="slider-row" id="massSliderRow">
+              <button class="step-btn" id="massMinus" type="button">−</button>
+              <input class="range" id="massSlider" type="range" min="1" max="50" step="1" value="10">
+              <button class="step-btn" id="massPlus" type="button">+</button>
+            </div>
+            <span class="lock" id="massLock" hidden>🔒 nespremenjeno</span>
+          </div>
+
+          <div class="control-card" id="planetCard">
+            <span class="label">Planet</span>
+            <div class="planets">
+              <button class="planet-btn active" type="button" data-planet="earth" title="Zemlja"><span>🌍</span>Zemlja<small>g = 9,81</small></button>
+              <button class="planet-btn" type="button" data-planet="mars" title="Mars"><span>🔴</span>Mars<small>g = 3,70</small></button>
+              <button class="planet-btn" type="button" data-planet="moon" title="Luna"><span>🌕</span>Luna<small>g = 1,63</small></button>
+              <button class="planet-btn" type="button" data-planet="venus" title="Venera – zelo gosta atmosfera"><span>🟠</span>Venera<small>g = 8,87</small></button>
+              <button class="planet-btn" type="button" data-planet="jupiter" title="Jupiter – referenčna raven oblakov pri približno 1 baru"><span>🟤</span>Jupiter<small>g = 24,79</small></button>
+              <button class="planet-btn" type="button" data-planet="pluto" title="Pluton – pritlikavi planet"><span>⚪</span>Pluton<small>g = 0,62</small></button>
+            </div>
+            <span class="lock" id="planetLock">🔒 nespremenjeno</span>
+          </div>
+
+          <div class="atmosphere-card">
+            <div class="atmo-top">
+              <div>
+                <span class="label">Atmosfera</span>
+                <div style="font-weight:950;font-size:1.18rem;margin-top:3px" id="atmoTitle">Vakum</div>
+              </div>
+              <div class="atmo-readout">
+                <strong id="rhoValue">ρ = 0,000 kg/m³</strong>
+                <small id="rhoMax">realno: 1,225 kg/m³</small>
+              </div>
+            </div>
+            <input class="range" id="atmoSlider" type="range" min="0" max="100" step="5" value="0" style="margin-top:17px">
+            <div class="atmo-scale"><span>VAKUM</span><span>REALISTIČNO</span></div>
+            <div class="atmo-note" id="atmoNote">V vakumu na telo med padanjem deluje le teža.</div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-box"><small>m</small><strong id="sumMass">10 kg</strong></div>
+            <div class="summary-box"><small>g</small><strong id="sumG">9,81 m/s²</strong></div>
+            <div class="summary-box"><small>F<sub>g</sub></small><strong id="sumWeight">98,1 N</strong></div>
+          </div>
+
+          <button class="drop-btn" id="dropBtn" type="button">SPUSTI</button>
+
+          <div class="discovery">
+            <strong>Kaj ostane vedno res?</strong>
+            <div class="discovery-formula">F<sub>g</sub> = m · g</div>
+          </div>
+        </div>
+
+        <div class="world earth" id="world">
+          <div class="world-title" id="worldTitle">Zemlja</div>
+          <div class="world-sub" id="worldSub">Višina padca: 40 m · točke na vsakih 0,5 s</div>
+
+          <div class="drop-path" id="dropPath">
+            <div id="traceLayer"></div>
+            <div class="body" id="body"></div>
+            <div class="body-tag" id="bodyTag">0,0 m/s</div>
+          </div>
+
+          <div class="force-hud">
+            <div class="force-hud-title">Sile na telo</div>
+            <div class="force-row">
+              <strong><span>↓ F<sub>g</sub></span><span id="hudWeight">98,1 N</span></strong>
+              <div class="arrow-down" id="weightArrow"></div>
+            </div>
+            <div class="force-row drag-row" id="dragRow">
+              <strong><span>↑ F<sub>u</sub></span><span id="hudDrag">0 N</span></strong>
+              <div class="arrow-up" id="dragArrow"></div>
+            </div>
+            <div class="physics-status" id="physicsStatus">Vakum: a = g</div>
+          </div>
+
+          <div class="clock" id="clock">t = 0,00 s</div>
+          <div class="ground"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel tasks-panel" aria-labelledby="tasksTitle">
+      <div class="section-head">
+        <div>
+          <h2 id="tasksTitle">2 · Računanje po korakih</h2>
+          <p>Uporabi isti odnos med maso, gravitacijskim pospeškom in težo.</p>
+        </div>
+      </div>
+
+      <div class="task-layout">
+        <div class="task-card">
+          <div class="task-top">
+            <span class="task-heading">Računska naloga</span>
+            <span class="task-chip" id="taskChip"></span>
+          </div>
+
+          <div class="task-text" id="taskText"></div>
+
+          <div class="step">
+            <h3>1. Kaj moramo izračunati?</h3>
+            <div class="choices" id="targetChoices"></div>
+          </div>
+
+          <div class="step" id="stepMagic" hidden>
+            <h3>2. V magičnem trikotniku klikni količino, ki jo iščemo.</h3>
+            <div class="magic-wrap">
+              <div>
+                <div class="magic-triangle">
+                  <svg viewBox="0 0 360 305" aria-hidden="true">
+                    <path d="M180 18 L338 280 L22 280 Z" fill="#fffaf4" stroke="#c7683d" stroke-width="6"/>
+                    <line x1="73" y1="185" x2="287" y2="185" stroke="#c7683d" stroke-width="5"/>
+                    <line x1="180" y1="185" x2="180" y2="280" stroke="#c7683d" stroke-width="5"/>
+                  </svg>
+                  <button class="magic-btn fg" type="button" data-magic="Fg">F<sub>g</sub></button>
+                  <button class="magic-btn m" type="button" data-magic="m">m</button>
+                  <button class="magic-btn g" type="button" data-magic="g">g</button>
+                </div>
+                <div class="step-feedback" id="magicFeedback"></div>
+              </div>
+              <div class="magic-help">
+                <strong>F<sub>g</sub> = m · g</strong>
+                Klikni količino, ki jo iščeš. Trikotnik sestavi pravo enačbo.
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="stepEquation" hidden>
+            <h3>3. Vstavi podatke.</h3>
+            <div class="equation-card">
+              <div class="equation-line" id="equationLine"></div>
+              <button class="btn" id="checkDataBtn" type="button" style="margin-top:14px">Preveri podatke</button>
+              <div class="step-feedback" id="dataFeedback"></div>
+
+              <div class="result-stage" id="resultStage" hidden>
+                <strong>Izračunaj rezultat.</strong>
+                <div class="answer-row">
+                  <input class="answer-input" id="answerInput" inputmode="decimal" autocomplete="off" placeholder="rezultat">
+                  <span class="answer-unit" id="answerUnit"></span>
+                  <button class="btn" id="checkAnswerBtn" type="button">Preveri rezultat</button>
+                </div>
+                <div class="feedback" id="feedback"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-nav">
+            <button class="btn secondary" id="prevTask" type="button">← Prejšnja</button>
+            <button class="btn secondary" id="nextTask" type="button">Naslednja →</button>
+          </div>
+        </div>
+
+        <aside class="help-card">
+          <h3>Pomoč pri računanju</h3>
+          <p>Namig se razkriva po korakih.</p>
+          <button class="btn secondary" id="hintBtn" type="button">Pokaži namig</button>
+          <div class="help-text" id="hintText">Poskusi najprej sam.</div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer>Fizika 9 · Zveza med maso in težo · opazuj povezavo → računaj</footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+const TASKS=[{"id": 1, "type": "weight", "text": "Telo z maso 1 kg je na površju planeta Zemlja. Kolikšna je njegova teža? Uporabi g = 9,81 m/s².", "target": "Fg", "answer": 9.81, "unit": "N", "planet": "Zemlja", "m": 1, "g": 9.81}, {"id": 2, "type": "weight", "text": "Telo z maso 2 kg je na površju planeta Zemlja. Kolikšna je njegova teža? Uporabi g = 9,81 m/s².", "target": "Fg", "answer": 19.62, "unit": "N", "planet": "Zemlja", "m": 2, "g": 9.81}, {"id": 3, "type": "weight", "text": "Telo z maso 5 kg je v izbranem referenčnem območju sveta Venera. Kolikšna je njegova teža? Uporabi g = 8,87 m/s².", "target": "Fg", "answer": 44.35, "unit": "N", "planet": "Venera", "m": 5, "g": 8.87}, {"id": 4, "type": "weight", "text": "Telo z maso 10 kg je na površju planeta Zemlja. Kolikšna je njegova teža? Uporabi g = 9,81 m/s².", "target": "Fg", "answer": 98.1, "unit": "N", "planet": "Zemlja", "m": 10, "g": 9.81}, {"id": 5, "type": "weight", "text": "Telo z maso 20 kg je na površju planeta Zemlja. Kolikšna je njegova teža? Uporabi g = 9,81 m/s².", "target": "Fg", "answer": 196.2, "unit": "N", "planet": "Zemlja", "m": 20, "g": 9.81}, {"id": 6, "type": "weight", "text": "Telo z maso 10 kg je v izbranem referenčnem območju sveta Jupiter. Kolikšna je njegova teža? Uporabi g = 24,79 m/s².", "target": "Fg", "answer": 247.9, "unit": "N", "planet": "Jupiter", "m": 10, "g": 24.79}, {"id": 7, "type": "weight", "text": "Telo z maso 1 kg je na površju planeta Mars. Kolikšna je njegova teža? Uporabi g = 3,7 m/s².", "target": "Fg", "answer": 3.7, "unit": "N", "planet": "Mars", "m": 1, "g": 3.7}, {"id": 8, "type": "weight", "text": "Telo z maso 2 kg je na površju planeta Mars. Kolikšna je njegova teža? Uporabi g = 3,7 m/s².", "target": "Fg", "answer": 7.4, "unit": "N", "planet": "Mars", "m": 2, "g": 3.7}, {"id": 9, "type": "weight", "text": "Telo z maso 10 kg je v izbranem referenčnem območju sveta Pluton. Kolikšna je njegova teža? Uporabi g = 0,62 m/s².", "target": "Fg", "answer": 6.2, "unit": "N", "planet": "Pluton", "m": 10, "g": 0.62}, {"id": 10, "type": "weight", "text": "Telo z maso 10 kg je na površju planeta Mars. Kolikšna je njegova teža? Uporabi g = 3,7 m/s².", "target": "Fg", "answer": 37.0, "unit": "N", "planet": "Mars", "m": 10, "g": 3.7}, {"id": 11, "type": "weight", "text": "Telo z maso 20 kg je na površju planeta Mars. Kolikšna je njegova teža? Uporabi g = 3,7 m/s².", "target": "Fg", "answer": 74.0, "unit": "N", "planet": "Mars", "m": 20, "g": 3.7}, {"id": 12, "type": "weight", "text": "Telo z maso 50 kg je na površju planeta Mars. Kolikšna je njegova teža? Uporabi g = 3,7 m/s².", "target": "Fg", "answer": 185.0, "unit": "N", "planet": "Mars", "m": 50, "g": 3.7}, {"id": 13, "type": "weight", "text": "Telo z maso 1 kg je na površju planeta Luna. Kolikšna je njegova teža? Uporabi g = 1,63 m/s².", "target": "Fg", "answer": 1.63, "unit": "N", "planet": "Luna", "m": 1, "g": 1.63}, {"id": 14, "type": "weight", "text": "Telo z maso 2 kg je na površju planeta Luna. Kolikšna je njegova teža? Uporabi g = 1,63 m/s².", "target": "Fg", "answer": 3.26, "unit": "N", "planet": "Luna", "m": 2, "g": 1.63}, {"id": 15, "type": "weight", "text": "Telo z maso 5 kg je na površju planeta Luna. Kolikšna je njegova teža? Uporabi g = 1,63 m/s².", "target": "Fg", "answer": 8.15, "unit": "N", "planet": "Luna", "m": 5, "g": 1.63}, {"id": 16, "type": "weight", "text": "Telo z maso 10 kg je na površju planeta Luna. Kolikšna je njegova teža? Uporabi g = 1,63 m/s².", "target": "Fg", "answer": 16.3, "unit": "N", "planet": "Luna", "m": 10, "g": 1.63}, {"id": 17, "type": "weight", "text": "Telo z maso 20 kg je na površju planeta Luna. Kolikšna je njegova teža? Uporabi g = 1,63 m/s².", "target": "Fg", "answer": 32.6, "unit": "N", "planet": "Luna", "m": 20, "g": 1.63}, {"id": 18, "type": "weight", "text": "Telo z maso 50 kg je na površju planeta Luna. Kolikšna je njegova teža? Uporabi g = 1,63 m/s².", "target": "Fg", "answer": 81.5, "unit": "N", "planet": "Luna", "m": 50, "g": 1.63}, {"id": 19, "type": "weight", "text": "Telo z maso 200 g je na površju planeta Zemlja. Kolikšna je njegova teža? Uporabi g = 9,81 m/s².", "target": "Fg", "answer": 1.962, "unit": "N", "planet": "Zemlja", "m": 0.2, "g": 9.81}, {"id": 20, "type": "weight", "text": "Telo z maso 500 g je na površju planeta Mars. Kolikšna je njegova teža? Uporabi g = 3,7 m/s².", "target": "Fg", "answer": 1.85, "unit": "N", "planet": "Mars", "m": 0.5, "g": 3.7}, {"id": 21, "type": "mass", "text": "Na površju planeta Zemlja ima telo težo 19,62 N. Kolikšna je njegova masa? Uporabi g = 9,81 m/s².", "target": "m", "answer": 2.0, "unit": "kg", "planet": "Zemlja", "Fg": 19.62, "g": 9.81}, {"id": 22, "type": "mass", "text": "Na površju planeta Zemlja ima telo težo 39,24 N. Kolikšna je njegova masa? Uporabi g = 9,81 m/s².", "target": "m", "answer": 4.0, "unit": "kg", "planet": "Zemlja", "Fg": 39.24, "g": 9.81}, {"id": 23, "type": "mass", "text": "Na površju planeta Zemlja ima telo težo 78,48 N. Kolikšna je njegova masa? Uporabi g = 9,81 m/s².", "target": "m", "answer": 8.0, "unit": "kg", "planet": "Zemlja", "Fg": 78.48, "g": 9.81}, {"id": 24, "type": "mass", "text": "Na površju planeta Zemlja ima telo težo 117,72 N. Kolikšna je njegova masa? Uporabi g = 9,81 m/s².", "target": "m", "answer": 12.0, "unit": "kg", "planet": "Zemlja", "Fg": 117.72, "g": 9.81}, {"id": 25, "type": "mass", "text": "Telo ima v izbranem referenčnem območju sveta Venera težo 70,96 N. Kolikšna je njegova masa? Uporabi g = 8,87 m/s².", "target": "m", "answer": 8.0, "unit": "kg", "planet": "Venera", "Fg": 70.96, "g": 8.87}, {"id": 26, "type": "mass", "text": "Na površju planeta Mars ima telo težo 7,4 N. Kolikšna je njegova masa? Uporabi g = 3,7 m/s².", "target": "m", "answer": 2.0, "unit": "kg", "planet": "Mars", "Fg": 7.4, "g": 3.7}, {"id": 27, "type": "mass", "text": "Na površju planeta Mars ima telo težo 18,5 N. Kolikšna je njegova masa? Uporabi g = 3,7 m/s².", "target": "m", "answer": 5.0, "unit": "kg", "planet": "Mars", "Fg": 18.5, "g": 3.7}, {"id": 28, "type": "mass", "text": "Telo ima v izbranem referenčnem območju sveta Pluton težo 12,4 N. Kolikšna je njegova masa? Uporabi g = 0,62 m/s².", "target": "m", "answer": 20.0, "unit": "kg", "planet": "Pluton", "Fg": 12.4, "g": 0.62}, {"id": 29, "type": "mass", "text": "Na površju planeta Mars ima telo težo 74,0 N. Kolikšna je njegova masa? Uporabi g = 3,7 m/s².", "target": "m", "answer": 20.0, "unit": "kg", "planet": "Mars", "Fg": 74.0, "g": 3.7}, {"id": 30, "type": "mass", "text": "Na površju planeta Mars ima telo težo 148,0 N. Kolikšna je njegova masa? Uporabi g = 3,7 m/s².", "target": "m", "answer": 40.0, "unit": "kg", "planet": "Mars", "Fg": 148.0, "g": 3.7}, {"id": 31, "type": "mass", "text": "Na površju planeta Luna ima telo težo 3,26 N. Kolikšna je njegova masa? Uporabi g = 1,63 m/s².", "target": "m", "answer": 2.0, "unit": "kg", "planet": "Luna", "Fg": 3.26, "g": 1.63}, {"id": 32, "type": "mass", "text": "Na površju planeta Luna ima telo težo 8,15 N. Kolikšna je njegova masa? Uporabi g = 1,63 m/s².", "target": "m", "answer": 5.0, "unit": "kg", "planet": "Luna", "Fg": 8.149999999999999, "g": 1.63}, {"id": 33, "type": "mass", "text": "Na površju planeta Luna ima telo težo 16,3 N. Kolikšna je njegova masa? Uporabi g = 1,63 m/s².", "target": "m", "answer": 10.0, "unit": "kg", "planet": "Luna", "Fg": 16.299999999999997, "g": 1.63}, {"id": 34, "type": "mass", "text": "Na površju planeta Luna ima telo težo 32,6 N. Kolikšna je njegova masa? Uporabi g = 1,63 m/s².", "target": "m", "answer": 20.0, "unit": "kg", "planet": "Luna", "Fg": 32.599999999999994, "g": 1.63}, {"id": 35, "type": "mass", "text": "Na površju planeta Luna ima telo težo 81,5 N. Kolikšna je njegova masa? Uporabi g = 1,63 m/s².", "target": "m", "answer": 50.0, "unit": "kg", "planet": "Luna", "Fg": 81.5, "g": 1.63}, {"id": 36, "type": "gravity", "text": "Telo z maso 2 kg ima na površju planeta Zemlja težo 19,62 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 9.81, "unit": "m/s²", "planet": "Zemlja", "Fg": 19.62, "m": 2}, {"id": 37, "type": "gravity", "text": "Telo z maso 5 kg ima na površju planeta Zemlja težo 49,05 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 9.81, "unit": "m/s²", "planet": "Zemlja", "Fg": 49.050000000000004, "m": 5}, {"id": 38, "type": "gravity", "text": "Telo z maso 10 kg ima na površju planeta Zemlja težo 98,1 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 9.81, "unit": "m/s²", "planet": "Zemlja", "Fg": 98.10000000000001, "m": 10}, {"id": 39, "type": "gravity", "text": "Telo z maso 20 kg ima na površju planeta Zemlja težo 196,2 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 9.81, "unit": "m/s²", "planet": "Zemlja", "Fg": 196.20000000000002, "m": 20}, {"id": 40, "type": "gravity", "text": "Telo z maso 5 kg ima v izbranem referenčnem območju sveta Jupiter težo 123,95 N. Kolikšen je gravitacijski pospešek?", "target": "g", "answer": 24.79, "unit": "m/s²", "planet": "Jupiter", "Fg": 123.94999999999999, "m": 5}, {"id": 41, "type": "gravity", "text": "Telo z maso 2 kg ima na površju planeta Mars težo 7,4 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 3.7, "unit": "m/s²", "planet": "Mars", "Fg": 7.4, "m": 2}, {"id": 42, "type": "gravity", "text": "Telo z maso 5 kg ima na površju planeta Mars težo 18,5 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 3.7, "unit": "m/s²", "planet": "Mars", "Fg": 18.5, "m": 5}, {"id": 43, "type": "gravity", "text": "Telo z maso 10 kg ima na površju planeta Mars težo 37,0 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 3.7, "unit": "m/s²", "planet": "Mars", "Fg": 37.0, "m": 10}, {"id": 44, "type": "gravity", "text": "Telo z maso 20 kg ima na površju planeta Mars težo 74,0 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 3.7, "unit": "m/s²", "planet": "Mars", "Fg": 74.0, "m": 20}, {"id": 45, "type": "gravity", "text": "Telo z maso 10 kg ima v izbranem referenčnem območju sveta Pluton težo 6,2 N. Kolikšen je gravitacijski pospešek?", "target": "g", "answer": 0.62, "unit": "m/s²", "planet": "Pluton", "Fg": 6.2, "m": 10}, {"id": 46, "type": "gravity", "text": "Telo z maso 2 kg ima na površju planeta Luna težo 3,26 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 1.63, "unit": "m/s²", "planet": "Luna", "Fg": 3.26, "m": 2}, {"id": 47, "type": "gravity", "text": "Telo z maso 5 kg ima na površju planeta Luna težo 8,15 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 1.63, "unit": "m/s²", "planet": "Luna", "Fg": 8.149999999999999, "m": 5}, {"id": 48, "type": "gravity", "text": "Telo z maso 10 kg ima na površju planeta Luna težo 16,3 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 1.63, "unit": "m/s²", "planet": "Luna", "Fg": 16.299999999999997, "m": 10}, {"id": 49, "type": "gravity", "text": "Telo z maso 20 kg ima na površju planeta Luna težo 32,6 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 1.63, "unit": "m/s²", "planet": "Luna", "Fg": 32.599999999999994, "m": 20}, {"id": 50, "type": "gravity", "text": "Telo z maso 50 kg ima na površju planeta Luna težo 81,5 N. Kolikšen je gravitacijski pospešek na tem planetu?", "target": "g", "answer": 1.63, "unit": "m/s²", "planet": "Luna", "Fg": 81.5, "m": 50}];
+const $=id=>document.getElementById(id);
+const fmt=(n,d=2)=>(Math.round((n+Number.EPSILON)*10**d)/10**d)
+  .toLocaleString("sl-SI",{maximumFractionDigits:d});
+const parseNum=v=>Number(String(v).replace(",","."));
+const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
+
+/* ---------------------------------------------------------
+   Physics data: numbers match the school material.
+   Atmosphere je bonus realism layer, weight formula pa ostane clean.
+--------------------------------------------------------- */
+// Planet pack: contrast is the point — dense, strong-g, tiny-g. Keep it visually obvious.
+const PLANETS={
+  earth:{
+    name:"Zemlja",g:9.81,rho:1.225,className:"earth",
+    sub:"Višina padca: 40 m · točke na vsakih 0,5 s"
+  },
+  mars:{
+    name:"Mars",g:3.70,rho:0.020,className:"mars",
+    sub:"Višina padca: 40 m · točke na vsakih 0,5 s"
+  },
+  moon:{
+    name:"Luna",g:1.63,rho:0.0,className:"moon",
+    sub:"Brez atmosfere · višina padca: 40 m · točke na vsakih 0,5 s"
+  },
+  venus:{
+    name:"Venera",g:8.87,rho:65.0,className:"venus",
+    sub:"Zelo gosta atmosfera · višina padca: 40 m · točke na vsakih 0,5 s"
+  },
+  jupiter:{
+    name:"Jupiter",g:24.79,rho:0.16,className:"jupiter",
+    sub:"Referenčna raven oblakov (~1 bar) · 40 m · točke na vsakih 0,5 s"
+  },
+  pluto:{
+    name:"Pluton",g:0.62,rho:0.0001,className:"pluto",
+    sub:"Pritlikavi planet · zelo redka atmosfera · točke na vsakih 0,5 s"
+  }
+};
+
+const sim={
+  mode:"mass",
+  planet:"earth",
+  mass:10,
+  atmoPercent:0,
+  running:false,
+  raf:null
+};
+
+const modeButtons=[...document.querySelectorAll("[data-mode]")];
+const planetButtons=[...document.querySelectorAll("[data-planet]")];
+const massCard=$("massCard"),massSliderRow=$("massSliderRow"),massLock=$("massLock"),planetLock=$("planetLock");
+const massSlider=$("massSlider"),massMinus=$("massMinus"),massPlus=$("massPlus"),massValue=$("massValue");
+const atmoSlider=$("atmoSlider"),atmoTitle=$("atmoTitle"),rhoValue=$("rhoValue"),rhoMax=$("rhoMax"),atmoNote=$("atmoNote");
+const sumMass=$("sumMass"),sumG=$("sumG"),sumWeight=$("sumWeight");
+const world=$("world"),worldTitle=$("worldTitle"),worldSub=$("worldSub"),dropPath=$("dropPath"),body=$("body"),bodyTag=$("bodyTag"),traceLayer=$("traceLayer");
+const hudWeight=$("hudWeight"),weightArrow=$("weightArrow"),dragRow=$("dragRow"),hudDrag=$("hudDrag"),dragArrow=$("dragArrow"),physicsStatus=$("physicsStatus");
+const clock=$("clock"),dropBtn=$("dropBtn");
+
+function planet(){return PLANETS[sim.planet]}
+function weight(){return sim.mass*planet().g}
+function currentRho(){return planet().rho*(sim.atmoPercent/100)}
+
+function updateSliderFill(sl,color="#c7683d"){
+  const min=Number(sl.min),max=Number(sl.max),value=Number(sl.value);
+  const pct=((value-min)/(max-min))*100;
+  sl.style.setProperty("--fill",pct+"%");
+}
+
+// Tiny physics engine: quadratic drag. Not CFD, ampak dovolj legit za classroom model.
+function dragForce(v){
+  const rho=currentRho();
+  const Cd=.47;       // sphere-ish body
+  const area=.025;    // m²; same body shape/size across masses
+  return .5*rho*Cd*area*v*v;
+}
+
+function setMode(mode){
+  if(sim.running)return;
+  sim.mode=mode;
+  modeButtons.forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
+
+  if(mode==="mass"){
+    sim.planet="earth";
+    planetButtons.forEach(b=>b.disabled=true);
+    planetLock.hidden=false;
+    massSlider.disabled=false;massMinus.disabled=false;massPlus.disabled=false;
+    massSliderRow.style.opacity="1";massLock.hidden=true;
+  }else{
+    sim.mass=10;
+    massSlider.value="10";
+    planetButtons.forEach(b=>b.disabled=false);
+    planetLock.hidden=true;
+    massSlider.disabled=true;massMinus.disabled=true;massPlus.disabled=true;
+    massSliderRow.style.opacity=".35";massLock.hidden=false;
+  }
+
+  resetMotion();
+  renderAll();
+}
+
+function renderAll(){
+  const p=planet();
+  massValue.textContent=`${fmt(sim.mass,0)} kg`;
+  sumMass.textContent=`${fmt(sim.mass,0)} kg`;
+  sumG.textContent=`${fmt(p.g,2)} m/s²`;
+  sumWeight.textContent=`${fmt(weight(),2)} N`;
+
+  planetButtons.forEach(b=>b.classList.toggle("active",b.dataset.planet===sim.planet));
+  world.className=`world ${p.className}`;
+  worldTitle.textContent=p.name;
+  worldSub.textContent=p.sub;
+
+  hudWeight.textContent=`${fmt(weight(),2)} N`;
+  const fgPx=clamp(48+weight()*.35,52,150);
+  weightArrow.style.setProperty("--fgArrow",`${fgPx}px`);
+
+  const rho=currentRho();
+  rhoValue.textContent=`ρ = ${fmt(rho,3)} kg/m³`;
+  rhoMax.textContent=`realno: ${fmt(p.rho,3)} kg/m³`;
+
+  if(p.rho===0){
+    atmoTitle.textContent="Brez atmosfere";
+    atmoSlider.disabled=true;
+    atmoNote.textContent="Luna v tem modelu nima atmosfere.";
+    sim.atmoPercent=0;
+    atmoSlider.value="0";
+  }else{
+    atmoSlider.disabled=false;
+
+    if(sim.atmoPercent===0){
+      atmoTitle.textContent="Vakum";
+    }else if(sim.atmoPercent===100){
+      atmoTitle.textContent="Realistična atmosfera";
+    }else{
+      atmoTitle.textContent=`${sim.atmoPercent} % atmosfere`;
+    }
+
+    if(sim.planet==="venus" && sim.atmoPercent>0){
+      atmoNote.textContent="Venerina atmosfera je zelo gosta. Upor zraka lahko močno spremeni gibanje, teža Fg pa ostane enaka.";
+    }else if(sim.planet==="jupiter" && sim.atmoPercent>0){
+      atmoNote.textContent="Pri Jupitru uporabljamo referenčno raven oblakov. Atmosfera spremeni gibanje, ne pa zveze Fg = m · g.";
+    }else if(sim.planet==="pluto" && sim.atmoPercent>0){
+      atmoNote.textContent="Pluton ima izredno redko atmosfero, zato je njen vpliv na ta padec zelo majhen.";
+    }else{
+      atmoNote.textContent=sim.atmoPercent===0
+        ? "V vakumu na telo med padanjem deluje le teža."
+        : "Atmosfera vpliva na gibanje. Teža Fg se zaradi tega ne spremeni.";
+    }
+  }
+
+  updateSliderFill(massSlider);
+  updateSliderFill(atmoSlider);
+  dragRow.classList.toggle("show",sim.atmoPercent>0&&p.rho>0);
+  if(!sim.running){
+    hudDrag.textContent="0 N";
+    dragArrow.style.setProperty("--dragArrow","0px");
+    physicsStatus.textContent=sim.atmoPercent===0||p.rho===0
+      ? "Vakum: a = g"
+      : "Ob začetku je upor 0 N; z večjo hitrostjo raste.";
+  }
+}
+
+function stepMass(dir){
+  if(sim.running||sim.mode!=="mass")return;
+  massSlider.value=clamp(Number(massSlider.value)+dir,Number(massSlider.min),Number(massSlider.max));
+  sim.mass=Number(massSlider.value);
+  resetMotion();renderAll();
+}
+
+massSlider.addEventListener("input",()=>{
+  if(sim.running||sim.mode!=="mass")return;
+  sim.mass=Number(massSlider.value);
+  resetMotion();renderAll();
+});
+massMinus.addEventListener("click",()=>stepMass(-1));
+massPlus.addEventListener("click",()=>stepMass(1));
+
+planetButtons.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    if(sim.running||sim.mode!=="planet")return;
+    sim.planet=btn.dataset.planet;
+    sim.atmoPercent=0;atmoSlider.value="0";
+    resetMotion();renderAll();
+  });
+});
+
+atmoSlider.addEventListener("input",()=>{
+  if(sim.running)return;
+  sim.atmoPercent=Number(atmoSlider.value);
+  resetMotion();renderAll();
+});
+
+modeButtons.forEach(btn=>btn.addEventListener("click",()=>setMode(btn.dataset.mode)));
+
+function travelPx(){return Math.max(0,dropPath.clientHeight-body.offsetHeight)}
+
+function resetMotion(){
+  cancelAnimationFrame(sim.raf);
+  sim.running=false;
+  body.style.transform="translate3d(-50%,0,0)";
+  bodyTag.style.transform="translate3d(0,0,0)";
+  bodyTag.textContent="0,0 m/s";
+  clock.textContent="t = 0,00 s";
+  traceLayer.innerHTML="";
+  dropBtn.disabled=false;
+}
+
+function addTrace(t,s,height,travel){
+  const d=document.createElement("div");
+  d.className="trace";
+  const frac=clamp(s/height,0,1);
+  d.style.top=`${frac*travel+body.offsetHeight/2}px`;
+  const label=document.createElement("span");
+  label.textContent=`${fmt(t,1)} s`;
+  d.appendChild(label);
+  traceLayer.appendChild(d);
+}
+
+function runDrop(){
+  if(sim.running)return;
+  resetMotion();
+  sim.running=true;
+  dropBtn.disabled=true;
+  massSlider.disabled=true;massMinus.disabled=true;massPlus.disabled=true;
+  planetButtons.forEach(b=>b.disabled=true);
+  atmoSlider.disabled=true;
+
+  const height=40; // fixed on purpose: less controls, more physics
+  const travel=travelPx();
+  let t=0,s=0,v=0;
+  let last=performance.now();
+  let nextTrace=.5;
+
+  const tick=now=>{
+    // delta-time capped, ker background tab ne sme narediti teleport momenta.
+    const dt=Math.min((now-last)/1000,.025);
+    last=now;
+
+    const Fg=weight();
+    const Fu=dragForce(v);
+    const net=Math.max(0,Fg-Fu);
+    const a=net/sim.mass;
+
+    v+=a*dt;
+    s+=v*dt;
+    t+=dt;
+
+    const frac=clamp(s/height,0,1);
+    const y=frac*travel;
+
+    body.style.transform=`translate3d(-50%,${y}px,0)`;
+    bodyTag.style.transform=`translate3d(0,${y}px,0)`;
+    bodyTag.textContent=`${fmt(v,1)} m/s`;
+    clock.textContent=`t = ${fmt(t,2)} s`;
+
+    while(nextTrace<=t+0.0001 && s<height){
+      // Snapshot point uses current integrated position. Simple + honest.
+      addTrace(nextTrace,s,height,travel);
+      nextTrace+=.5;
+    }
+
+    hudDrag.textContent=`${fmt(Fu,2)} N`;
+    const dragPx=clamp(Fu*.9,0,110);
+    dragArrow.style.setProperty("--dragArrow",`${dragPx}px`);
+    physicsStatus.textContent=currentRho()===0
+      ? `a = g = ${fmt(planet().g,2)} m/s²`
+      : `a ≈ ${fmt(a,2)} m/s² · Fg ostane ${fmt(Fg,2)} N`;
+
+    if(s>=height || t>30){
+      body.style.transform=`translate3d(-50%,${travel}px,0)`;
+      bodyTag.style.transform=`translate3d(0,${travel}px,0)`;
+      sim.running=false;
+      dropBtn.disabled=false;
+
+      if(sim.mode==="mass"){
+        massSlider.disabled=false;massMinus.disabled=false;massPlus.disabled=false;
+        planetButtons.forEach(b=>b.disabled=true);
+      }else{
+        planetButtons.forEach(b=>b.disabled=false);
+        massSlider.disabled=true;massMinus.disabled=true;massPlus.disabled=true;
+      }
+      if(planet().rho>0)atmoSlider.disabled=false;
+      return;
+    }
+
+    sim.raf=requestAnimationFrame(tick);
+  };
+
+  sim.raf=requestAnimationFrame(tick);
+}
+
+dropBtn.addEventListener("click",runDrop);
+window.addEventListener("resize",()=>{if(!sim.running)resetMotion()});
+
+/* ---------------------------------------------------------
+   Solver — isti family feeling kot Newton app.
+   Triangle first, plugging numbers second. Less guessy formula picking.
+--------------------------------------------------------- */
+const chipMap={weight:"Teža",mass:"Masa",gravity:"Gravitacijski pospešek"};
+const taskChip=$("taskChip"),taskText=$("taskText"),targetChoices=$("targetChoices");
+const stepMagic=$("stepMagic"),magicFeedback=$("magicFeedback");
+const stepEquation=$("stepEquation"),equationLine=$("equationLine"),checkDataBtn=$("checkDataBtn"),dataFeedback=$("dataFeedback");
+const resultStage=$("resultStage"),answerInput=$("answerInput"),answerUnit=$("answerUnit"),checkAnswerBtn=$("checkAnswerBtn"),feedback=$("feedback");
+const hintBtn=$("hintBtn"),hintText=$("hintText"),prevTask=$("prevTask"),nextTask=$("nextTask");
+
+let taskIndex=0,taskHistory=[0],hintIndex=0;
+
+function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
+
+function renderTask(){
+  const t=TASKS[taskIndex];
+  hintIndex=0;
+  taskChip.textContent=chipMap[t.type];
+  taskText.textContent=t.text;
+  stepMagic.hidden=true;stepEquation.hidden=true;resultStage.hidden=true;
+  magicFeedback.textContent="";dataFeedback.textContent="";feedback.textContent="";
+  hintText.textContent="Poskusi najprej sam.";hintBtn.textContent="Pokaži namig";
+  answerInput.value="";answerUnit.textContent=t.unit;
+  prevTask.disabled=taskHistory.length<=1;
+  document.querySelectorAll("[data-magic]").forEach(b=>b.classList.remove("good","bad"));
+  targetChoices.innerHTML="";
+
+  shuffle([
+    {key:"Fg",html:'Težo F<sub>g</sub>'},
+    {key:"m",html:'Maso m'},
+    {key:"g",html:'Gravitacijski pospešek g'}
+  ]).forEach(opt=>{
+    const b=document.createElement("button");
+    b.type="button";b.className="choice";b.innerHTML=opt.html;
+    b.addEventListener("click",()=>{
+      targetChoices.querySelectorAll("button").forEach(x=>x.classList.remove("good","bad"));
+      if(opt.key===t.target){
+        b.classList.add("good");stepMagic.hidden=false;
+      }else b.classList.add("bad");
+    });
+    targetChoices.appendChild(b);
+  });
+}
+
+document.querySelectorAll("[data-magic]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const t=TASKS[taskIndex];
+    document.querySelectorAll("[data-magic]").forEach(b=>b.classList.remove("good","bad"));
+    if(btn.dataset.magic===t.target){
+      btn.classList.add("good");
+      magicFeedback.textContent="Tako je. Zdaj vstavi podatke.";
+      magicFeedback.className="step-feedback ok";
+      renderEquation(t);
+      stepEquation.hidden=false;
+    }else{
+      btn.classList.add("bad");
+      magicFeedback.textContent="Klikni količino, ki jo iščemo.";
+      magicFeedback.className="step-feedback err";
+      stepEquation.hidden=true;
+    }
+  });
+});
+
+function equationSpec(t){
+  if(t.target==="Fg"){
+    return {lhs:'F<sub>g</sub>',op:'·',fields:[
+      {key:"m",expected:t.m,unit:"kg"},
+      {key:"g",expected:t.g,unit:"m/s²"}
+    ]};
+  }
+  if(t.target==="m"){
+    return {lhs:"m",op:"/",fields:[
+      {key:"Fg",expected:t.Fg,unit:"N"},
+      {key:"g",expected:t.g,unit:"m/s²"}
+    ]};
+  }
+  return {lhs:"g",op:"/",fields:[
+    {key:"Fg",expected:t.Fg,unit:"N"},
+    {key:"m",expected:t.m,unit:"kg"}
+  ]};
+}
+
+function renderEquation(t){
+  const spec=equationSpec(t);
+  equationLine.innerHTML="";
+
+  const lhs=document.createElement("span");lhs.innerHTML=spec.lhs;equationLine.appendChild(lhs);
+  const eq=document.createElement("span");eq.textContent="=";equationLine.appendChild(eq);
+
+  spec.fields.forEach((field,i)=>{
+    const wrap=document.createElement("span");
+    wrap.style.display="inline-flex";wrap.style.alignItems="center";wrap.style.gap="6px";
+
+    const input=document.createElement("input");
+    input.className="eq-input";input.inputMode="decimal";
+    input.dataset.expected=String(field.expected);
+    wrap.appendChild(input);
+
+    const unit=document.createElement("span");
+    unit.className="eq-unit";unit.textContent=field.unit;
+    wrap.appendChild(unit);
+
+    equationLine.appendChild(wrap);
+
+    if(i===0){
+      const op=document.createElement("span");op.textContent=spec.op;equationLine.appendChild(op);
+    }
+  });
+
+  dataFeedback.textContent="";dataFeedback.className="step-feedback";
+  resultStage.hidden=true;
+  setTimeout(()=>equationLine.querySelector(".eq-input")?.focus(),70);
+}
+
+function checkData(){
+  let ok=true;
+  [...equationLine.querySelectorAll(".eq-input")].forEach(inp=>{
+    inp.classList.remove("good","bad");
+    const v=parseNum(inp.value),exp=Number(inp.dataset.expected);
+    const tol=Math.max(.012,Math.abs(exp)*.003);
+    if(Number.isFinite(v)&&Math.abs(v-exp)<=tol)inp.classList.add("good");
+    else{inp.classList.add("bad");ok=false}
+  });
+
+  if(ok){
+    dataFeedback.textContent="Podatki so pravilno vstavljeni.";
+    dataFeedback.className="step-feedback ok";
+    resultStage.hidden=false;
+    setTimeout(()=>answerInput.focus(),70);
+  }else{
+    dataFeedback.textContent="Preveri podatke iz naloge.";
+    dataFeedback.className="step-feedback err";
+    resultStage.hidden=true;
+  }
+}
+checkDataBtn.addEventListener("click",checkData);
+equationLine.addEventListener("keydown",e=>{if(e.key==="Enter")checkData()});
+
+function checkAnswer(){
+  const t=TASKS[taskIndex],v=parseNum(answerInput.value);
+  if(!Number.isFinite(v)){
+    feedback.textContent="Vpiši številski rezultat.";feedback.className="feedback err";return;
+  }
+  const tol=Math.max(.02,Math.abs(t.answer)*.004);
+  if(Math.abs(v-t.answer)<=tol){
+    feedback.textContent=`Pravilno. Rezultat je ${fmt(t.answer,3)} ${t.unit}.`;
+    feedback.className="feedback ok";
+  }else{
+    feedback.textContent="Še ne. Preveri račun ali odpri namig.";
+    feedback.className="feedback err";
+  }
+}
+checkAnswerBtn.addEventListener("click",checkAnswer);
+answerInput.addEventListener("keydown",e=>{if(e.key==="Enter")checkAnswer()});
+
+function hintsFor(t){
+  if(t.type==="weight")return[
+    "Teža je sila. Merimo jo v newtonih.",
+    "Uporabi Fg = m · g.",
+    `Vstavi m = ${fmt(t.m,3)} kg in g = ${fmt(t.g,2)} m/s².`
+  ];
+  if(t.type==="mass")return[
+    "Masa se meri v kilogramih in se s spremembo planeta ne spremeni.",
+    "Iz Fg = m · g sledi m = Fg / g.",
+    `Deli ${fmt(t.Fg,2)} N z ${fmt(t.g,2)} m/s².`
+  ];
+  return[
+    "Gravitacijski pospešek pove, kako močno planet pospešuje prosto padajoče telo.",
+    "Iz Fg = m · g sledi g = Fg / m.",
+    `Deli ${fmt(t.Fg,2)} N z ${fmt(t.m,2)} kg.`
+  ];
+}
+
+hintBtn.addEventListener("click",()=>{
+  const hs=hintsFor(TASKS[taskIndex]);
+  hintIndex=Math.min(hintIndex+1,hs.length);
+  hintText.textContent=hs[hintIndex-1];
+  hintBtn.textContent=hintIndex>=hs.length?"Zadnji namig":"Naslednji namig";
+});
+
+prevTask.addEventListener("click",()=>{
+  if(taskHistory.length<=1)return;
+  taskHistory.pop();taskIndex=taskHistory[taskHistory.length-1];renderTask();
+});
+nextTask.addEventListener("click",()=>{
+  const recent=new Set(taskHistory.slice(-7));
+  let candidates=TASKS.map((_,i)=>i).filter(i=>i!==taskIndex&&!recent.has(i));
+  if(!candidates.length)candidates=TASKS.map((_,i)=>i).filter(i=>i!==taskIndex);
+  taskIndex=candidates[Math.floor(Math.random()*candidates.length)];
+  taskHistory.push(taskIndex);renderTask();
+});
+
+setMode("mass");
+renderAll();
+renderTask();
+
+})();
+</script>
+</body>
+</html>
