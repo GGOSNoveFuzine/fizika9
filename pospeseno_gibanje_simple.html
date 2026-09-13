@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pospešeno gibanje – primeri in vodene vaje</title>
+<style>
+:root{
+  --bg:#07111f; --panel:#0c1c30; --panel2:#0f243b; --line:#31516f;
+  --text:#f6f8fc; --muted:#b9c8d8; --cyan:#15d2ff; --orange:#ffae27;
+  --green:#49df8e; --red:#ff6d75; --road:#1b2a3b; --yellow:#ffe07a;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--text);
+  background:linear-gradient(180deg,#06101d 0%,#09182a 100%);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  font-size:clamp(20px,1.35vw,25px); line-height:1.5;
+}
+main{width:min(1220px,95vw);margin:auto;padding:28px 0 64px}
+header{text-align:center;padding:8px 0 24px}
+h1{font-size:clamp(40px,4.6vw,68px);line-height:1.03;margin:0;letter-spacing:-.03em}
+.subtitle{max-width:950px;margin:14px auto 0;color:var(--muted);font-size:1.12rem}
+.pill{display:inline-block;margin-top:14px;border:1px solid var(--line);border-radius:999px;padding:7px 13px;color:var(--cyan);font-weight:850;font-size:.8rem}
+section{
+  background:rgba(12,28,48,.97); border:1px solid var(--line); border-radius:22px;
+  padding:clamp(22px,3vw,38px); margin:24px 0; box-shadow:0 18px 45px rgba(0,0,0,.18);
+}
+h2{font-size:clamp(30px,3vw,45px);margin:0 0 7px;line-height:1.12}
+.intro{color:var(--muted);margin:0 0 22px}
+label{display:block;font-weight:900;margin-bottom:8px}
+select,input,button{font:inherit}
+select{
+  width:min(100%,780px); background:#071728; color:var(--text); border:2px solid #3b6288;
+  border-radius:13px; padding:14px 16px; min-height:62px; font-size:1.03rem; font-weight:800;
+}
+button{touch-action:manipulation}
+button:focus,select:focus,input:focus{outline:4px solid rgba(21,210,255,.22);outline-offset:2px}
+.example-nav{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 16px}
+.example-btn{
+  min-width:118px; min-height:54px; padding:9px 16px; border-radius:12px; cursor:pointer;
+  border:2px solid #335574; background:#08192b; color:var(--text); font-weight:900;
+}
+.example-btn.active{border-color:var(--cyan);background:#0c2a3e;color:var(--cyan)}
+.anchor{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  border:1px solid #2f526f;background:#081a2c;border-radius:15px;padding:14px 18px;margin-bottom:16px;
+}
+.anchor .topic{font-weight:900;color:var(--cyan)}
+.formula{font-size:clamp(32px,3vw,49px);font-weight:900;letter-spacing:.01em}
+sub{font-size:.62em;vertical-align:-.25em} sup{font-size:.62em}
+.frac{display:inline-grid;grid-template-rows:auto auto;text-align:center;vertical-align:middle;line-height:1.02}
+.frac>span:first-child{border-bottom:2px solid currentColor;padding:0 .22em .09em}
+.frac>span:last-child{padding:.09em .22em 0}
+.sim-card{border:2px solid #345a7d;border-radius:19px;overflow:hidden;background:#081827}
+.sim-head{padding:18px 22px;background:#0b2238;border-bottom:1px solid var(--line)}
+.motion-badge{font-size:.78rem;font-weight:950;letter-spacing:.055em;color:var(--cyan)}
+.problem{font-size:clamp(27px,2.35vw,36px);line-height:1.4;font-weight:850;margin:8px 0 0}
+.given{color:var(--orange);font-weight:950}.asked{color:var(--cyan);font-weight:950}.good{color:var(--green);font-weight:950}
+.sim-body{padding:22px}
+.data-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.data-chip{
+  border:2px solid #385e80;background:#0b2034;border-radius:13px;padding:9px 14px;font-weight:900;
+  font-size:1.02rem;transition:opacity .35s ease,transform .35s ease;
+}
+.data-chip.start{border-color:#8a681f}.data-chip.end{border-color:#277e58}.data-chip.ask{border-color:#147e99;color:var(--cyan);background:#09243a}
+.data-chip.pending{opacity:.18;transform:translateY(3px)}
+.road-wrap{position:relative;height:235px;border-radius:17px;overflow:hidden;background:linear-gradient(#10263d 0 57%,#172330 57% 100%);border:1px solid #284761}
+.sky-label{position:absolute;left:16px;top:12px;color:#9fb1c5;font-weight:850;font-size:.8rem}
+.timer{
+  position:absolute;right:16px;top:12px;border:1px solid #436987;border-radius:10px;padding:6px 11px;
+  background:#071827;font-weight:900;color:var(--yellow);display:none
+}
+.road{position:absolute;left:0;right:0;bottom:0;height:43%;background:var(--road);border-top:4px solid #52687d}
+.road:after{
+  content:"";position:absolute;left:0;right:0;top:50%;height:5px;transform:translateY(-50%);
+  background:repeating-linear-gradient(90deg,#d9e1e8 0 36px,transparent 36px 66px);opacity:.72
+}
+.endpoint{position:absolute;bottom:11px;font-size:.72rem;font-weight:900;color:#dbe7f4;z-index:3}
+.endpoint.a{left:13px}.endpoint.b{right:13px}
+.car{
+  position:absolute;bottom:53px;left:5%;width:102px;height:54px;z-index:6;
+  filter:drop-shadow(0 7px 4px rgba(0,0,0,.4));will-change:left
+}
+.car-body{position:absolute;left:4px;right:4px;bottom:11px;height:29px;border-radius:13px 18px 8px 8px;background:#2f9ff4;border:3px solid #bce7ff}
+.car-roof{position:absolute;left:29px;bottom:34px;width:49px;height:20px;border-radius:18px 18px 4px 4px;background:#2f9ff4;border:3px solid #bce7ff}
+.wheel{position:absolute;bottom:2px;width:20px;height:20px;border-radius:50%;background:#06101c;border:4px solid #9fb0c0}
+.wheel.w1{left:18px}.wheel.w2{right:17px}
+.speed-arrow{
+  position:absolute;left:2px;top:-20px;height:5px;width:42px;background:var(--orange);border-radius:9px;
+  transform-origin:left center;will-change:width
+}
+.speed-arrow:after{content:"";position:absolute;right:-2px;top:-6px;border-left:12px solid var(--orange);border-top:8px solid transparent;border-bottom:8px solid transparent}
+.speed-tag{position:absolute;left:3px;top:-52px;font-size:.7rem;font-weight:950;color:var(--orange);white-space:nowrap}
+.trail-dot{position:absolute;bottom:59px;width:13px;height:13px;border-radius:50%;background:var(--cyan);opacity:.65;z-index:4;box-shadow:0 0 0 4px rgba(21,210,255,.09)}
+.trail-dot:after{content:attr(data-time);position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:.6rem;white-space:nowrap;color:#b9ddec}
+.trail-dot.edge-start:after{left:0;transform:none}
+.trail-dot.edge-end:after{left:auto;right:0;transform:none}
+.distance-fill{position:absolute;left:5%;bottom:0;height:7px;width:0;background:var(--green);z-index:7;will-change:width}
+.visual-after{margin-top:18px;display:none}
+.midpoint{
+  display:grid;grid-template-columns:auto 1fr auto 1fr auto;align-items:center;gap:10px;max-width:850px;margin:8px auto;
+}
+.midpoint .line{height:5px;border-radius:99px;background:#35536e}
+.midpoint .mark{text-align:center;font-weight:950;font-size:1.05rem}
+.question-banner{
+  margin-top:16px;border:2px dashed #267e9e;border-radius:14px;padding:13px 17px;
+  color:#e9fbff;background:#09243a;font-size:1.05rem;font-weight:900;display:none
+}
+.solution-toggle{
+  margin-top:18px;min-height:61px;border:0;border-radius:13px;padding:12px 22px;cursor:pointer;
+  background:var(--cyan);color:#00141c;font-weight:950;font-size:1.04rem;
+}
+.solution{display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:18px}
+.solution.visible{display:block}
+.steps{display:grid;gap:12px}
+.step{border-left:5px solid #315574;background:#0c2036;border-radius:9px;padding:12px 16px}
+.stepname{text-transform:uppercase;letter-spacing:.045em;color:#b7c8da;font-size:.72rem;font-weight:950}
+.eq{font-size:clamp(31px,2.8vw,46px);font-weight:900;text-align:center;padding:10px 4px}
+.explain{margin:4px 0 0;color:#dbe7f2}
+.triangle{position:relative;width:280px;height:225px;margin:4px auto 10px}
+.triangle svg{position:absolute;inset:0;width:100%;height:100%}
+.tri-label{
+  position:absolute;width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  border:2px solid #3b6082;background:#0a1c31;font-weight:950;font-size:1.35rem
+}
+.tri-top{top:0;left:104px;color:var(--cyan)}.tri-left{left:22px;bottom:4px;color:var(--orange)}.tri-right{right:22px;bottom:4px;color:var(--green)}
+/* practice */
+.practice-top{display:flex;gap:18px;align-items:end;justify-content:space-between;flex-wrap:wrap}
+.practice-top .selector{flex:1;min-width:min(100%,540px)}
+.counter{color:var(--muted);font-weight:850;padding-bottom:13px;white-space:nowrap}
+.task-card{margin-top:19px;border:2px solid #345a7d;border-radius:18px;overflow:hidden;background:#081827}
+.task-head{padding:16px 20px;background:#0b2238;border-bottom:1px solid var(--line);font-weight:900;color:var(--cyan)}
+.task-body{padding:22px}
+.prompt{font-weight:950;font-size:1.05rem;margin:0 0 12px}
+.choice-row{display:flex;gap:10px;flex-wrap:wrap}
+.choice{
+  border:2px solid #375a7b;background:#08192b;color:var(--text);border-radius:12px;min-height:55px;
+  padding:10px 16px;font-weight:900;cursor:pointer
+}
+.choice:hover{border-color:var(--cyan)}.choice.right{border-color:var(--green);color:var(--green)}.choice.wrong{border-color:var(--red);color:#ffd7da}
+.feedback{margin-top:13px;border:1px solid #315574;background:#0b1e32;border-radius:12px;padding:12px 15px;min-height:54px}
+.feedback.ok{border-color:#317f5a;color:#d5ffe5}.feedback.no{border-color:#94464b;color:#ffe0e2}
+.input-line{display:flex;align-items:center;flex-wrap:wrap;gap:11px;margin-top:12px}
+.answer-input{
+  width:170px;max-width:50vw;min-height:58px;border:2px solid #3d6388;border-radius:12px;background:#06111f;
+  color:var(--text);padding:8px 12px;text-align:center;font-weight:950
+}
+.check-btn,.new-btn{
+  min-height:58px;border:0;border-radius:12px;background:var(--cyan);color:#00141c;padding:10px 20px;font-weight:950;cursor:pointer
+}
+.new-wrap{display:flex;justify-content:flex-end;margin-top:15px}.new-btn:disabled{opacity:.35;cursor:not-allowed}
+.finish{margin-top:15px;border:2px solid #32835d;background:#0a2c22;color:#d8ffe7;border-radius:13px;padding:14px 16px}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+footer{text-align:center;color:#8296aa;font-size:.74rem;padding-top:6px}
+@media (max-width:760px){
+  main{width:94vw;padding-top:18px}section{padding:20px 15px;border-radius:17px}
+  .example-btn{flex:1 1 30%;min-width:96px}.road-wrap{height:210px}
+  .car{width:88px}.midpoint{font-size:.82rem}
+  .anchor{align-items:flex-start}.choice{flex:1 1 45%}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.data-chip{transition:none}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>Pospešeno gibanje</h1>
+  <p class="subtitle">Najprej opazuj kratek primer gibanja in poglej rešitev. Nato izberi vrsto naloge in vadi po korakih.</p>
+  <span class="pill">VELIK PRIKAZ • BREZ GRAFOV • KALKULATOR JE DOVOLJEN</span>
+</header>
+
+<section id="learn">
+  <h2>1. Poglej primer</h2>
+  <p class="intro">Izberi vrsto naloge in nato Primer 1–5. Klik na primer hkrati ponovno zažene kratko animacijo.</p>
+
+  <label for="learnType">Vrsta naloge:</label>
+  <select id="learnType">
+    <option value="change">Sprememba hitrosti in manjkajoča hitrost</option>
+    <option value="average">Povprečna hitrost</option>
+    <option value="acc">Pospešek</option>
+    <option value="pathavg">Pot s povprečno hitrostjo</option>
+    <option value="pathrest">Pot pri začetku iz mirovanja</option>
+  </select>
+
+  <div class="example-nav" id="exampleNav"></div>
+
+  <div class="anchor">
+    <div class="topic" id="anchorTopic"></div>
+    <div class="formula" id="anchorFormula"></div>
+  </div>
+
+  <div class="sim-card">
+    <div class="sim-head">
+      <div class="motion-badge">ENAKOMERNO POSPEŠENO GIBANJE</div>
+      <p class="problem" id="workedProblem"></p>
+    </div>
+    <div class="sim-body">
+      <div class="data-row" id="workedData"></div>
+
+      <div class="road-wrap" id="roadWrap">
+        <div class="sky-label" id="skyLabel">Opazuj gibanje.</div>
+        <div class="timer" id="timer">0,0 s</div>
+        <div class="road"><span class="endpoint a">ZAČETEK</span><span class="endpoint b">KONEC</span></div>
+        <div class="distance-fill" id="distanceFill"></div>
+        <div class="car" id="car">
+          <div class="speed-tag" id="speedTag">hitrost</div>
+          <div class="speed-arrow" id="speedArrow"></div>
+          <div class="car-roof"></div><div class="car-body"></div>
+          <div class="wheel w1"></div><div class="wheel w2"></div>
+        </div>
+        <div id="trailLayer"></div>
+      </div>
+
+      <div class="visual-after" id="visualAfter"></div>
+      <div class="question-banner" id="workedQuestion"></div>
+      <button class="solution-toggle" id="solutionToggle" aria-expanded="false" disabled>POKAŽI REŠITEV</button>
+      <div class="solution" id="solution"></div>
+    </div>
+  </div>
+</section>
+
+<section id="practice">
+  <h2>2. Zdaj poskusi ti</h2>
+  <p class="intro">Najprej izberi, kaj želiš vaditi. Naloga je naključno izbrana iz vnaprej pripravljenega nabora z lepimi števili.</p>
+
+  <div class="practice-top">
+    <div class="selector">
+      <label for="practiceType">Kaj želiš vaditi?</label>
+      <select id="practiceType">
+        <option value="change">Sprememba hitrosti</option>
+        <option value="average">Povprečna hitrost</option>
+        <option value="acc">Pospešek</option>
+        <option value="pathavg">Pot s povprečno hitrostjo</option>
+        <option value="pathrest">Pot iz mirovanja: s = a·t² / 2</option>
+        <option value="mixed">Mešane naloge – ko si pripravljen/a</option>
+      </select>
+    </div>
+    <div class="counter" id="counter">Rešene naloge: 0</div>
+  </div>
+
+  <div class="task-card" id="taskCard"></div>
+  <div class="new-wrap"><button class="new-btn" id="newTask" disabled>NOVA NALOGA</button></div>
+</section>
+
+<footer>Fizika 9 • enakomerno pospešeno gibanje • brez prijave</footer>
+</main>
+
+<script>
+const TASKS = [{"cat":"change","subject":"Avto","target":"dv","vz":2.0,"vk":7.0,"dv":5.0},{"cat":"change","subject":"Kolesar","target":"dv","vz":1.5,"vk":6.0,"dv":4.5},{"cat":"change","subject":"Vlak","target":"dv","vz":3.2,"vk":8.7,"dv":5.5},{"cat":"change","subject":"Voziček","target":"dv","vz":0.0,"vk":6.4,"dv":6.4},{"cat":"change","subject":"Motorist","target":"dv","vz":4.1,"vk":9.6,"dv":5.5},{"cat":"change","subject":"Skiro","target":"dv","vz":2.8,"vk":7.3,"dv":4.5},{"cat":"change","subject":"Avto","target":"vk","vz":2.4,"vk":7.6,"dv":5.2},{"cat":"change","subject":"Kolesar","target":"vk","vz":1.8,"vk":5.5,"dv":3.7},{"cat":"change","subject":"Vlak","target":"vk","vz":0.0,"vk":6.2,"dv":6.2},{"cat":"change","subject":"Voziček","target":"vz","vz":3.5,"vk":8.2,"dv":4.7},{"cat":"change","subject":"Motorist","target":"vz","vz":4.7,"vk":7.5,"dv":2.8},{"cat":"change","subject":"Skiro","target":"vz","vz":2.5,"vk":9.0,"dv":6.5},{"cat":"average","subject":"Avto","target":"vbar","vz":2.0,"vk":8.0,"vbar":5.0},{"cat":"average","subject":"Kolesar","target":"vbar","vz":1.5,"vk":6.5,"vbar":4.0},{"cat":"average","subject":"Vlak","target":"vbar","vz":3.2,"vk":7.8,"vbar":5.5},{"cat":"average","subject":"Voziček","target":"vbar","vz":0.0,"vk":8.0,"vbar":4.0},{"cat":"average","subject":"Motorist","target":"vbar","vz":2.4,"vk":6.6,"vbar":4.5},{"cat":"average","subject":"Skiro","target":"vk","vz":2.0,"vk":8.0,"vbar":5.0},{"cat":"average","subject":"Avto","target":"vk","vz":1.5,"vk":7.5,"vbar":4.5},{"cat":"average","subject":"Kolesar","target":"vk","vz":0.0,"vk":7.6,"vbar":3.8},{"cat":"average","subject":"Vlak","target":"vk","vz":4.2,"vk":7.8,"vbar":6.0},{"cat":"average","subject":"Voziček","target":"vz","vz":2.0,"vk":8.4,"vbar":5.2},{"cat":"average","subject":"Motorist","target":"vz","vz":1.5,"vk":7.9,"vbar":4.7},{"cat":"average","subject":"Skiro","target":"vz","vz":1.2,"vk":6.0,"vbar":3.6},{"cat":"acc","subject":"Avto","target":"a","vz":2.0,"vk":8.0,"t":3.0,"dv":6.0,"a":2.0},{"cat":"acc","subject":"Kolesar","target":"a","vz":1.5,"vk":6.5,"t":2.5,"dv":5.0,"a":2.0},{"cat":"acc","subject":"Vlak","target":"a","vz":3.2,"vk":8.0,"t":2.4,"dv":4.8,"a":2.0},{"cat":"acc","subject":"Voziček","target":"a","vz":0.0,"vk":6.0,"t":4.0,"dv":6.0,"a":1.5},{"cat":"acc","subject":"Motorist","target":"a","vz":2.5,"vk":7.0,"t":3.0,"dv":4.5,"a":1.5},{"cat":"acc","subject":"Skiro","target":"a","vz":4.0,"vk":9.6,"t":2.8,"dv":5.6,"a":2.0},{"cat":"acc","subject":"Avto","target":"a","vz":1.2,"vk":5.2,"t":2.0,"dv":4.0,"a":2.0},{"cat":"acc","subject":"Kolesar","target":"a","vz":3.5,"vk":8.5,"t":5.0,"dv":5.0,"a":1.0},{"cat":"acc","subject":"Vlak","target":"a","vz":null,"vk":null,"t":2.4,"dv":3.6,"a":1.5},{"cat":"acc","subject":"Voziček","target":"a","vz":null,"vk":null,"t":3.2,"dv":6.4,"a":2.0},{"cat":"acc","subject":"Motorist","target":"dv","vz":null,"vk":null,"t":4.0,"dv":6.0,"a":1.5},{"cat":"acc","subject":"Skiro","target":"t","vz":null,"vk":null,"t":3.0,"dv":4.8,"a":1.6},{"cat":"pathavg","subject":"Avto","target":"s","vbar":3.0,"t":4.0,"vz":null,"vk":null,"s":12.0},{"cat":"pathavg","subject":"Kolesar","target":"s","vbar":4.5,"t":2.0,"vz":null,"vk":null,"s":9.0},{"cat":"pathavg","subject":"Vlak","target":"s","vbar":2.8,"t":5.0,"vz":null,"vk":null,"s":14.0},{"cat":"pathavg","subject":"Voziček","target":"s","vbar":5.2,"t":3.0,"vz":null,"vk":null,"s":15.6},{"cat":"pathavg","subject":"Motorist","target":"s","vbar":3.6,"t":2.5,"vz":null,"vk":null,"s":9.0},{"cat":"pathavg","subject":"Skiro","target":"s","vbar":6.0,"t":1.5,"vz":null,"vk":null,"s":9.0},{"cat":"pathavg","subject":"Avto","target":"s","vbar":5.0,"t":4.0,"vz":2.0,"vk":8.0,"s":20.0},{"cat":"pathavg","subject":"Kolesar","target":"s","vbar":4.0,"t":3.0,"vz":1.5,"vk":6.5,"s":12.0},{"cat":"pathavg","subject":"Vlak","target":"s","vbar":3.6,"t":2.5,"vz":0.0,"vk":7.2,"s":9.0},{"cat":"pathavg","subject":"Voziček","target":"s","vbar":5.5,"t":2.0,"vz":3.2,"vk":7.8,"s":11.0},{"cat":"pathavg","subject":"Motorist","target":"s","vbar":4.5,"t":3.2,"vz":2.4,"vk":6.6,"s":14.4},{"cat":"pathavg","subject":"Skiro","target":"s","vbar":6.0,"t":2.5,"vz":4.0,"vk":8.0,"s":15.0},{"cat":"pathrest","subject":"Avto","target":"s","a":2.0,"t":3.0,"s":9.0,"vz":0.0},{"cat":"pathrest","subject":"Kolesar","target":"s","a":1.5,"t":4.0,"s":12.0,"vz":0.0},{"cat":"pathrest","subject":"Vlak","target":"s","a":1.2,"t":5.0,"s":15.0,"vz":0.0},{"cat":"pathrest","subject":"Voziček","target":"s","a":2.4,"t":2.5,"s":7.5,"vz":0.0},{"cat":"pathrest","subject":"Motorist","target":"s","a":1.6,"t":3.0,"s":7.2,"vz":0.0},{"cat":"pathrest","subject":"Skiro","target":"s","a":2.0,"t":4.0,"s":16.0,"vz":0.0},{"cat":"pathrest","subject":"Avto","target":"s","a":0.8,"t":5.0,"s":10.0,"vz":0.0},{"cat":"pathrest","subject":"Kolesar","target":"s","a":2.5,"t":2.0,"s":5.0,"vz":0.0},{"cat":"pathrest","subject":"Vlak","target":"s","a":1.4,"t":4.0,"s":11.2,"vz":0.0},{"cat":"pathrest","subject":"Voziček","target":"s","a":1.8,"t":3.0,"s":8.1,"vz":0.0},{"cat":"pathrest","subject":"Motorist","target":"s","a":3.0,"t":2.0,"s":6.0,"vz":0.0},{"cat":"pathrest","subject":"Skiro","target":"s","a":2.2,"t":3.0,"s":9.9,"vz":0.0}];
+
+const $ = s => document.querySelector(s);
+const fmt = n => {
+  if(n===null || n===undefined) return "";
+  const r=Math.round(n*10)/10;
+  return (Number.isInteger(r)?String(r):r.toFixed(1)).replace(".",",");
+};
+function parseAnswer(raw){
+  const text=String(raw??"").trim();
+  if(!text) return {kind:"empty",value:NaN};
+  const compact=text.replace(/\s/g,"");
+  const normalized=compact.replace(",",".");
+  if(!/^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/.test(normalized)){
+    const hasUnit=/[a-zA-Z²³°/]/.test(compact);
+    return {kind:hasUnit?"unit":"invalid",value:NaN};
+  }
+  return {kind:"number",value:Number(normalized)};
+}
+const closeEnough = (a,b) => Number.isFinite(a) && Math.abs(a-b)<=0.051;
+
+const V={
+  vz:'v<sub>z</sub>', vk:'v<sub>k</sub>', vbar:'v̄', dv:'Δv', a:'a', t:'t', s:'s'
+};
+const UNIT={vz:'m/s',vk:'m/s',vbar:'m/s',dv:'m/s',a:'m/s²',t:'s',s:'m'};
+const NAME={
+  vz:'začetno hitrost',vk:'končno hitrost',vbar:'povprečno hitrost',
+  dv:'spremembo hitrosti',a:'pospešek',t:'čas',s:'pot'
+};
+const frac=(top,bottom)=>`<span class="frac"><span>${top}</span><span>${bottom}</span></span>`;
+const EQ=html=>`<div class="eq">${html}</div>`;
+const STEP=(title,html)=>`<div class="step"><div class="stepname">${title}</div>${html}</div>`;
+const TRIANGLE=()=>`<div class="triangle">
+  <svg viewBox="0 0 280 225" aria-hidden="true">
+    <path d="M140 20 L27 207 L253 207 Z" fill="none" stroke="#2f506e" stroke-width="6"/>
+    <path d="M70 138 L210 138" fill="none" stroke="#2f506e" stroke-width="5"/>
+    <path d="M140 138 L140 207" fill="none" stroke="#2f506e" stroke-width="5"/>
+  </svg>
+  <div class="tri-label tri-top">${V.dv}</div>
+  <div class="tri-label tri-left">${V.a}</div>
+  <div class="tri-label tri-right">${V.t}</div>
+</div>`;
+
+const WORKED={
+  change:{
+    title:'Sprememba hitrosti',
+    formula:`${V.dv} = ${V.vk} − ${V.vz}`,
+    examples:[
+      {
+        problem:`Avto ima na začetku hitrost <span class="given">2,0 m/s</span>, na koncu pa <span class="given">7,0 m/s</span>. Za koliko se je hitrost spremenila?`,
+        chips:[['start',V.vz,'2,0 m/s'],['end',V.vk,'7,0 m/s'],['ask',V.dv,'?']],
+        anim:{v0:2,v1:7},
+        question:`Za koliko se je hitrost spremenila?`,
+        solution:[
+          STEP('1. Podatki',EQ(`${V.vz} = 2,0 m/s &nbsp;&nbsp;&nbsp; ${V.vk} = 7,0 m/s`)),
+          STEP('2. Enačba',EQ(`${V.dv} = ${V.vk} − ${V.vz}`)),
+          STEP('3. Izračun',EQ(`${V.dv} = 7,0 − 2,0 = 5,0 m/s`)),
+          STEP('4. Pomen',`<p class="explain">Hitrost se je povečala za <span class="good">5,0 m/s</span>.</p>`)
+        ].join('')
+      },
+      {
+        problem:`Kolesar poveča hitrost s <span class="given">3,5 m/s</span> na <span class="given">8,0 m/s</span>. Kolikšna je sprememba hitrosti?`,
+        chips:[['start',V.vz,'3,5 m/s'],['end',V.vk,'8,0 m/s'],['ask',V.dv,'?']],
+        anim:{v0:3.5,v1:8},
+        question:`Izračunaj spremembo hitrosti ${V.dv}.`,
+        solution:[
+          STEP('1. Enačba',EQ(`${V.dv} = ${V.vk} − ${V.vz}`)),
+          STEP('2. Vstavimo',EQ(`${V.dv} = 8,0 − 3,5`)),
+          STEP('3. Rezultat',EQ(`${V.dv} = 4,5 m/s`))
+        ].join('')
+      },
+      {
+        problem:`Voziček začne iz mirovanja in doseže hitrost <span class="given">6,0 m/s</span>. Za koliko se je hitrost spremenila?`,
+        chips:[['start',V.vz,'0 m/s'],['end',V.vk,'6,0 m/s'],['ask',V.dv,'?']],
+        anim:{v0:0,v1:6,rest:true},
+        question:`Če je ${V.vz}=0 m/s, kolikšna je ${V.dv}?`,
+        solution:[
+          STEP('1. Podatki',EQ(`${V.vz} = 0 m/s &nbsp;&nbsp;&nbsp; ${V.vk} = 6,0 m/s`)),
+          STEP('2. Izračun',EQ(`${V.dv} = 6,0 − 0 = 6,0 m/s`)),
+          STEP('3. Pomen',`<p class="explain">Ker je telo začelo iz mirovanja, je sprememba hitrosti enaka končni hitrosti.</p>`)
+        ].join('')
+      },
+      {
+        problem:`Avto ima začetno hitrost <span class="given">2,5 m/s</span>. Hitrost se poveča za <span class="given">4,0 m/s</span>. Kolikšna je končna hitrost?`,
+        chips:[['start',V.vz,'2,5 m/s'],['always',V.dv,'4,0 m/s'],['askEnd',V.vk,'?']],
+        anim:{v0:2.5,v1:6.5},
+        question:`Katero hitrost ima avto na koncu?`,
+        solution:[
+          STEP('1. Osnovna zveza',EQ(`${V.dv} = ${V.vk} − ${V.vz}`)),
+          STEP('2. Iščemo končno hitrost',EQ(`${V.vk} = ${V.vz} + ${V.dv}`)),
+          STEP('3. Izračun',EQ(`${V.vk} = 2,5 + 4,0 = 6,5 m/s`))
+        ].join('')
+      },
+      {
+        problem:`Končna hitrost motorista je <span class="given">9,0 m/s</span>. Hitrost se je povečala za <span class="given">5,0 m/s</span>. Kolikšna je bila začetna hitrost?`,
+        chips:[['askStart',V.vz,'?'],['always',V.dv,'5,0 m/s'],['end',V.vk,'9,0 m/s']],
+        anim:{v0:4,v1:9},
+        question:`Kakšna je bila začetna hitrost?`,
+        solution:[
+          STEP('1. Osnovna zveza',EQ(`${V.dv} = ${V.vk} − ${V.vz}`)),
+          STEP('2. Iščemo začetno hitrost',EQ(`${V.vz} = ${V.vk} − ${V.dv}`)),
+          STEP('3. Izračun',EQ(`${V.vz} = 9,0 − 5,0 = 4,0 m/s`))
+        ].join('')
+      }
+    ]
+  },
+  average:{
+    title:'Povprečna hitrost',
+    formula:`${V.vbar} = ${frac(`${V.vz} + ${V.vk}`,'2')}`,
+    examples:[
+      {
+        problem:`Avto se giblje enakomerno pospešeno od <span class="given">2,0 m/s</span> do <span class="given">8,0 m/s</span>. Kolikšna je njegova povprečna hitrost?`,
+        chips:[['start',V.vz,'2,0 m/s'],['end',V.vk,'8,0 m/s'],['ask',V.vbar,'?']],
+        anim:{v0:2,v1:8,mid:[2,'?',8]},
+        question:`Katera hitrost je na polovici med začetno in končno?`,
+        solution:[
+          STEP('1. Enačba',EQ(`${V.vbar} = ${frac(`${V.vz} + ${V.vk}`,'2')}`)),
+          STEP('2. Izračun',EQ(`${V.vbar} = ${frac('2,0 + 8,0','2')} = 5,0 m/s`)),
+          STEP('3. Pomen',`<p class="explain">Pri enakomerno pospešenem gibanju je povprečna hitrost na polovici med začetno in končno.</p>`)
+        ].join('')
+      },
+      {
+        problem:`Kolesar poveča hitrost z <span class="given">1,5 m/s</span> na <span class="given">6,5 m/s</span>. Kolikšna je povprečna hitrost?`,
+        chips:[['start',V.vz,'1,5 m/s'],['end',V.vk,'6,5 m/s'],['ask',V.vbar,'?']],
+        anim:{v0:1.5,v1:6.5,mid:[1.5,'?',6.5]},
+        question:`Izračunaj ${V.vbar}.`,
+        solution:[
+          STEP('1. Vstavimo',EQ(`${V.vbar} = ${frac('1,5 + 6,5','2')}`)),
+          STEP('2. Rezultat',EQ(`${V.vbar} = 4,0 m/s`))
+        ].join('')
+      },
+      {
+        problem:`Voziček začne iz mirovanja in doseže hitrost <span class="given">7,0 m/s</span>. Kolikšna je povprečna hitrost?`,
+        chips:[['start',V.vz,'0 m/s'],['end',V.vk,'7,0 m/s'],['ask',V.vbar,'?']],
+        anim:{v0:0,v1:7,rest:true,mid:[0,'?',7]},
+        question:`Kolikšna je ${V.vbar}?`,
+        solution:[
+          STEP('1. Enačba',EQ(`${V.vbar} = ${frac(`${V.vz} + ${V.vk}`,'2')}`)),
+          STEP('2. Izračun',EQ(`${V.vbar} = ${frac('0 + 7,0','2')} = 3,5 m/s`))
+        ].join('')
+      },
+      {
+        problem:`Pri enakomerno pospešenem gibanju je začetna hitrost <span class="given">2,0 m/s</span>, povprečna pa <span class="given">5,0 m/s</span>. Kolikšna je končna hitrost?`,
+        chips:[['start',V.vz,'2,0 m/s'],['always',V.vbar,'5,0 m/s'],['askEnd',V.vk,'?']],
+        anim:{v0:2,v1:8,mid:[2,5,'?']},
+        question:`Če je 5,0 m/s na polovici, kolikšna mora biti končna hitrost?`,
+        solution:[
+          STEP('1. Vizualno',`<p class="explain">Od 2,0 do 5,0 so 3,0 m/s. Enak korak naredimo še od 5,0 do končne hitrosti.</p>`),
+          STEP('2. Izračun',EQ(`${V.vk} = 2 · ${V.vbar} − ${V.vz} = 10,0 − 2,0 = 8,0 m/s`))
+        ].join('')
+      },
+      {
+        problem:`Povprečna hitrost je <span class="given">4,5 m/s</span>, končna pa <span class="given">7,5 m/s</span>. Kolikšna je začetna hitrost?`,
+        chips:[['askStart',V.vz,'?'],['always',V.vbar,'4,5 m/s'],['end',V.vk,'7,5 m/s']],
+        anim:{v0:1.5,v1:7.5,mid:['?',4.5,7.5]},
+        question:`Katera začetna hitrost je enako oddaljena od 4,5 m/s kot 7,5 m/s?`,
+        solution:[
+          STEP('1. Vizualno',`<p class="explain">Od 4,5 do 7,5 so 3,0 m/s. Zato je začetna hitrost 3,0 m/s manjša od 4,5 m/s.</p>`),
+          STEP('2. Izračun',EQ(`${V.vz} = 2 · ${V.vbar} − ${V.vk} = 9,0 − 7,5 = 1,5 m/s`))
+        ].join('')
+      }
+    ]
+  },
+  acc:{
+    title:'Pospešek',
+    formula:`${V.a} = ${frac(V.dv,V.t)}`,
+    examples:[
+      {
+        problem:`Avto poveča hitrost z <span class="given">2,0 m/s</span> na <span class="given">8,0 m/s</span> v <span class="given">3,0 s</span>. Kolikšen je pospešek?`,
+        chips:[['start',V.vz,'2,0 m/s'],['end',V.vk,'8,0 m/s'],['always',V.t,'3,0 s'],['ask',V.a,'?']],
+        anim:{v0:2,v1:8,time:3,trail:true},
+        question:`Najprej določi ${V.dv}, nato izračunaj ${V.a}.`,
+        solution:[
+          STEP('1. Sprememba hitrosti',EQ(`${V.dv} = ${V.vk} − ${V.vz} = 8,0 − 2,0 = 6,0 m/s`)),
+          STEP('2. Magični trikotnik',TRIANGLE()+EQ(`${V.a} = ${frac(V.dv,V.t)}`)),
+          STEP('3. Izračun',EQ(`${V.a} = ${frac('6,0','3,0')} = 2,0 m/s²`)),
+          STEP('4. Pomen',`<p class="explain"><span class="good">2,0 m/s²</span> pomeni, da se hitrost vsako sekundo poveča za 2,0 m/s.</p>`)
+        ].join('')
+      },
+      {
+        problem:`Kolesar poveča hitrost z <span class="given">1,5 m/s</span> na <span class="given">6,5 m/s</span> v <span class="given">2,5 s</span>. Kolikšen je pospešek?`,
+        chips:[['start',V.vz,'1,5 m/s'],['end',V.vk,'6,5 m/s'],['always',V.t,'2,5 s'],['ask',V.a,'?']],
+        anim:{v0:1.5,v1:6.5,time:2.5,trail:true},
+        question:`Kolikšen je pospešek?`,
+        solution:[
+          STEP('1. Najprej Δv',EQ(`${V.dv} = 6,5 − 1,5 = 5,0 m/s`)),
+          STEP('2. Pospešek',EQ(`${V.a} = ${frac('5,0','2,5')} = 2,0 m/s²`))
+        ].join('')
+      },
+      {
+        problem:`Voziček začne iz mirovanja in v <span class="given">4,0 s</span> doseže hitrost <span class="given">6,0 m/s</span>. Kolikšen je pospešek?`,
+        chips:[['start',V.vz,'0 m/s'],['end',V.vk,'6,0 m/s'],['always',V.t,'4,0 s'],['ask',V.a,'?']],
+        anim:{v0:0,v1:6,time:4,trail:true,rest:true},
+        question:`Izračunaj ${V.a}.`,
+        solution:[
+          STEP('1. Sprememba hitrosti',EQ(`${V.dv} = 6,0 − 0 = 6,0 m/s`)),
+          STEP('2. Pospešek',EQ(`${V.a} = ${frac('6,0','4,0')} = 1,5 m/s²`))
+        ].join('')
+      },
+      {
+        problem:`Hitrost se v <span class="given">3,0 s</span> spremeni za <span class="given">4,8 m/s</span>. Kolikšen je pospešek?`,
+        chips:[['always',V.dv,'4,8 m/s'],['always',V.t,'3,0 s'],['ask',V.a,'?']],
+        anim:{v0:2,v1:6.8,time:3,trail:true},
+        question:`Uporabi spremembo hitrosti in čas.`,
+        solution:[
+          STEP('1. Magični trikotnik',TRIANGLE()+EQ(`${V.a} = ${frac(V.dv,V.t)}`)),
+          STEP('2. Izračun',EQ(`${V.a} = ${frac('4,8','3,0')} = 1,6 m/s²`))
+        ].join('')
+      },
+      {
+        problem:`Telo se giblje s pospeškom <span class="given">1,5 m/s²</span> <span class="given">4,0 s</span>. Za koliko se spremeni hitrost?`,
+        chips:[['always',V.a,'1,5 m/s²'],['always',V.t,'4,0 s'],['ask',V.dv,'?']],
+        anim:{v0:2,v1:8,time:4,trail:true},
+        question:`V magičnem trikotniku tokrat iščemo ${V.dv}.`,
+        solution:[
+          STEP('1. Magični trikotnik',TRIANGLE()+EQ(`${V.dv} = ${V.a} · ${V.t}`)),
+          STEP('2. Izračun',EQ(`${V.dv} = 1,5 · 4,0 = 6,0 m/s`))
+        ].join('')
+      }
+    ]
+  },
+  pathavg:{
+    title:'Pot s povprečno hitrostjo',
+    formula:`${V.s} = ${V.vbar} · ${V.t}`,
+    examples:[
+      {
+        problem:`Povprečna hitrost vozila je <span class="given">3,0 m/s</span>, čas gibanja pa <span class="given">4,0 s</span>. Kolikšno pot opravi?`,
+        chips:[['always',V.vbar,'3,0 m/s'],['always',V.t,'4,0 s'],['ask',V.s,'?']],
+        anim:{v0:2,v1:4,time:4,distance:true},
+        question:`Kolikšna je pot od začetka do konca?`,
+        solution:[STEP('1. Enačba',EQ(`${V.s} = ${V.vbar} · ${V.t}`)),STEP('2. Izračun',EQ(`${V.s} = 3,0 · 4,0 = 12,0 m`))].join('')
+      },
+      {
+        problem:`Povprečna hitrost je <span class="given">4,5 m/s</span>, gibanje pa traja <span class="given">2,0 s</span>. Kolikšna je pot?`,
+        chips:[['always',V.vbar,'4,5 m/s'],['always',V.t,'2,0 s'],['ask',V.s,'?']],
+        anim:{v0:3.5,v1:5.5,time:2,distance:true},
+        question:`Izračunaj pot.`,
+        solution:[STEP('1. Izračun',EQ(`${V.s} = 4,5 · 2,0 = 9,0 m`))].join('')
+      },
+      {
+        problem:`Avto enakomerno pospešuje od <span class="given">2,0 m/s</span> do <span class="given">8,0 m/s</span> v <span class="given">4,0 s</span>. Kolikšno pot opravi?`,
+        chips:[['start',V.vz,'2,0 m/s'],['end',V.vk,'8,0 m/s'],['always',V.t,'4,0 s'],['ask',V.s,'?']],
+        anim:{v0:2,v1:8,time:4,distance:true,mid:[2,'?',8]},
+        question:`Najprej izračunaj povprečno hitrost, nato pot.`,
+        solution:[
+          STEP('1. Povprečna hitrost',EQ(`${V.vbar} = ${frac('2,0 + 8,0','2')} = 5,0 m/s`)),
+          STEP('2. Pot',EQ(`${V.s} = 5,0 · 4,0 = 20,0 m`))
+        ].join('')
+      },
+      {
+        problem:`Kolesar enakomerno pospešuje od <span class="given">1,5 m/s</span> do <span class="given">6,5 m/s</span> v <span class="given">3,0 s</span>. Kolikšno pot opravi?`,
+        chips:[['start',V.vz,'1,5 m/s'],['end',V.vk,'6,5 m/s'],['always',V.t,'3,0 s'],['ask',V.s,'?']],
+        anim:{v0:1.5,v1:6.5,time:3,distance:true,mid:[1.5,'?',6.5]},
+        question:`Dva koraka: ${V.vbar}, nato ${V.s}.`,
+        solution:[
+          STEP('1. Povprečna hitrost',EQ(`${V.vbar} = ${frac('1,5 + 6,5','2')} = 4,0 m/s`)),
+          STEP('2. Pot',EQ(`${V.s} = 4,0 · 3,0 = 12,0 m`))
+        ].join('')
+      },
+      {
+        problem:`Voziček začne iz mirovanja in po enakomernem pospeševanju doseže <span class="given">7,0 m/s</span>. Gibanje traja <span class="given">2,0 s</span>. Kolikšna je pot?`,
+        chips:[['start',V.vz,'0 m/s'],['end',V.vk,'7,0 m/s'],['always',V.t,'2,0 s'],['ask',V.s,'?']],
+        anim:{v0:0,v1:7,time:2,distance:true,rest:true,mid:[0,'?',7]},
+        question:`Najprej ${V.vbar}, nato ${V.s}.`,
+        solution:[
+          STEP('1. Povprečna hitrost',EQ(`${V.vbar} = ${frac('0 + 7,0','2')} = 3,5 m/s`)),
+          STEP('2. Pot',EQ(`${V.s} = 3,5 · 2,0 = 7,0 m`))
+        ].join('')
+      }
+    ]
+  },
+  pathrest:{
+    title:'Pot pri začetku iz mirovanja',
+    formula:`${V.s} = ${frac(`${V.a} · ${V.t}<sup>2</sup>`,'2')}`,
+    examples:[
+      {
+        problem:`Avto začne iz mirovanja (<span class="given">${V.vz}=0 m/s</span>). Pospešek je <span class="given">2,0 m/s²</span>, čas pa <span class="given">3,0 s</span>. Kolikšno pot opravi?`,
+        chips:[['start',V.vz,'0 m/s'],['always',V.a,'2,0 m/s²'],['always',V.t,'3,0 s'],['ask',V.s,'?']],
+        anim:{v0:0,v1:6,time:3,trail:true,distance:true,rest:true},
+        question:`Ker je ${V.vz}=0, uporabi enačbo za pot iz mirovanja.`,
+        solution:[
+          STEP('1. Enačba',EQ(`${V.s} = ${frac(`${V.a} · ${V.t}<sup>2</sup>`,'2')}`)),
+          STEP('2. Kvadrat časa',EQ(`${V.t}<sup>2</sup> = 3,0<sup>2</sup> = 9,0 s²`)),
+          STEP('3. Izračun',EQ(`${V.s} = ${frac('2,0 · 9,0','2')} = 9,0 m`))
+        ].join('')
+      },
+      {
+        problem:`Kolesar začne iz mirovanja. Pospešek je <span class="given">1,5 m/s²</span>, čas <span class="given">4,0 s</span>. Kolikšno pot opravi?`,
+        chips:[['start',V.vz,'0 m/s'],['always',V.a,'1,5 m/s²'],['always',V.t,'4,0 s'],['ask',V.s,'?']],
+        anim:{v0:0,v1:6,time:4,trail:true,distance:true,rest:true},
+        question:`Izračunaj pot.`,
+        solution:[STEP('1. Izračun',EQ(`${V.s} = ${frac('1,5 · 4,0²','2')} = 12,0 m`))].join('')
+      },
+      {
+        problem:`Voziček začne iz mirovanja. Pospešuje z <span class="given">2,4 m/s²</span> <span class="given">2,5 s</span>. Kolikšno pot opravi?`,
+        chips:[['start',V.vz,'0 m/s'],['always',V.a,'2,4 m/s²'],['always',V.t,'2,5 s'],['ask',V.s,'?']],
+        anim:{v0:0,v1:6,time:2.5,trail:true,distance:true,rest:true},
+        question:`Izračunaj ${V.s}.`,
+        solution:[STEP('1. Izračun',EQ(`${V.s} = ${frac('2,4 · 2,5²','2')} = 7,5 m`))].join('')
+      },
+      {
+        problem:`Avto začne iz mirovanja. Pospešek je <span class="given">0,8 m/s²</span>, čas pa <span class="given">5,0 s</span>. Kolikšna je pot?`,
+        chips:[['start',V.vz,'0 m/s'],['always',V.a,'0,8 m/s²'],['always',V.t,'5,0 s'],['ask',V.s,'?']],
+        anim:{v0:0,v1:4,time:5,trail:true,distance:true,rest:true},
+        question:`Pazi na ${V.t}<sup>2</sup>.`,
+        solution:[STEP('1. Izračun',EQ(`${V.s} = ${frac('0,8 · 5,0²','2')} = 10,0 m`))].join('')
+      },
+      {
+        problem:`Motorist začne iz mirovanja. Pospešek je <span class="given">3,0 m/s²</span>, čas pa <span class="given">2,0 s</span>. Kolikšno pot opravi?`,
+        chips:[['start',V.vz,'0 m/s'],['always',V.a,'3,0 m/s²'],['always',V.t,'2,0 s'],['ask',V.s,'?']],
+        anim:{v0:0,v1:6,time:2,trail:true,distance:true,rest:true},
+        question:`Izračunaj pot.`,
+        solution:[STEP('1. Izračun',EQ(`${V.s} = ${frac('3,0 · 2,0²','2')} = 6,0 m`))].join('')
+      }
+    ]
+  }
+};
+
+// ---------- Worked examples / animation ----------
+let learnIndex=0, rafId=null, animToken=0;
+
+function renderExampleButtons(){
+  const nav=$("#exampleNav"); nav.innerHTML="";
+  for(let i=0;i<5;i++){
+    const b=document.createElement("button");
+    b.className="example-btn"+(i===learnIndex?" active":"");
+    b.setAttribute("aria-pressed",String(i===learnIndex));
+    b.textContent=`Primer ${i+1}`;
+    b.addEventListener("click",()=>{learnIndex=i; renderWorked();});
+    nav.appendChild(b);
+  }
+}
+function renderChips(chips,final=false){
+  const box=$("#workedData"); box.innerHTML="";
+  chips.forEach(([phase,label,value])=>{
+    const d=document.createElement("div");
+    const endish=phase==="end"||phase==="askEnd";
+    const classes=["data-chip"];
+    if(phase==="start"||phase==="askStart") classes.push("start");
+    if(phase==="end"||phase==="askEnd") classes.push("end");
+    if(phase==="ask"||phase==="askEnd"||phase==="askStart") classes.push("ask");
+    d.className=classes.join(" ");
+    if(endish && !final) d.classList.add("pending");
+    d.innerHTML=`${label} = ${value}`;
+    box.appendChild(d);
+  });
+}
+function makeMidpoint(values,reveal=false,anim=null){
+  if(!values) return "";
+  const original=[...values];
+  const solved=[
+    anim?.v0,
+    (anim?.v0!==undefined && anim?.v1!==undefined) ? (anim.v0+anim.v1)/2 : undefined,
+    anim?.v1
+  ];
+  const display=original.map((x,i)=>{
+    if(x==="?" && reveal && solved[i]!==undefined) return fmt(solved[i]);
+    return typeof x==="number"?fmt(x):x;
+  });
+  const klass=(x,i)=>{
+    if(x==="?" && !reveal) return "asked";
+    if(x==="?" && reveal) return "good";
+    return "given";
+  };
+  return `<div class="midpoint">
+    <div class="mark ${klass(original[0],0)}">${V.vz}<br>${display[0]}</div><div class="line"></div>
+    <div class="mark ${klass(original[1],1)}">${V.vbar}<br>${display[1]}</div><div class="line"></div>
+    <div class="mark ${klass(original[2],2)}">${V.vk}<br>${display[2]}</div>
+  </div>`;
+}
+function addTrail(anim){
+  const layer=$("#trailLayer"); layer.innerHTML="";
+  if(!anim.trail) return;
+  const n=Math.max(3,Math.min(5,Math.round(anim.time||4)));
+  const v0=anim.v0??0, v1=anim.v1??6;
+  const roadWidth=Math.max(1,$("#roadWrap").getBoundingClientRect().width);
+  const carWidth=Math.max(1,$("#car").getBoundingClientRect().width);
+  const carHalfPct=(carWidth/2)/roadWidth*100;
+  for(let i=0;i<=n;i++){
+    const tau=i/n;
+    const p=motionP(v0,v1,tau);
+    const dot=document.createElement("span");
+    dot.className="trail-dot";
+    if(i===0) dot.classList.add("edge-start");
+    if(i===n) dot.classList.add("edge-end");
+    const centerPct=Math.max(1.5,Math.min(98.5,5+84*p+carHalfPct));
+    dot.style.left=`${centerPct}%`;
+    dot.style.transform="translateX(-50%)";
+    dot.dataset.time=`${fmt((anim.time||n)*tau)} s`;
+    layer.appendChild(dot);
+  }
+}
+function motionP(v0,v1,tau){
+  const denom=v0+0.5*(v1-v0);
+  if(Math.abs(denom)<1e-9) return tau*tau;
+  return Math.max(0,Math.min(1,(v0*tau+0.5*(v1-v0)*tau*tau)/denom));
+}
+function renderWorked(){
+  cancelAnimationFrame(rafId); animToken++;
+  const type=$("#learnType").value, group=WORKED[type], ex=group.examples[learnIndex];
+  renderExampleButtons();
+  $("#anchorTopic").textContent=group.title;
+  $("#anchorFormula").innerHTML=group.formula;
+  $("#workedProblem").innerHTML=ex.problem;
+  renderChips(ex.chips,false);
+  $("#workedQuestion").style.display="none";
+  $("#workedQuestion").innerHTML=ex.question;
+  $("#visualAfter").style.display="none"; $("#visualAfter").innerHTML="";
+  $("#solution").classList.remove("visible"); $("#solution").innerHTML=ex.solution;
+  $("#solutionToggle").textContent="POKAŽI REŠITEV"; $("#solutionToggle").setAttribute("aria-expanded","false"); $("#solutionToggle").disabled=true;
+  $("#timer").style.display=ex.anim.time?"block":"none";
+  $("#timer").textContent="0,0 s";
+  $("#distanceFill").style.width="0%";
+  $("#speedTag").textContent=ex.anim.rest?"začetek: mirovanje":"hitrost";
+  $("#car").style.left="5%";
+  const initialSpeed=ex.anim.v0??0;
+  const initialMax=Math.max(ex.anim.v1??0,initialSpeed,1);
+  $("#speedArrow").style.width=initialSpeed<=1e-9?"0px":`${28+92*(initialSpeed/initialMax)}px`;
+  $("#speedArrow").style.opacity=initialSpeed<=1e-9?"0":"1";
+  addTrail(ex.anim);
+  runAnimation(ex);
+}
+function runAnimation(ex){
+  const token=animToken;
+  const reduce=window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const duration=reduce?60:4300;
+  const pause=ex.anim.rest && !reduce ? 520 : 0;
+  const v0=ex.anim.v0??2, v1=ex.anim.v1??7, total=ex.anim.time||0;
+  const start=performance.now();
+  $("#skyLabel").textContent=ex.anim.rest?"Telo na začetku miruje.":"Opazuj, kako se hitrost spreminja.";
+  function frame(now){
+    if(token!==animToken) return;
+    const elapsed=now-start;
+    let tau=elapsed<=pause?0:(elapsed-pause)/Math.max(1,duration-pause);
+    tau=Math.max(0,Math.min(1,tau));
+    const p=motionP(v0,v1,tau);
+    $("#car").style.left=`${5+84*p}%`;
+    const speed=v0+(v1-v0)*tau, maxv=Math.max(v1,v0,1);
+    if(speed<=1e-9){
+      $("#speedArrow").style.width="0px";
+      $("#speedArrow").style.opacity="0";
+    }else{
+      $("#speedArrow").style.opacity="1";
+      $("#speedArrow").style.width=`${28+92*(speed/maxv)}px`;
+    }
+    if(total){
+      $("#timer").textContent=`${fmt(total*tau)} s`;
+    }
+    if(ex.anim.distance) $("#distanceFill").style.width=`${84*p}%`;
+    if(tau<1){rafId=requestAnimationFrame(frame);}
+    else finishAnimation(ex);
+  }
+  rafId=requestAnimationFrame(frame);
+}
+function finishAnimation(ex){
+  renderChips(ex.chips,true);
+  $("#skyLabel").textContent="Konec opazovanega gibanja.";
+  if(ex.anim.mid){
+    $("#visualAfter").innerHTML=`<div class="motion-badge">HITROSTI</div>${makeMidpoint(ex.anim.mid,false,ex.anim)}`;
+    $("#visualAfter").style.display="block";
+  }else if(ex.anim.trail){
+    $("#visualAfter").innerHTML=`<div class="note" style="color:#dce9f6"><strong style="color:var(--cyan)">Opazi:</strong> oznake so v enakih časovnih korakih, razmiki pa se večajo.</div>`;
+    $("#visualAfter").style.display="block";
+  }
+  $("#workedQuestion").style.display="block";
+  $("#solutionToggle").disabled=false;
+}
+$("#learnType").addEventListener("change",()=>{learnIndex=0;renderWorked();});
+$("#solutionToggle").addEventListener("click",()=>{
+  const sol=$("#solution"), visible=sol.classList.toggle("visible");
+  $("#solutionToggle").textContent=visible?"SKRIJ REŠITEV":"POKAŽI REŠITEV";
+  $("#solutionToggle").setAttribute("aria-expanded",String(visible));
+  const ex=WORKED[$("#learnType").value].examples[learnIndex];
+  if(ex.anim.mid){
+    $("#visualAfter").innerHTML=`<div class="motion-badge">HITROSTI</div>${makeMidpoint(ex.anim.mid,visible,ex.anim)}`;
+  }
+  if(visible) sol.scrollIntoView({behavior:"smooth",block:"nearest"});
+});
+window.addEventListener("resize",()=>{
+  const ex=WORKED[$("#learnType").value].examples[learnIndex];
+  if(ex?.anim?.trail) addTrail(ex.anim);
+});
+renderWorked();
+
+// ---------- Practice ----------
+let solved=0,current=null,attempts={},finished=false;
+const bags={};
+const categoryName=c=>({
+  change:"Sprememba hitrosti",average:"Povprečna hitrost",acc:"Pospešek",
+  pathavg:"Pot s povprečno hitrostjo",pathrest:"Pot iz mirovanja"
+})[c]||"Mešana naloga";
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function nextTask(cat){
+  if(!bags[cat]||!bags[cat].length) bags[cat]=shuffle(cat==="mixed"?TASKS:TASKS.filter(x=>x.cat===cat));
+  return bags[cat].pop();
+}
+function taskText(t){
+  if(t.cat==="change"){
+    if(t.target==="dv") return `${t.subject} ima začetno hitrost <span class="given">${fmt(t.vz)} m/s</span>, končno pa <span class="given">${fmt(t.vk)} m/s</span>. Za koliko se je hitrost spremenila?`;
+    if(t.target==="vk") return `${t.subject} ima začetno hitrost <span class="given">${fmt(t.vz)} m/s</span>. Hitrost se poveča za <span class="given">${fmt(t.dv)} m/s</span>. Kolikšna je končna hitrost?`;
+    return `${t.subject} ima končno hitrost <span class="given">${fmt(t.vk)} m/s</span>. Hitrost se je povečala za <span class="given">${fmt(t.dv)} m/s</span>. Kolikšna je začetna hitrost?`;
+  }
+  if(t.cat==="average"){
+    if(t.target==="vbar") return `${t.subject} se giblje enakomerno pospešeno. ${V.vz}=<span class="given">${fmt(t.vz)} m/s</span>, ${V.vk}=<span class="given">${fmt(t.vk)} m/s</span>. Kolikšna je povprečna hitrost?`;
+    if(t.target==="vk") return `${t.subject} se giblje enakomerno pospešeno. ${V.vz}=<span class="given">${fmt(t.vz)} m/s</span>, ${V.vbar}=<span class="given">${fmt(t.vbar)} m/s</span>. Kolikšna je končna hitrost?`;
+    return `${t.subject} se giblje enakomerno pospešeno. ${V.vbar}=<span class="given">${fmt(t.vbar)} m/s</span>, ${V.vk}=<span class="given">${fmt(t.vk)} m/s</span>. Kolikšna je začetna hitrost?`;
+  }
+  if(t.cat==="acc"){
+    if(t.target==="a"&&t.vz!==null) return `${t.subject} poveča hitrost z <span class="given">${fmt(t.vz)} m/s</span> na <span class="given">${fmt(t.vk)} m/s</span> v <span class="given">${fmt(t.t)} s</span>. Kolikšen je pospešek?`;
+    if(t.target==="a") return `${t.subject} v <span class="given">${fmt(t.t)} s</span> spremeni hitrost za <span class="given">${fmt(t.dv)} m/s</span>. Kolikšen je pospešek?`;
+    if(t.target==="dv") return `${t.subject} se <span class="given">${fmt(t.t)} s</span> giblje s pospeškom <span class="given">${fmt(t.a)} m/s²</span>. Za koliko se spremeni hitrost?`;
+    return `${t.subject} spremeni hitrost za <span class="given">${fmt(t.dv)} m/s</span> pri pospešku <span class="given">${fmt(t.a)} m/s²</span>. Koliko časa traja sprememba?`;
+  }
+  if(t.cat==="pathavg"){
+    if(t.vz!==null) return `${t.subject} enakomerno pospešuje od <span class="given">${fmt(t.vz)} m/s</span> do <span class="given">${fmt(t.vk)} m/s</span> v <span class="given">${fmt(t.t)} s</span>. Kolikšno pot opravi?`;
+    return `${t.subject} ima povprečno hitrost <span class="given">${fmt(t.vbar)} m/s</span> in se giblje <span class="given">${fmt(t.t)} s</span>. Kolikšno pot opravi?`;
+  }
+  return `${t.subject} začne iz mirovanja. Pospešek je <span class="given">${fmt(t.a)} m/s²</span>, čas pa <span class="given">${fmt(t.t)} s</span>. Kolikšno pot opravi?`;
+}
+function targetOptions(t){
+  if(t.cat==="change")return["dv","vk","vz"];
+  if(t.cat==="average")return["vbar","vk","vz"];
+  if(t.cat==="acc")return["a","dv","t"];
+  return["s","a","vbar"];
+}
+function startTask(){
+  current=nextTask($("#practiceType").value);attempts={};finished=false;$("#newTask").disabled=true;
+  const opts=targetOptions(current);
+  $("#taskCard").innerHTML=`<div class="task-head">NALOGA • ${categoryName(current.cat)}</div>
+    <div class="task-body">
+      <p class="problem">${taskText(current)}</p>
+      <div class="step" id="targetStep">
+        <div class="stepname">1. korak</div>
+        <p class="prompt">Kaj moramo izračunati?</p>
+        <div class="choice-row">${opts.map(k=>`<button class="choice" data-target="${k}">${NAME[k]} (${V[k]})</button>`).join("")}</div>
+        <div class="feedback" id="targetFb">Izberi količino, ki jo zahteva naloga.</div>
+      </div>
+    </div>`;
+  document.querySelectorAll("[data-target]").forEach(b=>b.addEventListener("click",()=>checkTarget(b)));
+}
+function checkTarget(b){
+  const fb=$("#targetFb");
+  if(b.dataset.target===current.target){
+    document.querySelectorAll("[data-target]").forEach(x=>x.disabled=true);b.classList.add("right");
+    fb.className="feedback ok";fb.innerHTML=`✓ Tako je. Iščemo <strong>${NAME[current.target]} (${V[current.target]})</strong>.`;
+    setTimeout(()=>renderCalculation(current),200);
+  }else{
+    b.classList.add("wrong");fb.className="feedback no";fb.textContent="Preberi zadnji stavek naloge še enkrat.";
+  }
+}
+function addInput(box,{prompt,formula,answer,unit,key,hint,after,meaning}){
+  box.insertAdjacentHTML("beforeend",`<div class="step" id="step-${key}">
+    <div class="stepname">Naslednji korak</div><p class="prompt">${prompt}</p>${formula?EQ(formula):""}
+    <div class="input-line">
+      <label class="sr-only" for="in-${key}">${prompt} Vpiši samo številsko vrednost.</label>
+      <input class="answer-input" id="in-${key}" inputmode="decimal" autocomplete="off"
+        aria-label="${prompt} Vpiši samo številsko vrednost." aria-describedby="fb-${key}">
+      <span aria-hidden="true"><strong>${unit}</strong></span>
+      <button class="check-btn" id="btn-${key}">PREVERI</button>
+    </div>
+    <div class="feedback" id="fb-${key}" aria-live="polite">Vpiši samo število. Uporabiš lahko vejico ali piko.</div></div>`);
+  const inp=$(`#in-${key}`),btn=$(`#btn-${key}`),fb=$(`#fb-${key}`);
+  const check=()=>{
+    const parsed=parseAnswer(inp.value);
+    if(parsed.kind==="empty"){
+      fb.className="feedback no";
+      fb.textContent="Najprej vpiši rezultat.";
+      inp.focus();
+      return;
+    }
+    if(parsed.kind==="unit"){
+      fb.className="feedback no";
+      fb.textContent="Vpiši samo število. Enota je že zapisana ob polju.";
+      inp.focus();
+      return;
+    }
+    if(parsed.kind!=="number"){
+      fb.className="feedback no";
+      fb.textContent="Zapisa ne prepoznam. Vpiši število, na primer 4,5.";
+      inp.focus();
+      return;
+    }
+    const val=parsed.value;
+    attempts[key]=(attempts[key]||0)+1;
+    if(closeEnough(val,answer)){
+      inp.disabled=true;btn.disabled=true;fb.className="feedback ok";
+      fb.innerHTML=`✓ Pravilno: <strong>${fmt(answer)} ${unit}</strong>${meaning?`<br>${meaning}`:""}`;
+      if(after)setTimeout(after,180);else finishPractice();
+    }else{
+      fb.className="feedback no";
+      fb.innerHTML=attempts[key]===1?"Še ne. Preveri podatke in račun."
+        :attempts[key]===2?`Namig: ${hint}`
+        :`Pravilni rezultat je <strong>${fmt(answer)} ${unit}</strong>. Vpiši ga in nadaljuj.`;
+    }
+  };
+  btn.addEventListener("click",check);
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")check();});
+  setTimeout(()=>inp.focus(),100);
+}
+function renderCalculation(t){
+  const body=$("#taskCard .task-body"),box=document.createElement("div");body.appendChild(box);
+  if(t.cat==="change"){
+    const form=t.target==="dv"?`${V.dv} = ${V.vk} − ${V.vz}`:t.target==="vk"?`${V.vk} = ${V.vz} + ${V.dv}`:`${V.vz} = ${V.vk} − ${V.dv}`;
+    addInput(box,{prompt:`Izračunaj ${NAME[t.target]}.`,formula:form,answer:t[t.target],unit:UNIT[t.target],key:"one",
+      hint:t.target==="dv"?`${fmt(t.vk)} − ${fmt(t.vz)}`:t.target==="vk"?`${fmt(t.vz)} + ${fmt(t.dv)}`:`${fmt(t.vk)} − ${fmt(t.dv)}`});
+  }else if(t.cat==="average"){
+    const form=t.target==="vbar"?`${V.vbar} = ${frac(`${V.vz} + ${V.vk}`,'2')}`:t.target==="vk"?`${V.vk} = 2 · ${V.vbar} − ${V.vz}`:`${V.vz} = 2 · ${V.vbar} − ${V.vk}`;
+    addInput(box,{prompt:`Izračunaj ${NAME[t.target]}.`,formula:form,answer:t[t.target],unit:"m/s",key:"one",
+      hint:t.target==="vbar"?"seštej začetno in končno hitrost ter deli z 2":"povprečna hitrost je na polovici med začetno in končno"});
+  }else if(t.cat==="acc"){
+    const afterTriangle=()=>{
+      const step=document.createElement("div");step.className="step";
+      step.innerHTML=`<div class="stepname">Magični trikotnik</div>${TRIANGLE()}`;
+      box.appendChild(step);
+      const form=t.target==="a"?`${V.a} = ${frac(V.dv,V.t)}`:t.target==="dv"?`${V.dv} = ${V.a} · ${V.t}`:`${V.t} = ${frac(V.dv,V.a)}`;
+      addInput(box,{prompt:`Izračunaj ${NAME[t.target]}.`,formula:form,answer:t[t.target],unit:UNIT[t.target],key:"acc",
+        hint:t.target==="a"?"spremembo hitrosti deli s časom":t.target==="dv"?"pospešek pomnoži s časom":"spremembo hitrosti deli s pospeškom",
+        meaning:t.target==="a"?`To pomeni, da se hitrost vsako sekundo spremeni za ${fmt(t.a)} m/s.`:""});
+    };
+    if(t.target==="a"&&t.vz!==null){
+      addInput(box,{prompt:`Najprej izračunaj ${V.dv}.`,formula:`${V.dv} = ${V.vk} − ${V.vz}`,answer:t.dv,unit:"m/s",key:"dv",
+        hint:`${fmt(t.vk)} − ${fmt(t.vz)}`,after:afterTriangle});
+    }else afterTriangle();
+  }else if(t.cat==="pathavg"){
+    const path=()=>addInput(box,{prompt:`Izračunaj pot.`,formula:`${V.s} = ${V.vbar} · ${V.t}`,answer:t.s,unit:"m",key:"s",
+      hint:`${fmt(t.vbar)} · ${fmt(t.t)}`});
+    if(t.vz!==null) addInput(box,{prompt:`Najprej izračunaj ${V.vbar}.`,formula:`${V.vbar} = ${frac(`${V.vz} + ${V.vk}`,'2')}`,answer:t.vbar,unit:"m/s",key:"vbar",
+      hint:`(${fmt(t.vz)} + ${fmt(t.vk)}) : 2`,after:path});
+    else path();
+  }else{
+    addInput(box,{prompt:`Izračunaj pot.`,formula:`${V.s} = ${frac(`${V.a} · ${V.t}<sup>2</sup>`,'2')}`,answer:t.s,unit:"m",key:"s",
+      hint:`najprej izračunaj ${fmt(t.t)}², nato pomnoži z ${fmt(t.a)} in deli z 2`});
+  }
+}
+function finishPractice(){
+  if(finished)return;finished=true;solved++;$("#counter").textContent=`Rešene naloge: ${solved}`;$("#newTask").disabled=false;
+  $("#taskCard .task-body").insertAdjacentHTML("beforeend",`<div class="finish"><strong>✓ Naloga je rešena.</strong> Poglej postopek: podatki → zveza → račun → enota.</div>`);
+}
+$("#practiceType").addEventListener("change",startTask);$("#newTask").addEventListener("click",startTask);startTask();
+</script>
+</body>
+</html>
