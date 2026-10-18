@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="sl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#102b38"><title>Tankovska bitka · 0.4.8</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23102b38'/%3E%3Cpath d='M12 40h40v12H12zM20 30h25v10H20zM33 30l18-13' stroke='%2386e3bc' stroke-width='7' fill='none'/%3E%3C/svg%3E"><link rel="stylesheet" href="./app.css"></head>
+<body>
+<header class="topbar"><a class="brand" href="./"><span class="brand-mark">↗</span><span>TANKOVSKA BITKA <small>FIZIKA V IGRI</small></span></a><div class="top-actions"><span class="version">0.4.8</span><button id="help" class="quiet">? Pomoč</button><button id="show-rules" class="quiet">Pravila</button><button id="audio" class="quiet" aria-pressed="false">Zvok: izklopljen</button><button id="menu" class="quiet" hidden>Meni</button></div></header>
+<main>
+<section id="home">
+  <div class="intro"><div><p class="eyebrow">DELO · ENERGIJA · MOČ</p><h1>Premisli. Nameri. Izstreli.</h1><p>Tri runde. Spreminjajoč se teren. Do pet tankov.<br>Vprašanja in upravljanje so na bojišču.</p></div><div class="intro-note"><b>01 — 03</b><span>Planota → gričevje → višinske razlike</span></div></div>
+  <div class="modes" role="group" aria-label="Način igre">
+    <button class="mode selected" data-mode="solo"><span>01 / SAMOSTOJNO</span><strong>Proti računalniku</strong><small>Izberi pravila in število nasprotnikov.</small></button>
+    <button class="mode" data-mode="training"><span>02 / UČENJE</span><strong>Trening</strong><small>Namigi, pot izstrelka in ponovitev.</small></button>
+    <button class="mode" data-mode="hotseat"><span>03 / ISTI ZASLON</span><strong>Hotseat</strong><small>Do trije ljudje. Brez izmika.</small></button>
+    <button class="mode" data-mode="online"><span>04 / VEČ ZASLONOV</span><strong>Spletna igra</strong><small>Skupna soba za ljudi in računalnik.</small></button>
+  </div>
+  <div class="setup-grid"><form id="setup" class="panel setup">
+    <div class="section-title"><h2>Priprava boja</h2><span id="cpu-count" class="badge"></span></div>
+    <div class="fields"><label>Pravila<select id="rules"><option value="sequential">Izmenične poteze</option><option value="salvo">Sočasne salve</option><option value="rapid">Hitri obračun</option></select></label><label>Skupaj tankov<select id="total"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label><label id="humans-label">Ljudje<select id="humans"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label><label>Računalnik<select id="difficulty"><option value="1">Lahek</option><option value="2" selected>Srednji</option><option value="3">Težji</option></select></label><label>Vprašanja<select id="question-difficulty"><option value="1">Osnovna</option><option value="2">Srednja</option><option value="3">Zahtevnejša</option></select></label><label id="timer-label">Čas priprave<select id="prep"><option>30</option><option>60</option><option selected>90</option><option>120</option></select><small>sekund za vsako fazo</small></label><label id="training-terrain-label" hidden>Teren za trening<select id="training-terrain"><option value="1">Odprta planota</option><option value="2">Gričevje</option><option value="3">Višinske razlike</option></select></label></div>
+    <div id="names" class="fields"></div>
+    <fieldset class="topics"><legend>Vsebina vprašanj</legend><label><input type="checkbox" value="work" checked> Delo</label><label><input type="checkbox" value="kinetic" checked> Kinetična energija</label><label><input type="checkbox" value="potential" checked> Potencialna energija</label><label><input type="checkbox" value="power" checked> Moč</label></fieldset>
+    <p id="rules-description" class="muted"></p><div id="rules-brief" class="rules-brief"></div><button id="start" class="primary big" type="submit" disabled>Nalagam vprašanja …</button>
+    <div id="join-section" hidden><div class="divider">ALI SE PRIDRUŽI SOBI</div><div class="join-row"><label class="sr-only" for="code">Koda sobe</label><input id="code" autocomplete="off" placeholder="8-mestna koda" maxlength="8"><button id="join" type="button">Vstopi</button></div><button id="resume" type="button" class="quiet" hidden>Nadaljuj zadnjo spletno sobo</button></div>
+  </form><div class="panel preview-panel"><canvas id="demo" aria-label="Predogled terena s tanki"></canvas><div class="preview-caption"><span class="eyebrow">ENAKA FIZIKA, RAZLIČEN RITEM</span><h2 id="mode-title">Vsak strel spremeni areno.</h2><p id="mode-detail">Eksplozije naredijo kraterje. Teren pod tankom se lahko udre. Med rundami dobiš svežo areno in novo zalogo.</p><div class="preview-tags"><span>200 vprašanj</span><span>3 runde</span><span>2–5 tankov</span></div></div></div></div>
+  <footer><span>9. razred · delo, kinetična in potencialna energija, moč · g = 10 m/s²</span><a href="./legacy-0.3.html">Arhiv 0.3 / SCORM</a></footer>
+</section>
+<section id="lobby" class="panel lobby" hidden><p class="eyebrow">SPLETNA SOBA</p><h1 id="room-code"></h1><p id="lobby-config"></p><button id="copy-room" class="quiet">Kopiraj povezavo</button><div id="lobby-players"></div><button id="ready" class="primary big">Pripravljen sem</button><p class="muted">Boj se začne, ko so vsi ljudje pripravljeni. Računalniški igralci se pridružijo samodejno.</p></section>
+<section id="battle" hidden>
+<div id="battlefield" class="canvas-wrap">
+  <canvas id="arena" tabindex="0" aria-label="Bojna arena. Miška meri. Levo in desno: kot. Gor in dol: sila. Presledek: strel. Med obrambo levo in desno: premik."></canvas>
+  <div id="field-top" class="field-top hud-obstacle"><div><p id="match-label" class="eyebrow"></p><h1 id="round-title"></h1></div><div class="phase-pill"><span id="phase-label"></span><strong id="clock"></strong></div><div class="control-heading"><strong id="actor-name"></strong><span id="wallet"></span></div></div>
+  <div id="score-strip" class="score-strip hud-obstacle"></div>
+  <div id="controls">
+    <div id="attack-controls">
+      <div id="weapon-rail" class="weapon-rail hud-obstacle" role="group" aria-label="Orožja">
+        <button id="weapon-ball" data-weapon="ball" class="arena-tool" type="button" aria-label="Jeklena krogla"></button>
+        <button id="weapon-cone" data-weapon="cone" class="arena-tool" type="button" aria-label="Konični izstrelek"></button>
+        <button id="weapon-rod" data-weapon="rod" class="arena-tool" type="button" aria-label="Volframova palica"></button>
+        <button id="weapon-rock" data-weapon="rock" class="arena-tool" type="button" aria-label="Letalski spust"></button>
+      </div>
+      <div id="aim-readout" class="aim-readout hud-obstacle" aria-label="Merjenje">
+        <span>ENERGIJA STRELA <strong id="energy-value"></strong></span><span><span id="aim-label">KOT</span><strong id="aim-value"></strong></span>
+        <small id="aim-secondary"></small><p id="quote" class="quote"></p>
+        <div class="aim-buttons"><button id="flip-direction" class="quiet" aria-label="Obrni cev v drugo smer">⇄ Obrni cev</button><button id="aim-settings" class="quiet" aria-expanded="false" aria-controls="weapon-popover">Masa in cena</button></div>
+      </div>
+      <section id="weapon-popover" class="weapon-popover hud-obstacle" aria-label="Nastavitve orožja" hidden>
+        <div class="popover-heading"><strong id="weapon-title"></strong><button id="close-weapon" class="quiet" aria-label="Zapri nastavitve">×</button></div>
+        <p class="popover-label">Masa in cena izstrelka</p><div id="mass-choices" class="mass-choices" role="group" aria-label="Masa izstrelka"></div>
+        <div id="rock-controls" class="sliders" hidden><label>Višina od 0 m <output id="height-output"></output><input id="height" type="range" min="10" max="87" step="1" value="50"></label><label>Cilj <output id="target-output"></output><input id="target" type="range" min="0" max="240" step="0.5" value="90"></label></div>
+        <p id="item-price" class="muted"></p>
+      </section>
+    </div>
+      <div id="battle-actions" class="battle-actions hud-obstacle" role="group" aria-label="Dejanja poteze"><button id="shield" class="arena-tool" aria-label="Obnovi ščit"></button><button id="save" class="arena-tool" aria-label="Varčuj"></button><button id="fire" class="arena-tool fire-tool" aria-label="Strel"></button></div>
+      <p id="action-status" class="action-status hud-obstacle" role="status"></p>
+    <div id="defense-controls" class="defense-controls hud-obstacle" hidden><p id="defense-description"></p><label>Premik <output id="dodge-output">0 m</output><input id="dodge" type="range" min="-6" max="6" step="0.1" value="0"></label><div class="action-row"><button id="move" class="primary">Potrdi premik</button><button id="stay">Ostani na mestu</button></div></div>
+    <p id="wait-message" class="wait-message hud-obstacle"></p>
+  </div>
+  <button id="question-toggle" class="question-launcher hud-obstacle" aria-expanded="false" aria-controls="question-panel">Vprašanje · Q <span id="question-badge"></span><span id="question-toggle-icon">+</span></button>
+  <section id="question-panel" class="question-panel" role="dialog" aria-modal="false" aria-labelledby="question-heading" hidden>
+    <div class="question-heading"><div><strong id="question-heading">Fizikalni izziv</strong><small id="question-context"></small></div><button id="question-close" class="quiet" aria-label="Umakni vprašanje in meri na bojišču">×</button></div>
+    <div id="question-body"><p id="question-purpose" class="question-purpose"></p><div id="rapid-intent" hidden><label>Pravilni odgovor odklene<select id="intent"><option value="attack">En strel</option><option value="move">En obrambni premik</option></select></label></div><div id="feedback" class="feedback" role="status" aria-live="polite" hidden></div><div id="question"></div><div id="utility-actions" class="utility-actions" hidden><button id="skip-utility" class="quiet">Nadaljuj brez bonusa</button><button id="continue-utility" class="primary" hidden>Nadaljuj</button></div><section id="training-help" class="panel training-help" hidden><p class="eyebrow">TRENING</p><details><summary>Računanje in enote</summary><p>Delo: A = F · s. Kinetična energija: Wₖ = m · v² / 2. Potencialna energija: Wₚ = m · g · h. Moč: P = A / t.</p><p>Najprej izpiši podatke, pretvori enote, vstavi v enačbo in preveri velikost rezultata. 1 kJ = 1000 J; 1 kW = 1000 W. Naloga določa zaokroževanje.</p><p>Vprašanja prihajajo iz učne zbirke; njihove številke niso nujno številke tvojega strela.</p></details><details><summary>Merjenje in taktika</summary><p>Začni s kroglo in spremeni le eno nastavitev naenkrat. Višji kot poveča lok; pri enaki energiji večja masa zmanjša hitrost. Prejšnja sled pokaže, kaj je tvoj strel dejansko naredil.</p><p>Krater lahko podre tla pod tankom. Padec poškoduje tudi tank s ščitom. Letalski spust ima raztros; ščit ga dobro ustavlja. Izmik porablja denar in ne omogoča vzpona.</p><p>Nasprotniki v treningu mirujejo. Pot lahko opazuješ brez časovne omejitve.</p></details><button id="replay" class="quiet">Ponovi isti teren</button></section><section class="panel learning-mini"><span class="eyebrow">MOJE UČENJE</span><div id="learning-summary"></div><small>Učni rezultat je ločen od točk boja.</small></section></div><button id="question-back" class="question-back">Na bojišče · Esc</button>
+  </section>
+  <aside id="trace-panel" class="trace-panel" aria-label="Izbrana prejšnja sled" hidden><div class="trace-text"><p id="trace-title"></p><p id="trace-values"></p></div><button id="copy-trace" class="copy-trace" title="Prenesi nastavitve brez strela">↶ Uporabi</button><button id="close-trace" class="quiet" aria-label="Skrij podatke sledi">×</button></aside>
+  <div id="field-options" class="field-options hud-obstacle"><details><summary>Prikaz</summary><label><input id="traces" type="checkbox" checked> Moji prejšnji streli</label><button id="latest-trace" class="quiet" hidden>Podatki zadnjega strela</button><label><input id="inset" type="checkbox"> Povečava tanka</label></details></div>
+  <p id="arena-note" class="arena-note hud-obstacle"></p>
+  <div id="handoff" class="overlay" hidden><p class="eyebrow">PREDAJ TIPKOVNICO</p><h2 id="handoff-name"></h2><p>Vsak igralec pripravi svojo potezo.</p><button id="take-seat" class="primary">To sem jaz — nadaljuj</button></div>
+</div>
+</section>
+<section id="results" class="panel results" hidden></section>
+</main><div id="connection" role="status" hidden></div><div id="toast" role="alert" hidden></div><div id="help-layer" class="help-layer" hidden><div id="guide-highlight" hidden></div><section id="help-card" class="help-card" role="dialog" aria-modal="true" aria-labelledby="help-title" tabindex="-1"><div class="popover-heading"><span id="help-count" class="eyebrow"></span><button id="help-close" class="quiet" aria-label="Zapri pomoč">×</button></div><h2 id="help-title"></h2><div id="help-content"></div><label id="hide-guide-label"><input id="hide-guide" type="checkbox"> Ne prikazuj več ob začetku</label><div class="help-buttons"><button id="help-prev">Nazaj</button><button id="help-skip" class="quiet">Preskoči</button><button id="help-next" class="primary">Naprej →</button></div><p id="help-clock-note" class="muted"></p></section></div><script type="module" src="./app.mjs"></script>
+</body></html>
